@@ -21,6 +21,44 @@ Document your AI-assisted development:
 
 - Take a look at my chatbot, and the server endpoint which streams from the LLM. My server endpoint is configured to also accept a parameter called useTools. Please modify my API endpoint and my chatbot to accept tool-calling. When the chatbot calls a tool, it should call the tool and add it to the chat history. You may have to make a new API endpoint in tools/+server.ts for executing tool calls. Ask me if you need help.
 
+
+### Agent for estimates workflow
+
+
+# Goal: Create a Project Cost Estimates Workflow in the application.
+
+Purpose: take some unstructured documents, and move them through six stages: Artifacts → Business Case → Requirements → Solution/Architecture → Effort Estimate → Quote, with LLM processing and user validation at each stage.
+
+Each stage has entry criteria and approval gates:
+
+1. Artifacts: Create project and attach ≥2 artifacts (transcripts, documents, notes). Advance when ready.
+2. Business Case: LLM generates business case from artifacts (scope, outcomes, constraints). Edit and approve to advance.
+3. Requirements: LLM generates requirements summary from artifacts. Edit and validate to advance.
+4. Solution/Architecture: Document approach and solution architecture, tech stack, risks. Approve to advance.
+5. Effort Estimate: LLM generates WBS with tasks, assigned roles, hours per task, and assumptions from all prior artifacts. Approve to advance.
+6. Quote: Apply rates to roles, add payment terms and timeline. Export CSV or copy-to-clipboard. Mark delivered.
+
+Must-have screens:
+- Projects list: Show all projects with current stage indicator, filter by stage. Put this project list on the Dashboard.svelte component.
+- New Project screen: Create a new project by naming it and uploading some artifacts. Then give the option to advance it to the next stage.
+- Project detail: Stage stepper/progress indicator at top, current stage content panel, stage transition history timeline with timestamps/approvers.
+- Stage transitions: Validation before advancing (e.g., artifacts uploaded, approval recorded), clear advance/approve buttons per stage.
+
+## How you should do it:
+
+- Use the existing LLM APIs used by the current Chatbot component, paricularly the `bedrock` API endpoint for LLM interactions.
+- Use the existing Postgres database hosted in vercel. The DB connection URL is available in `src/lib/server/db.ts`. For a look at the DB tables, look at the SQL commands in the `DELIVERABLES/AI_ARTIFACTS.md` file. You may want to create typescript types for those tables and use them in your implementation.
+- For uploading / storing / download files, use the blob storage URL in `lib/server/settings.ts`, along with the `@vercel/blob` package, which is already installed.
+
+## Ground rules:
+
+- always use Svelte5 syntax with Runes mode. Do NOT use old svelte syntax. If you need to check, look at the existing components and use them as a guide.
+- use existing packages which are already installed: `@vercel/blob`, `@neondatabase/serverless`, and `@vercel/postgres`, rather than installing new packages.
+- use the existing tailwindcss styling in the `app.css` file when you can, rather than creating new custom styles on each component.
+- use the existing resources in the app, but keep your workflow components separate and modular so its easy to integrate or remove them. 
+
+
+
 ### Database
 
 From Google Gemini:

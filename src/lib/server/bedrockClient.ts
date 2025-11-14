@@ -66,14 +66,4 @@ export const handleLLMInference = async (payload: LLMInferencePayload): Promise<
 	return responseText;
 };
 
-// Execute an LLM tool call by name
-export const executeToolCall = async (toolUseBlock: ToolUseBlock, userData: UserData) => {
-	// Find the tool class by name and execute it
-	console.log(`Executing tool call: ${JSON.stringify(toolUseBlock)}`);
-	for (const tool of TOOLS) {
-		if (tool.spec.toolSpec.name === toolUseBlock.name) {
-			return await tool.run(toolUseBlock.input as any, userData);
-		}
-	}
-};
 */
