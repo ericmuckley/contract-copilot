@@ -16,7 +16,7 @@
 
 	const stageColors: Record<string, string> = {
 		Artifacts: 'bg-slate-100 text-slate-700',
-		BusinessCase: 'bg-blue-100 text-blue-700',
+		BusinessCase: 'bg-sky-100 text-sky-700',
 		Requirements: 'bg-purple-100 text-purple-700',
 		SolutionArchitecture: 'bg-green-100 text-green-700',
 		EffortEstimate: 'bg-yellow-100 text-yellow-700',

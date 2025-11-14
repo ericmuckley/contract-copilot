@@ -253,7 +253,7 @@
 					<textarea
 						bind:value={editedAssumptions}
 						rows="10"
-						class="w-full rounded-lg border border-slate-300 p-4 font-mono text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+						class="w-full rounded-lg border border-slate-300 p-4 font-mono text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
 						placeholder="Enter assumptions in Markdown format..."
 					></textarea>
 				</div>
@@ -261,7 +261,7 @@
 				<div>
 					<div class="mb-2 flex items-center justify-between">
 						<label class="text-sm font-semibold text-slate-700">Tasks:</label>
-						<button onclick={addTask} class="text-sm text-blue-600 hover:text-blue-700">
+						<button onclick={addTask} class="text-sm text-sky-600 hover:text-sky-700">
 							<i class="bi bi-plus-lg mr-1"></i>
 							Add Task
 						</button>
@@ -331,8 +331,8 @@
 		{/if}
 
 		{#if isGenerating && generatedContent}
-			<div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-				<div class="mb-2 text-sm font-semibold text-blue-700">
+			<div class="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-4">
+				<div class="mb-2 text-sm font-semibold text-sky-700">
 					<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
 					Generating estimate...
 				</div>

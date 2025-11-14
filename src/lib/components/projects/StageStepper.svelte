@@ -23,14 +23,14 @@
 					<div
 						class="flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors {index <=
 						currentIndex
-							? 'border-blue-500 bg-blue-500 text-white'
+							? 'border-sky-500 bg-sky-500 text-white'
 							: 'border-slate-300 bg-white text-slate-400'}"
 					>
 						<i class="bi {stage.icon}"></i>
 					</div>
 					<div
 						class="mt-2 text-center text-xs font-medium {index === currentIndex
-							? 'text-blue-700'
+							? 'text-sky-700'
 							: index < currentIndex
 								? 'text-slate-600'
 								: 'text-slate-400'}"
@@ -40,7 +40,7 @@
 				</div>
 				{#if index < stages.length - 1}
 					<div
-						class="mx-2 h-0.5 flex-1 {index < currentIndex ? 'bg-blue-500' : 'bg-slate-300'}"
+						class="mx-2 h-0.5 flex-1 {index < currentIndex ? 'bg-sky-500' : 'bg-slate-300'}"
 					></div>
 				{/if}
 			</div>

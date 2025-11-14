@@ -73,8 +73,8 @@
 				<!-- Display tool results -->
 				{#each toolResults as result}
 					<div class="message flex justify-end">
-						<div class="max-w-[80%] rounded-xl bg-blue-100 px-4 py-2 text-sm">
-							<div class="font-semibold text-blue-800">🔧 Tool Result</div>
+						<div class="max-w-[80%] rounded-xl bg-sky-100 px-4 py-2 text-sm">
+							<div class="font-semibold text-sky-800">🔧 Tool Result</div>
 							<div class="mt-1 text-gray-700">{result.content}</div>
 						</div>
 					</div>

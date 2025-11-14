@@ -274,7 +274,7 @@
 					<textarea
 						bind:value={editedPaymentTerms}
 						rows="4"
-						class="w-full rounded-lg border border-slate-300 p-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+						class="w-full rounded-lg border border-slate-300 p-3 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
 						placeholder="e.g., Net 30, 50% upfront 50% on completion..."
 					></textarea>
 				</div>
@@ -284,7 +284,7 @@
 					<textarea
 						bind:value={editedTimeline}
 						rows="4"
-						class="w-full rounded-lg border border-slate-300 p-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+						class="w-full rounded-lg border border-slate-300 p-3 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
 						placeholder="e.g., 8 weeks from project start..."
 					></textarea>
 				</div>

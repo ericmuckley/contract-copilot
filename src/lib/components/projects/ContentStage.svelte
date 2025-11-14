@@ -178,7 +178,7 @@
 				<textarea
 					bind:value={editedContent}
 					rows="20"
-					class="w-full rounded-lg border border-slate-300 p-4 font-mono text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+					class="w-full rounded-lg border border-slate-300 p-4 font-mono text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
 					placeholder="Enter content in Markdown format..."
 				></textarea>
 				<div class="flex space-x-2">
@@ -210,8 +210,8 @@
 		{/if}
 
 		{#if isGenerating && generatedContent}
-			<div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-				<div class="mb-2 text-sm font-semibold text-blue-700">
+			<div class="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-4">
+				<div class="mb-2 text-sm font-semibold text-sky-700">
 					<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
 					Generating content...
 				</div>

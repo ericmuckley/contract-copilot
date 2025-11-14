@@ -25,5 +25,5 @@
 	oninput={autoExpandTextarea}
 	onkeydown={handleKeyDown}
 	placeholder="Type your message..."
-	class="placeholder-muted max-h-48 w-full resize-none overflow-y-auto rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm transition-colors focus:border-blue-400 focus:outline-none"
+	class="placeholder-muted max-h-48 w-full resize-none overflow-y-auto rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm transition-colors focus:border-sky-400 focus:outline-none"
 ></textarea>

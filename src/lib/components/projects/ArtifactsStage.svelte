@@ -75,7 +75,7 @@
 		<div class="mb-4">
 			<label
 				for="artifact-upload"
-				class="inline-flex cursor-pointer items-center space-x-2 rounded-lg bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600 {isUploading
+				class="inline-flex cursor-pointer items-center space-x-2 rounded-lg bg-sky-500 px-4 py-2 text-white transition-colors hover:bg-sky-600 {isUploading
 					? 'cursor-not-allowed opacity-50'
 					: ''}"
 			>
@@ -135,7 +135,7 @@
 							<a
 								href={artifact.file_url}
 								target="_blank"
-								class="rounded px-3 py-1 text-sm text-blue-600 hover:bg-blue-50"
+								class="rounded px-3 py-1 text-sm text-sky-600 hover:bg-sky-50"
 							>
 								<i class="bi bi-download"></i>
 								Download
