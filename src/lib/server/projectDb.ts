@@ -429,3 +429,15 @@ export async function updateQuoteApprovedBy(
 		WHERE project_id = ${project_id}
 	`;
 }
+
+// Update approved_by field for all EstimateTasks in an EffortEstimate
+export async function updateEstimateTasksApprovedBy(
+	estimate_id: number,
+	approved_by: string
+): Promise<void> {
+	await sql`
+		UPDATE "EstimateTask"
+		SET approved_by = ${approved_by}
+		WHERE estimate_id = ${estimate_id}
+	`;
+}

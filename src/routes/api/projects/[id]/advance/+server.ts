@@ -16,7 +16,8 @@ import {
 	updateRequirementsApprovedBy,
 	updateSolutionArchitectureApprovedBy,
 	updateEffortEstimateApprovedBy,
-	updateQuoteApprovedBy
+	updateQuoteApprovedBy,
+	updateEstimateTasksApprovedBy
 } from '$lib/server/projectDb';
 import type { ProjectStage } from '$lib/types/project';
 
@@ -184,9 +185,15 @@ async function updateStageApprovedBy(
 		case 'SolutionArchitecture':
 			await updateSolutionArchitectureApprovedBy(projectId, approvedBy);
 			break;
-		case 'EffortEstimate':
+		case 'EffortEstimate': {
 			await updateEffortEstimateApprovedBy(projectId, approvedBy);
+			// Also update all tasks in the effort estimate
+			const estimate = await getEffortEstimate(projectId);
+			if (estimate) {
+				await updateEstimateTasksApprovedBy(estimate.id, approvedBy);
+			}
 			break;
+		}
 		case 'Quote':
 			await updateQuoteApprovedBy(projectId, approvedBy);
 			break;
