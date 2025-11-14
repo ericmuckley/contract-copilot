@@ -24,10 +24,9 @@ Document your AI-assisted development:
 
 ### Agent for estimates workflow
 
-
 # Goal: Create a Project Cost Estimates Workflow in the application.
 
-Purpose: take some unstructured documents, and move them through six stages: Artifacts → Business Case → Requirements → Solution/Architecture → Effort Estimate → Quote, with LLM processing and user validation at each stage.
+Purpose: take some unstructured documents, and move them through six stages, with LLM processing and user validation at each stage: Artifacts → Business Case → Requirements → Solution/Architecture → Effort Estimate → Quote.
 
 Each stage has entry criteria and approval gates:
 
@@ -52,10 +51,10 @@ Must-have screens:
 
 ## Ground rules:
 
-- always use Svelte5 syntax with Runes mode. Do NOT use old svelte syntax. If you need to check, look at the existing components and use them as a guide.
-- use existing packages which are already installed: `@vercel/blob`, `@neondatabase/serverless`, and `@vercel/postgres`, rather than installing new packages.
-- use the existing tailwindcss styling in the `app.css` file when you can, rather than creating new custom styles on each component.
-- use the existing resources in the app, but keep your workflow components separate and modular so its easy to integrate or remove them. 
+- Always use Svelte5 syntax with Runes mode. Do NOT use old svelte syntax. If you need to check, look at the existing components and use them as a guide.
+- Use existing packages which are already installed: `@vercel/blob`, `@neondatabase/serverless`, and `@vercel/postgres`, rather than installing new packages.
+- Use the existing tailwindcss styling in the `app.css` file when you can, rather than creating new custom styles on each component.
+- Use the existing resources in the app, but keep your workflow components separate and modular so its easy to integrate or remove them. 
 
 
 
