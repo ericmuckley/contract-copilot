@@ -23,14 +23,14 @@
 <svelte:window onmousedown={handleMouseDown} />
 
 <aside
-	class="sticky top-0 left-0 bg-white {isExpanded
+	class="sticky top-0 left-0 bg-white border-r border-slate-200 {isExpanded
 		? 'w-96'
 		: 'w-52'} z-10 flex h-screen flex-col transition-all duration-300"
 >
 	<div class="py-4">
 		<div class="muted cursor-default px-4 text-xl leading-none font-light">
 			<span
-				class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+				class="bg-linear-to-r from-sky-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
 			>
 				ContractCopilot
 			</span>

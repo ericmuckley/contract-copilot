@@ -5,7 +5,7 @@
 
 	const stageColors: Record<string, string> = {
 		Artifacts: 'bg-slate-200 text-slate-700',
-		BusinessCase: 'bg-blue-200 text-blue-700',
+		BusinessCase: 'bg-sky-200 text-sky-700',
 		Requirements: 'bg-purple-200 text-purple-700',
 		SolutionArchitecture: 'bg-green-200 text-green-700',
 		EffortEstimate: 'bg-yellow-200 text-yellow-700',
@@ -31,7 +31,7 @@
 	}
 </script>
 
-<a href="/projects/{project.id}" class="card block bg-white transition-shadow hover:shadow-lg">
+<a href="/projects/{project.id}" class="card border border-slate-200 block bg-white transition-shadow hover:shadow-lg">
 	<div class="mb-3 flex items-start justify-between">
 		<h3 class="text-xl font-semibold text-slate-800">{project.name}</h3>
 		<span class="rounded-full px-3 py-1 text-xs font-semibold {stageColors[project.current_stage]}">

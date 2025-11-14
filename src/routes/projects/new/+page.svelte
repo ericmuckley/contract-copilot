@@ -99,7 +99,7 @@
 					bind:value={projectName}
 					disabled={isCreating}
 					placeholder="Enter project name"
-					class="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+					class="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-sky-500 focus:ring-2 focus:ring-sky-500 disabled:cursor-not-allowed disabled:bg-slate-100"
 				/>
 			</div>
 
@@ -115,7 +115,7 @@
 					onchange={handleFileChange}
 					disabled={isCreating}
 					accept=".pdf,.doc,.docx,.txt,.md"
-					class="w-full rounded-lg border border-slate-300 px-4 py-2 file:mr-4 file:rounded file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+					class="w-full rounded-lg border border-slate-300 px-4 py-2 file:mr-4 file:rounded file:border-0 file:bg-sky-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-sky-700 hover:file:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-50"
 				/>
 				{#if files && files.length > 0}
 					<div class="mt-2 text-sm text-slate-600">
@@ -132,7 +132,7 @@
 			{/if}
 
 			{#if uploadProgress}
-				<div class="rounded-lg bg-blue-50 p-4 text-sm text-blue-700">
+				<div class="rounded-lg bg-sky-50 p-4 text-sm text-sky-700">
 					<i class="bi bi-hourglass-split mr-2"></i>
 					{uploadProgress}
 				</div>

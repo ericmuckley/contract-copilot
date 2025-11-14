@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { slide } from 'svelte/transition';
 	import StageStepper from '$lib/components/projects/StageStepper.svelte';
 	import ArtifactsStage from '$lib/components/projects/ArtifactsStage.svelte';
 	import ContentStage from '$lib/components/projects/ContentStage.svelte';
@@ -84,7 +85,9 @@
 	<StageStepper currentStage={data.project.current_stage} />
 
 	{#if showHistory}
-		<ProjectHistory history={data.history} />
+		<div in:slide out:slide>
+			<ProjectHistory history={data.history} />
+		</div>
 	{/if}
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -137,7 +140,7 @@
 		</div>
 
 		<div class="space-y-4">
-			<div class="card bg-white">
+			<div class="">
 				<h3 class="mb-4 text-lg font-semibold text-slate-800">Stage Actions</h3>
 
 				{#if !isLastStage}

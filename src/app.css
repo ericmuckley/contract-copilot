@@ -1,9 +1,11 @@
 @import 'tailwindcss';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
+/*
 body {
 	@apply bg-black;
 }
+*/
 h1,
 h2,
 h3,
@@ -28,7 +30,7 @@ button {
 }
 
 .link {
-	@apply text-blue-500 hover:text-blue-700;
+	@apply text-sky-500 hover:text-sky-700;
 }
 
 .card {
@@ -38,7 +40,7 @@ button {
 	@apply rounded px-4 py-2 text-white;
 }
 .btn-primary {
-	@apply bg-blue-500 hover:bg-blue-700;
+	@apply bg-sky-500 hover:bg-sky-700;
 }
 .btn-danger {
 	@apply bg-red-500 hover:bg-red-700;
