@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+h1,
+h2,
+h3,
+p {
+	@apply text-slate-600;
+}
+h1 {
+	@apply mb-4 text-4xl font-bold;
+}
+h2 {
+	@apply mb-3 text-3xl font-semibold;
+}
+h3 {
+	@apply mb-2 text-2xl font-semibold;
+}
+button {
+	@apply cursor-pointer;
+}
+
+.muted {
+	@apply text-slate-400;
+}
+
+.link {
+	@apply text-blue-500 hover:text-blue-700;
+}
+
+.btn {
+	@apply rounded px-4 py-2 text-white;
+}
+.btn-primary {
+	@apply bg-blue-500 hover:bg-blue-700;
+}
+.btn-danger {
+	@apply bg-red-500 hover:bg-red-700;
+}

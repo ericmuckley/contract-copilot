@@ -1,0 +1,4 @@
+- Which AI tools you used and why
+- Your prompt strategy in 3-5 bullets
+- Biggest pivot/surprise during implementation
+- What you'd do differently with more time
