@@ -37,3 +37,25 @@ button {
 .btn-danger {
 	@apply bg-red-500 hover:bg-red-700;
 }
+
+.boilerplate p {
+	@apply mb-6;
+}
+.boilerplate ul {
+	@apply mb-6 space-y-1 pl-5;
+}
+.boilerplate ol {
+	@apply mb-6 space-y-1 pl-5;
+}
+.boilerplate li {
+	@apply list-disc;
+}
+.boilerplate h1 {
+	@apply mb-10;
+}
+.boilerplate h2 {
+	@apply mb-6;
+}
+.boilerplate h3 {
+	@apply mb-4;
+}

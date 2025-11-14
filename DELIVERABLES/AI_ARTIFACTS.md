@@ -16,3 +16,5 @@ Document your AI-assisted development:
 - Change my POST function to take the user's request, then use my `streamInference` function to stream back the LLM response from the POST endpoint.
 
 - Make the textarea in this component look good, and it should auto expand when text is added/removed, so it fits the size of the text. When the user clicks the "enter" button while the text area is focused, have it trigger a function called "handleSubmit"
+
+- Look at my Chatbot component, and my server endpoint that produces a readable stream. When the user submits a chat message, it should send a post request to my server endpoint and create a stream of response objects back. Finish my chatbot component by adding a `ChatHistory` compnent in it, showing the chat messages including the newest content as its streamed in real-time.
