@@ -31,7 +31,10 @@
 	}
 </script>
 
-<a href="/projects/{project.id}" class="card border border-slate-200 block bg-white transition-shadow hover:shadow-lg">
+<a
+	href="/projects/{project.id}"
+	class="card block border border-slate-200 bg-white transition-shadow hover:shadow-lg"
+>
 	<div class="mb-3 flex items-start justify-between">
 		<h3 class="text-xl font-semibold text-slate-800">{project.name}</h3>
 		<span class="rounded-full px-3 py-1 text-xs font-semibold {stageColors[project.current_stage]}">

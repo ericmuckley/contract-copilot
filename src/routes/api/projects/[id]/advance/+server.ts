@@ -10,7 +10,13 @@ import {
 	getSolutionArchitecture,
 	getEffortEstimate,
 	listEstimateTasks,
-	getQuote
+	getQuote,
+	updateProjectApprovedBy,
+	updateBusinessCaseApprovedBy,
+	updateRequirementsApprovedBy,
+	updateSolutionArchitectureApprovedBy,
+	updateEffortEstimateApprovedBy,
+	updateQuoteApprovedBy
 } from '$lib/server/projectDb';
 import type { ProjectStage } from '$lib/types/project';
 
@@ -24,11 +30,20 @@ const STAGE_ORDER: ProjectStage[] = [
 ];
 
 // POST /api/projects/[id]/advance - Advance project to next stage
-export async function POST({ params }: RequestEvent) {
+export async function POST({ params, request }: RequestEvent) {
 	try {
 		const projectId = parseInt(params.id || '');
 		if (isNaN(projectId)) {
 			return json({ error: 'Invalid project ID' }, { status: 400 });
+		}
+
+		// Parse request body
+		const body = await request.json();
+		const approvedBy = body.approved_by;
+
+		// Validate approved_by field
+		if (!approvedBy || typeof approvedBy !== 'string' || approvedBy.trim() === '') {
+			return json({ error: 'Approver name is required' }, { status: 400 });
 		}
 
 		const project = await getProject(projectId);
@@ -50,6 +65,9 @@ export async function POST({ params }: RequestEvent) {
 
 		const nextStage = STAGE_ORDER[currentIndex + 1];
 
+		// Update the approved_by field for the current stage
+		await updateStageApprovedBy(projectId, project.current_stage, approvedBy.trim());
+
 		// Update project to next stage
 		const updatedProject = await updateProject(projectId, undefined, nextStage);
 		if (!updatedProject) {
@@ -60,7 +78,7 @@ export async function POST({ params }: RequestEvent) {
 		await createProjectHistory(
 			projectId,
 			nextStage,
-			`Advanced from ${project.current_stage} to ${nextStage}`
+			`Advanced from ${project.current_stage} to ${nextStage} (approved by ${approvedBy.trim()})`
 		);
 
 		return json({ project: updatedProject });
@@ -145,5 +163,32 @@ async function validateStageRequirements(
 		}
 		default:
 			return { valid: true };
+	}
+}
+
+async function updateStageApprovedBy(
+	projectId: number,
+	stage: ProjectStage,
+	approvedBy: string
+): Promise<void> {
+	switch (stage) {
+		case 'Artifacts':
+			await updateProjectApprovedBy(projectId, approvedBy);
+			break;
+		case 'BusinessCase':
+			await updateBusinessCaseApprovedBy(projectId, approvedBy);
+			break;
+		case 'Requirements':
+			await updateRequirementsApprovedBy(projectId, approvedBy);
+			break;
+		case 'SolutionArchitecture':
+			await updateSolutionArchitectureApprovedBy(projectId, approvedBy);
+			break;
+		case 'EffortEstimate':
+			await updateEffortEstimateApprovedBy(projectId, approvedBy);
+			break;
+		case 'Quote':
+			await updateQuoteApprovedBy(projectId, approvedBy);
+			break;
 	}
 }

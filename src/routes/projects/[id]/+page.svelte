@@ -6,12 +6,14 @@
 	import EffortEstimateStage from '$lib/components/projects/EffortEstimateStage.svelte';
 	import QuoteStage from '$lib/components/projects/QuoteStage.svelte';
 	import ProjectHistory from '$lib/components/projects/ProjectHistory.svelte';
+	import ApproverNameInput from '$lib/components/ApproverNameInput.svelte';
 
 	let { data } = $props();
 
 	let isAdvancing = $state(false);
 	let advanceError = $state('');
 	let showHistory = $state(false);
+	let approverName = $state('');
 
 	async function refreshData() {
 		// Reload the page data
@@ -19,12 +21,24 @@
 	}
 
 	async function advanceStage() {
+		// Validate approver name
+		if (!approverName || approverName.trim() === '') {
+			advanceError = 'Please enter your name before advancing';
+			return;
+		}
+
 		isAdvancing = true;
 		advanceError = '';
 
 		try {
 			const response = await fetch(`/api/projects/${data.project.id}/advance`, {
-				method: 'POST'
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					approved_by: approverName.trim()
+				})
 			});
 
 			if (!response.ok) {
@@ -146,11 +160,18 @@
 				{#if !isLastStage}
 					<p class="mb-4 text-sm text-slate-600">
 						{#if canAdvance()}
-							You've completed this stage. Click below to advance to the next stage.
+							You've completed this stage. Enter your name and click below to advance to the next
+							stage.
 						{:else}
 							Complete the requirements for this stage before advancing.
 						{/if}
 					</p>
+
+					{#if canAdvance()}
+						<div class="mb-4">
+							<ApproverNameInput bind:value={approverName} />
+						</div>
+					{/if}
 
 					<button
 						onclick={advanceStage}

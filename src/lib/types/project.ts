@@ -12,6 +12,7 @@ export interface Project {
 	id: number;
 	name: string;
 	current_stage: ProjectStage;
+	approved_by: string | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -29,6 +30,7 @@ export interface BusinessCase {
 	id: number;
 	project_id: number;
 	content: string | null;
+	approved_by: string | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -37,6 +39,7 @@ export interface Requirements {
 	id: number;
 	project_id: number;
 	content: string | null;
+	approved_by: string | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -45,6 +48,7 @@ export interface SolutionArchitecture {
 	id: number;
 	project_id: number;
 	content: string | null;
+	approved_by: string | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -53,6 +57,7 @@ export interface EffortEstimate {
 	id: number;
 	project_id: number;
 	assumptions: string | null;
+	approved_by: string | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -63,6 +68,7 @@ export interface EstimateTask {
 	task_description: string;
 	assigned_role: string;
 	hours: number;
+	approved_by: string | null;
 }
 
 export interface Quote {
@@ -71,6 +77,7 @@ export interface Quote {
 	payment_terms: string | null;
 	timeline: string | null;
 	is_delivered: boolean;
+	approved_by: string | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -121,6 +128,7 @@ export interface AdvanceStageRequest {
 	project_id: number;
 	current_stage: ProjectStage;
 	action: string;
+	approved_by: string;
 }
 
 export interface GenerateContentRequest {

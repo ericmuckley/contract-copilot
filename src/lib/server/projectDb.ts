@@ -357,3 +357,75 @@ export async function listProjectHistory(project_id: number): Promise<ProjectHis
 	`;
 	return result as ProjectHistory[];
 }
+
+// Update approved_by field for Project
+export async function updateProjectApprovedBy(
+	project_id: number,
+	approved_by: string
+): Promise<void> {
+	await sql`
+		UPDATE "Project"
+		SET approved_by = ${approved_by}, updated_at = NOW()
+		WHERE id = ${project_id}
+	`;
+}
+
+// Update approved_by field for BusinessCase
+export async function updateBusinessCaseApprovedBy(
+	project_id: number,
+	approved_by: string
+): Promise<void> {
+	await sql`
+		UPDATE "BusinessCase"
+		SET approved_by = ${approved_by}, updated_at = NOW()
+		WHERE project_id = ${project_id}
+	`;
+}
+
+// Update approved_by field for Requirements
+export async function updateRequirementsApprovedBy(
+	project_id: number,
+	approved_by: string
+): Promise<void> {
+	await sql`
+		UPDATE "Requirements"
+		SET approved_by = ${approved_by}, updated_at = NOW()
+		WHERE project_id = ${project_id}
+	`;
+}
+
+// Update approved_by field for SolutionArchitecture
+export async function updateSolutionArchitectureApprovedBy(
+	project_id: number,
+	approved_by: string
+): Promise<void> {
+	await sql`
+		UPDATE "SolutionArchitecture"
+		SET approved_by = ${approved_by}, updated_at = NOW()
+		WHERE project_id = ${project_id}
+	`;
+}
+
+// Update approved_by field for EffortEstimate
+export async function updateEffortEstimateApprovedBy(
+	project_id: number,
+	approved_by: string
+): Promise<void> {
+	await sql`
+		UPDATE "EffortEstimate"
+		SET approved_by = ${approved_by}, updated_at = NOW()
+		WHERE project_id = ${project_id}
+	`;
+}
+
+// Update approved_by field for Quote
+export async function updateQuoteApprovedBy(
+	project_id: number,
+	approved_by: string
+): Promise<void> {
+	await sql`
+		UPDATE "Quote"
+		SET approved_by = ${approved_by}, updated_at = NOW()
+		WHERE project_id = ${project_id}
+	`;
+}

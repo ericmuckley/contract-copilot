@@ -56,13 +56,11 @@ Must-have screens:
 - Use the existing tailwindcss styling in the `app.css` file when you can, rather than creating new custom styles on each component.
 - Use the existing resources in the app, but keep your workflow components separate and modular so its easy to integrate or remove them.
 
-
 ## Adding approved_by
 
 I added a new VARCHAR field called `approved_by` in these database tables: Project, BusinessCase, Requirements, SolutionArchitecture, EffortEstimate, EstimateTask, Quote.
 
 I need the approved_by field to be populated whenever there is a new record added to the database in these tables. At each project stage, when the user is wants to approve and move to the next stage, add a required text input that they must use to enter their name in. That is the name that will get saved in the `approved_by` column. Make one reusable component for the name so you don't have to replicate it inside each component.
-
 
 ### Database
 
