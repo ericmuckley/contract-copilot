@@ -18,3 +18,5 @@ Document your AI-assisted development:
 - Make the textarea in this component look good, and it should auto expand when text is added/removed, so it fits the size of the text. When the user clicks the "enter" button while the text area is focused, have it trigger a function called "handleSubmit"
 
 - Look at my Chatbot component, and my server endpoint that produces a readable stream. When the user submits a chat message, it should send a post request to my server endpoint and create a stream of response objects back. Finish my chatbot component by adding a `ChatHistory` compnent in it, showing the chat messages including the newest content as its streamed in real-time.
+
+- Take a look at my chatbot, and the server endpoint which streams from the LLM. My server endpoint is configured to also accept a parameter called useTools. Please modify my API endpoint and my chatbot to accept tool-calling. When the chatbot calls a tool, it should call the tool and add it to the chat history. You may have to make a new API endpoint in tools/+server.ts for executing tool calls. Ask me if you need help.

@@ -16,10 +16,64 @@ export async function POST({ request }: RequestEvent) {
 						// Handle content block delta (text chunks)
 						if (chunk.contentBlockDelta?.delta?.text) {
 							const text = chunk.contentBlockDelta.delta.text;
-							controller.enqueue(new TextEncoder().encode(text));
+							controller.enqueue(
+								new TextEncoder().encode(
+									JSON.stringify({
+										type: 'text',
+										text
+									}) + '\n'
+								)
+							);
 						}
-						// Handle other event types as needed
+
+						// Handle tool use blocks
+						if (chunk.contentBlockStart?.start?.toolUse) {
+							const toolUse = chunk.contentBlockStart.start.toolUse;
+							controller.enqueue(
+								new TextEncoder().encode(
+									JSON.stringify({
+										type: 'tool_use_start',
+										toolUseId: toolUse.toolUseId,
+										name: toolUse.name
+									}) + '\n'
+								)
+							);
+						}
+
+						// Handle tool input deltas
+						if (chunk.contentBlockDelta?.delta?.toolUse) {
+							const toolUseDelta = chunk.contentBlockDelta.delta.toolUse;
+							controller.enqueue(
+								new TextEncoder().encode(
+									JSON.stringify({
+										type: 'tool_use_delta',
+										input: toolUseDelta.input
+									}) + '\n'
+								)
+							);
+						}
+
+						// Handle tool use completion
+						if (chunk.contentBlockStop) {
+							controller.enqueue(
+								new TextEncoder().encode(
+									JSON.stringify({
+										type: 'content_block_stop'
+									}) + '\n'
+								)
+							);
+						}
+
+						// Handle message stop
 						if (chunk.messageStop) {
+							controller.enqueue(
+								new TextEncoder().encode(
+									JSON.stringify({
+										type: 'message_stop',
+										stopReason: chunk.messageStop.stopReason
+									}) + '\n'
+								)
+							);
 							break;
 						}
 					}
@@ -34,7 +88,7 @@ export async function POST({ request }: RequestEvent) {
 
 	return new Response(stream, {
 		headers: {
-			'Content-Type': 'text/plain'
+			'Content-Type': 'application/x-ndjson'
 		}
 	});
 }

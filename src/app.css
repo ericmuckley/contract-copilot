@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
+body {
+	@apply bg-black;
+}
 h1,
 h2,
 h3,
@@ -38,6 +41,9 @@ button {
 	@apply bg-red-500 hover:bg-red-700;
 }
 
+.boilerplate {
+	@apply text-slate-600;
+}
 .boilerplate p {
 	@apply mb-6;
 }

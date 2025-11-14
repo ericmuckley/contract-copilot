@@ -5,14 +5,11 @@ https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html
 */
 
 import {
-	type Message,
-	type ToolUseBlock,
 	type ToolConfiguration,
 	type SystemContentBlock,
 	type ConverseStreamCommandInput,
 	BedrockRuntimeClient,
-	ConverseStreamCommand,
-	ConverseCommand
+	ConverseStreamCommand
 } from '@aws-sdk/client-bedrock-runtime';
 import type { LLMInferencePayload } from '$lib/types';
 import { AWS_REGION, LLM_MODEL_ID, LLM_MAX_TOKENS, LLM_TEMPERATURE } from '$lib/settings';

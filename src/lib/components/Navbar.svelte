@@ -24,11 +24,17 @@
 
 <aside
 	class="sticky top-0 left-0 bg-slate-100 {isExpanded
-		? 'w-84'
+		? 'w-96'
 		: 'w-52'} z-10 flex h-screen flex-col transition-all duration-300"
 >
 	<div class="py-4">
-		<div class="muted cursor-default px-4 text-xl leading-none font-bold">Contract Copilot</div>
+		<div class="muted cursor-default px-4 text-xl leading-none font-light">
+			<span
+				class="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+			>
+				ContractCopilot
+			</span>
+		</div>
 	</div>
 	<nav class="mb-2 flex flex-col space-y-1 px-2">
 		{#each links as link}
@@ -45,26 +51,16 @@
 		{/each}
 	</nav>
 
-	{#if isExpanded}
-		<div>
-			<button
-				class="text-standard w-full hover:bg-slate-200"
-				onclick={() => (isExpanded = false)}
-				aria-label="Collapse sidebar"
-			>
-				<i class="bi bi-chevron-double-left"></i>
-			</button>
+	<div class="min-h-0 flex-1 border-t border-slate-200 pt-2" bind:this={expandTarget}>
+		<div class="flex h-full flex-col">
+			<Chatbot />
 		</div>
-	{/if}
-
-	<div class="h-full border px-2" bind:this={expandTarget}>
-		<Chatbot />
 	</div>
 
 	{#if isExpanded}
-		<div>
+		<div class="px-2 pb-1">
 			<button
-				class="text-standard w-full hover:bg-slate-200"
+				class="text-standard w-full rounded-xl py-1 hover:bg-slate-200"
 				onclick={() => (isExpanded = false)}
 				aria-label="Collapse sidebar"
 			>

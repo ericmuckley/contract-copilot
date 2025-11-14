@@ -4,4 +4,4 @@
 
 <h1>Dashboard</h1>
 
-<Chatbot />
+<div class="h-[2000px] bg-red-950"></div>
