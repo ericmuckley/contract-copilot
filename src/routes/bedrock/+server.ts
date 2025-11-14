@@ -1,5 +1,5 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { streamInference } from './bedrockClient';
+import { streamInference } from '../../lib/server/bedrockClient';
 import type { LLMInferencePayload } from '$lib/types';
 
 export async function POST({ request }: RequestEvent) {

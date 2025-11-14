@@ -2,6 +2,12 @@
 	import Chatbot from '$lib/components/Chatbot.svelte';
 </script>
 
-<h1>Dashboard</h1>
+<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+	<div class="card bg-white">
+		<h1>Project Estimates</h1>
+	</div>
 
-<div class="h-[2000px] bg-red-950"></div>
+	<div class="card bg-white">
+		<h1>Contracts</h1>
+	</div>
+</div>

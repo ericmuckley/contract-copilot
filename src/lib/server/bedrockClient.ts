@@ -12,7 +12,7 @@ import {
 	ConverseStreamCommand
 } from '@aws-sdk/client-bedrock-runtime';
 import type { LLMInferencePayload } from '$lib/types';
-import { AWS_REGION, LLM_MODEL_ID, LLM_MAX_TOKENS, LLM_TEMPERATURE } from '$lib/settings';
+import { AWS_REGION, LLM_MODEL_ID, LLM_MAX_TOKENS, LLM_TEMPERATURE } from '$lib/server/settings';
 import { CheckTheWeatherTool } from './bedrockTools';
 
 export const bedrockClient = new BedrockRuntimeClient({ region: AWS_REGION });

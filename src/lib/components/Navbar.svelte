@@ -23,7 +23,7 @@
 <svelte:window onmousedown={handleMouseDown} />
 
 <aside
-	class="sticky top-0 left-0 bg-slate-100 {isExpanded
+	class="sticky top-0 left-0 bg-white {isExpanded
 		? 'w-96'
 		: 'w-52'} z-10 flex h-screen flex-col transition-all duration-300"
 >
@@ -42,8 +42,8 @@
 				href={link.href}
 				class="flex items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium {page.url
 					.pathname === link.href
-					? 'bg-blue-100 text-gray-900'
-					: 'link'}"
+					? 'bg-slate-200'
+					: 'tex-slate-600 hover:bg-slate-100'}"
 			>
 				<i class={link.icon}></i>
 				<span>{link.label}</span>
