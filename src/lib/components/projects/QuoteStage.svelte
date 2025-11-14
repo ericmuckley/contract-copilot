@@ -27,9 +27,7 @@
 	let error = $state('');
 
 	// Get unique roles from tasks
-	const uniqueRoles = $derived(
-		Array.from(new Set(tasks.map((t) => t.assigned_role))).sort()
-	);
+	const uniqueRoles = $derived(Array.from(new Set(tasks.map((t) => t.assigned_role))).sort());
 
 	// Calculate total cost
 	const totalCost = $derived(() => {
@@ -85,16 +83,19 @@
 	function startEditing() {
 		editedPaymentTerms = paymentTerms || '';
 		editedTimeline = timeline || '';
-		editedRates = rates.length > 0 
-			? [...rates.map(r => ({ role_name: r.role_name, rate_per_hour: r.rate_per_hour }))]
-			: uniqueRoles.map((role) => ({ role_name: role, rate_per_hour: 0 }));
+		editedRates =
+			rates.length > 0
+				? [...rates.map((r) => ({ role_name: r.role_name, rate_per_hour: r.rate_per_hour }))]
+				: uniqueRoles.map((role) => ({ role_name: role, rate_per_hour: 0 }));
 		isEditing = true;
 	}
 
 	function cancelEditing() {
 		editedPaymentTerms = paymentTerms || '';
 		editedTimeline = timeline || '';
-		editedRates = [...rates.map(r => ({ role_name: r.role_name, rate_per_hour: r.rate_per_hour }))];
+		editedRates = [
+			...rates.map((r) => ({ role_name: r.role_name, rate_per_hour: r.rate_per_hour }))
+		];
 		isEditing = false;
 		error = '';
 	}
@@ -105,16 +106,12 @@
 			const rate = rates.find((r) => r.role_name === task.assigned_role);
 			const ratePerHour = rate ? rate.rate_per_hour : 0;
 			const cost = Number(task.hours) * Number(ratePerHour);
-			return [
-				task.task_description,
-				task.assigned_role,
-				task.hours,
-				ratePerHour,
-				cost.toFixed(2)
-			];
+			return [task.task_description, task.assigned_role, task.hours, ratePerHour, cost.toFixed(2)];
 		});
 
-		const csv = [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+		const csv = [headers, ...rows]
+			.map((row) => row.map((cell) => `"${cell}"`).join(','))
+			.join('\n');
 
 		const blob = new Blob([csv], { type: 'text/csv' });
 		const url = URL.createObjectURL(blob);
@@ -188,7 +185,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each uniqueRoles as role}
+								{#each uniqueRoles as role (role)}
 									{@const rate = rates.find((r) => r.role_name === role)}
 									{@const ratePerHour = rate ? rate.rate_per_hour : 0}
 									{@const totalHoursForRole = tasks
@@ -215,7 +212,7 @@
 					<div>
 						<h4 class="mb-2 font-semibold text-slate-700">Payment Terms:</h4>
 						<div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-							<p class="whitespace-pre-wrap text-sm">{paymentTerms}</p>
+							<p class="text-sm whitespace-pre-wrap">{paymentTerms}</p>
 						</div>
 					</div>
 				{/if}
@@ -224,7 +221,7 @@
 					<div>
 						<h4 class="mb-2 font-semibold text-slate-700">Timeline:</h4>
 						<div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-							<p class="whitespace-pre-wrap text-sm">{timeline}</p>
+							<p class="text-sm whitespace-pre-wrap">{timeline}</p>
 						</div>
 					</div>
 				{/if}
@@ -251,7 +248,7 @@
 				<div>
 					<label class="mb-2 block text-sm font-semibold text-slate-700">Rates:</label>
 					<div class="space-y-2">
-						{#each editedRates as rate}
+						{#each editedRates as rate (rate.role_name)}
 							<div class="grid grid-cols-2 gap-2">
 								<input
 									type="text"

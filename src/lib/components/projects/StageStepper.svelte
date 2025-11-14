@@ -17,7 +17,7 @@
 
 <div class="card bg-white">
 	<div class="flex items-center justify-between">
-		{#each stages as stage, index}
+		{#each stages as stage, index (stage.key)}
 			<div class="flex flex-1 items-center">
 				<div class="flex flex-col items-center">
 					<div

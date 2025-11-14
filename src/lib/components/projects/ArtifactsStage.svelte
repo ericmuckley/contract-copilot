@@ -17,7 +17,7 @@
 	async function handleFileUpload(e: Event) {
 		const target = e.target as HTMLInputElement;
 		const files = target.files;
-		
+
 		if (!files || files.length === 0) return;
 
 		isUploading = true;
@@ -42,7 +42,7 @@
 
 			// Reset input
 			target.value = '';
-			
+
 			// Refresh artifacts list
 			onRefresh();
 		} catch (err) {
@@ -50,10 +50,6 @@
 		} finally {
 			isUploading = false;
 		}
-	}
-
-	function formatFileSize(url: string): string {
-		return 'Unknown size';
 	}
 
 	function formatDate(dateString: string): string {
@@ -107,9 +103,8 @@
 		{#if artifacts.length < 2}
 			<div class="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-700">
 				<i class="bi bi-exclamation-circle mr-2"></i>
-				You need at least {2 - artifacts.length} more artifact{artifacts.length === 1
-					? ''
-					: 's'} to advance to the next stage.
+				You need at least {2 - artifacts.length} more artifact{artifacts.length === 1 ? '' : 's'} to
+				advance to the next stage.
 			</div>
 		{/if}
 	</div>

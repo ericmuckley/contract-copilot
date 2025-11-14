@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import StageStepper from '$lib/components/projects/StageStepper.svelte';
 	import ArtifactsStage from '$lib/components/projects/ArtifactsStage.svelte';
 	import ContentStage from '$lib/components/projects/ContentStage.svelte';
@@ -43,7 +42,7 @@
 
 	const canAdvance = $derived(() => {
 		const stage = data.project.current_stage;
-		
+
 		if (stage === 'Artifacts') {
 			return data.artifacts.length >= 2;
 		} else if (stage === 'BusinessCase') {
@@ -57,7 +56,7 @@
 		} else if (stage === 'Quote') {
 			return false; // Final stage
 		}
-		
+
 		return false;
 	});
 
@@ -140,7 +139,7 @@
 		<div class="space-y-4">
 			<div class="card bg-white">
 				<h3 class="mb-4 text-lg font-semibold text-slate-800">Stage Actions</h3>
-				
+
 				{#if !isLastStage}
 					<p class="mb-4 text-sm text-slate-600">
 						{#if canAdvance()}

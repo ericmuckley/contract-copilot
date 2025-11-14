@@ -9,7 +9,7 @@
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
-		
+
 		if (!projectName.trim()) {
 			error = 'Project name is required';
 			return;
@@ -37,12 +37,12 @@
 			}
 
 			const { project } = await createResponse.json();
-			
+
 			// Upload artifacts
 			for (let i = 0; i < files.length; i++) {
 				const file = files[i];
 				uploadProgress = `Uploading artifact ${i + 1} of ${files.length}...`;
-				
+
 				const formData = new FormData();
 				formData.append('file', file);
 				formData.append('artifact_type', 'document');
@@ -58,7 +58,7 @@
 			}
 
 			uploadProgress = 'Project created successfully!';
-			
+
 			// Redirect to project detail page
 			setTimeout(() => {
 				goto(`/projects/${project.id}`);
@@ -99,7 +99,7 @@
 					bind:value={projectName}
 					disabled={isCreating}
 					placeholder="Enter project name"
-					class="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
+					class="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100"
 				/>
 			</div>
 

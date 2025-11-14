@@ -61,7 +61,7 @@
 						if (data.type === 'text') {
 							generatedContent += data.text;
 						}
-					} catch (e) {
+					} catch {
 						console.error('Failed to parse line:', line);
 					}
 				}
@@ -80,7 +80,7 @@
 	function parseGeneratedContent(content: string) {
 		// Extract assumptions (everything before the JSON block)
 		const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
-		
+
 		if (jsonMatch) {
 			// Get assumptions (everything before the JSON block)
 			const assumptionsText = content.substring(0, jsonMatch.index).trim();
@@ -218,7 +218,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each tasks as task}
+							{#each tasks as task (task.id)}
 								<tr class="border-b border-slate-100">
 									<td class="px-4 py-2 text-sm">{task.task_description}</td>
 									<td class="px-4 py-2 text-sm">{task.assigned_role}</td>
@@ -267,7 +267,7 @@
 						</button>
 					</div>
 					<div class="space-y-2">
-						{#each editedTasks as task, index}
+						{#each editedTasks as task, index (task.id)}
 							<div class="rounded-lg border border-slate-200 p-3">
 								<div class="grid grid-cols-12 gap-2">
 									<input

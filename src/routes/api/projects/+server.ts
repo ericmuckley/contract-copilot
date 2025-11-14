@@ -1,10 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import {
-	createProject,
-	listProjects,
-	createProjectHistory
-} from '$lib/server/projectDb';
+import { createProject, listProjects, createProjectHistory } from '$lib/server/projectDb';
 import type { ProjectStage } from '$lib/types/project';
 
 // GET /api/projects - List all projects with optional stage filter
@@ -23,16 +19,16 @@ export async function GET({ url }: RequestEvent) {
 export async function POST({ request }: RequestEvent) {
 	try {
 		const { name } = await request.json();
-		
+
 		if (!name || typeof name !== 'string' || name.trim().length === 0) {
 			return json({ error: 'Project name is required' }, { status: 400 });
 		}
 
 		const project = await createProject(name.trim());
-		
+
 		// Log creation in project history
 		await createProjectHistory(project.id, 'Artifacts', 'Project created');
-		
+
 		return json({ project }, { status: 201 });
 	} catch (error) {
 		console.error('Error creating project:', error);

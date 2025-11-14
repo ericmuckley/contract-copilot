@@ -7,9 +7,7 @@ import {
 	listArtifacts,
 	getBusinessCase,
 	getRequirements,
-	getSolutionArchitecture,
-	getEffortEstimate,
-	listEstimateTasks
+	getSolutionArchitecture
 } from '$lib/server/projectDb';
 import type { ProjectStage } from '$lib/types/project';
 
@@ -151,11 +149,7 @@ async function buildContextForStage(projectId: number, stage: ProjectStage): Pro
 	return parts.join('\n');
 }
 
-function generatePromptForStage(
-	stage: ProjectStage,
-	projectName: string,
-	context: string
-): string {
+function generatePromptForStage(stage: ProjectStage, projectName: string, context: string): string {
 	switch (stage) {
 		case 'BusinessCase':
 			return `You are analyzing the project "${projectName}" to create a comprehensive business case.

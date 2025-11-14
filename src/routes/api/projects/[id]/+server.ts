@@ -85,7 +85,7 @@ export async function PATCH({ params, request }: RequestEvent) {
 		}
 
 		const { name, current_stage } = await request.json();
-		
+
 		const project = await updateProject(
 			id,
 			name as string | undefined,

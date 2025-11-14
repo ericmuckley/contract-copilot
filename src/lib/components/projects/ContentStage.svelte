@@ -81,7 +81,7 @@
 						if (data.type === 'text') {
 							generatedContent += data.text;
 						}
-					} catch (e) {
+					} catch {
 						console.error('Failed to parse line:', line);
 					}
 				}

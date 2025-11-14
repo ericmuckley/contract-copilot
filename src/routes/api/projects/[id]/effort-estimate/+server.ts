@@ -52,12 +52,7 @@ export async function PUT({ params, request }: RequestEvent) {
 			// Create new tasks
 			await Promise.all(
 				tasks.map((task: { task_description: string; assigned_role: string; hours: number }) =>
-					createEstimateTask(
-						estimate.id,
-						task.task_description,
-						task.assigned_role,
-						task.hours
-					)
+					createEstimateTask(estimate.id, task.task_description, task.assigned_role, task.hours)
 				)
 			);
 		}

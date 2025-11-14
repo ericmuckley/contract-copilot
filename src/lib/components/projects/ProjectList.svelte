@@ -17,9 +17,7 @@
 	];
 
 	const filteredProjects = $derived(
-		stageFilter === 'all'
-			? projects
-			: projects.filter((p) => p.current_stage === stageFilter)
+		stageFilter === 'all' ? projects : projects.filter((p) => p.current_stage === stageFilter)
 	);
 </script>
 
@@ -39,7 +37,7 @@
 			bind:value={stageFilter}
 			class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 		>
-			{#each stages as stage}
+			{#each stages as stage (stage.value)}
 				<option value={stage.value}>{stage.label}</option>
 			{/each}
 		</select>

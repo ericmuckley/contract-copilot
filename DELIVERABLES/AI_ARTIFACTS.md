@@ -21,7 +21,6 @@ Document your AI-assisted development:
 
 - Take a look at my chatbot, and the server endpoint which streams from the LLM. My server endpoint is configured to also accept a parameter called useTools. Please modify my API endpoint and my chatbot to accept tool-calling. When the chatbot calls a tool, it should call the tool and add it to the chat history. You may have to make a new API endpoint in tools/+server.ts for executing tool calls. Ask me if you need help.
 
-
 ### Agent for estimates workflow
 
 # Goal: Create a Project Cost Estimates Workflow in the application.
@@ -38,6 +37,7 @@ Each stage has entry criteria and approval gates:
 6. Quote: Apply rates to roles, add payment terms and timeline. Export CSV or copy-to-clipboard. Mark delivered.
 
 Must-have screens:
+
 - Projects list: Show all projects with current stage indicator, filter by stage. Put this project list on the Dashboard.svelte component.
 - New Project screen: Create a new project by naming it and uploading some artifacts. Then give the option to advance it to the next stage.
 - Project detail: Stage stepper/progress indicator at top, current stage content panel, stage transition history timeline with timestamps/approvers.
@@ -54,9 +54,7 @@ Must-have screens:
 - Always use Svelte5 syntax with Runes mode. Do NOT use old svelte syntax. If you need to check, look at the existing components and use them as a guide.
 - Use existing packages which are already installed: `@vercel/blob`, `@neondatabase/serverless`, and `@vercel/postgres`, rather than installing new packages.
 - Use the existing tailwindcss styling in the `app.css` file when you can, rather than creating new custom styles on each component.
-- Use the existing resources in the app, but keep your workflow components separate and modular so its easy to integrate or remove them. 
-
-
+- Use the existing resources in the app, but keep your workflow components separate and modular so its easy to integrate or remove them.
 
 ### Database
 

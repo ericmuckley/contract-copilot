@@ -48,9 +48,7 @@
 								<p class="font-medium text-slate-800">{event.action}</p>
 								<p class="text-xs text-slate-500">{formatDate(event.timestamp)}</p>
 							</div>
-							<span
-								class="rounded-full px-2 py-0.5 text-xs font-medium {stageColors[event.stage]}"
-							>
+							<span class="rounded-full px-2 py-0.5 text-xs font-medium {stageColors[event.stage]}">
 								{event.stage}
 							</span>
 						</div>

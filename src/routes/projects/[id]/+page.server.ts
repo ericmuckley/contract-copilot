@@ -15,13 +15,13 @@ import {
 
 export const load: PageServerLoad = async ({ params }) => {
 	const projectId = parseInt(params.id);
-	
+
 	if (isNaN(projectId)) {
 		throw error(400, 'Invalid project ID');
 	}
 
 	const project = await getProject(projectId);
-	
+
 	if (!project) {
 		throw error(404, 'Project not found');
 	}
@@ -46,13 +46,13 @@ export const load: PageServerLoad = async ({ params }) => {
 	]);
 
 	// If there's an effort estimate, fetch tasks
-	let tasks: any[] = [];
+	let tasks: Awaited<ReturnType<typeof listEstimateTasks>> = [];
 	if (effortEstimate) {
 		tasks = await listEstimateTasks(effortEstimate.id);
 	}
 
 	// If there's a quote, fetch rates
-	let rates: any[] = [];
+	let rates: Awaited<ReturnType<typeof listQuoteRates>> = [];
 	if (quote) {
 		rates = await listQuoteRates(quote.id);
 	}

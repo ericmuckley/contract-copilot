@@ -51,11 +51,7 @@ export async function POST({ params, request }: RequestEvent) {
 		);
 
 		// Log in project history
-		await createProjectHistory(
-			projectId,
-			'Artifacts',
-			`Artifact uploaded: ${file.name}`
-		);
+		await createProjectHistory(projectId, 'Artifacts', `Artifact uploaded: ${file.name}`);
 
 		return json({ artifact }, { status: 201 });
 	} catch (error) {
