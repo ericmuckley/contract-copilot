@@ -1,41 +1,68 @@
 <script lang="ts">
-	import type { QuoteRate, EstimateTask } from '$lib/types/project';
+	import type { ProjectTask } from '$lib/schema';
+
+	interface QuoteRate {
+		role: string;
+		rate: number;
+	}
 
 	let {
 		projectId,
-		paymentTerms = null,
-		timeline = null,
-		isDelivered = false,
-		rates = [],
+		stageIndex,
+		content = null,
 		tasks = [],
 		onRefresh
 	}: {
 		projectId: number;
-		paymentTerms?: string | null;
-		timeline?: string | null;
-		isDelivered?: boolean;
-		rates?: QuoteRate[];
-		tasks?: EstimateTask[];
+		stageIndex: number;
+		content?: string | null;
+		tasks?: ProjectTask[];
 		onRefresh: () => void;
 	} = $props();
 
+	// Parse content if it exists (should contain payment terms, timeline, and rates as JSON)
+	let quoteData = $state<{ paymentTerms: string; timeline: string; rates: QuoteRate[] }>({
+		paymentTerms: '',
+		timeline: '',
+		rates: []
+	});
+
+	$effect(() => {
+		if (content) {
+			try {
+				quoteData = JSON.parse(content);
+			} catch {
+				quoteData = { paymentTerms: content, timeline: '', rates: [] };
+			}
+		}
+	});
+
 	let isEditing = $state(false);
-	let editedPaymentTerms = $state(paymentTerms || '');
-	let editedTimeline = $state(timeline || '');
-	let editedRates = $state<Array<{ role_name: string; rate_per_hour: number }>>([...rates]);
+	let editedPaymentTerms = $state('');
+	let editedTimeline = $state('');
+	let editedRates = $state<QuoteRate[]>([]);
 	let isSaving = $state(false);
 	let error = $state('');
 
+	// Initialize edited values when quoteData changes
+	$effect(() => {
+		if (!isEditing) {
+			editedPaymentTerms = quoteData.paymentTerms || '';
+			editedTimeline = quoteData.timeline || '';
+			editedRates = [...quoteData.rates];
+		}
+	});
+
 	// Get unique roles from tasks
-	const uniqueRoles = $derived(Array.from(new Set(tasks.map((t) => t.assigned_role))).sort());
+	const uniqueRoles = $derived(Array.from(new Set(tasks.map((t) => t.role))).sort());
 
 	// Calculate total cost
 	const totalCost = $derived(() => {
 		let total = 0;
 		for (const task of tasks) {
-			const rate = editedRates.find((r) => r.role_name === task.assigned_role);
+			const rate = editedRates.find((r) => r.role === task.role);
 			if (rate) {
-				total += Number(task.hours) * Number(rate.rate_per_hour);
+				total += Number(task.hours) * Number(rate.rate);
 			}
 		}
 		return total;
@@ -45,8 +72,8 @@
 	$effect(() => {
 		if (editedRates.length === 0 && uniqueRoles.length > 0) {
 			editedRates = uniqueRoles.map((role) => ({
-				role_name: role,
-				rate_per_hour: 0
+				role: role,
+				rate: 0
 			}));
 		}
 	});
@@ -56,14 +83,18 @@
 		error = '';
 
 		try {
-			const response = await fetch(`/api/projects/${projectId}/quote`, {
+			const quoteContent = JSON.stringify({
+				paymentTerms: editedPaymentTerms,
+				timeline: editedTimeline,
+				rates: editedRates
+			});
+
+			const response = await fetch(`/api/projects/${projectId}/stage-content`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					payment_terms: editedPaymentTerms,
-					timeline: editedTimeline,
-					is_delivered: isDelivered,
-					rates: editedRates
+					stageIndex,
+					content: quoteContent
 				})
 			});
 
@@ -81,21 +112,19 @@
 	}
 
 	function startEditing() {
-		editedPaymentTerms = paymentTerms || '';
-		editedTimeline = timeline || '';
+		editedPaymentTerms = quoteData.paymentTerms || '';
+		editedTimeline = quoteData.timeline || '';
 		editedRates =
-			rates.length > 0
-				? [...rates.map((r) => ({ role_name: r.role_name, rate_per_hour: r.rate_per_hour }))]
-				: uniqueRoles.map((role) => ({ role_name: role, rate_per_hour: 0 }));
+			quoteData.rates.length > 0
+				? [...quoteData.rates]
+				: uniqueRoles.map((role) => ({ role: role, rate: 0 }));
 		isEditing = true;
 	}
 
 	function cancelEditing() {
-		editedPaymentTerms = paymentTerms || '';
-		editedTimeline = timeline || '';
-		editedRates = [
-			...rates.map((r) => ({ role_name: r.role_name, rate_per_hour: r.rate_per_hour }))
-		];
+		editedPaymentTerms = quoteData.paymentTerms || '';
+		editedTimeline = quoteData.timeline || '';
+		editedRates = [...quoteData.rates];
 		isEditing = false;
 		error = '';
 	}
@@ -103,10 +132,10 @@
 	function exportToCSV() {
 		const headers = ['Task', 'Role', 'Hours', 'Rate/Hour', 'Cost'];
 		const rows = tasks.map((task) => {
-			const rate = rates.find((r) => r.role_name === task.assigned_role);
-			const ratePerHour = rate ? rate.rate_per_hour : 0;
+			const rate = quoteData.rates.find((r) => r.role === task.role);
+			const ratePerHour = rate ? rate.rate : 0;
 			const cost = Number(task.hours) * Number(ratePerHour);
-			return [task.task_description, task.assigned_role, task.hours, ratePerHour, cost.toFixed(2)];
+			return [task.description, task.role, task.hours, ratePerHour, cost.toFixed(2)];
 		});
 
 		const csv = [headers, ...rows]
@@ -131,18 +160,18 @@
 
 	function generateQuoteText(): string {
 		let text = `PROJECT QUOTE\n\n`;
-		text += `Payment Terms:\n${paymentTerms || 'Not specified'}\n\n`;
-		text += `Timeline:\n${timeline || 'Not specified'}\n\n`;
+		text += `Payment Terms:\n${quoteData.paymentTerms || 'Not specified'}\n\n`;
+		text += `Timeline:\n${quoteData.timeline || 'Not specified'}\n\n`;
 		text += `COST BREAKDOWN:\n\n`;
 
 		const roleHours: Record<string, number> = {};
 		tasks.forEach((task) => {
-			roleHours[task.assigned_role] = (roleHours[task.assigned_role] || 0) + Number(task.hours);
+			roleHours[task.role] = (roleHours[task.role] || 0) + Number(task.hours);
 		});
 
 		for (const [role, hours] of Object.entries(roleHours)) {
-			const rate = rates.find((r) => r.role_name === role);
-			const ratePerHour = rate ? rate.rate_per_hour : 0;
+			const rate = quoteData.rates.find((r) => r.role === role);
+			const ratePerHour = rate ? rate.rate : 0;
 			const cost = hours * Number(ratePerHour);
 			text += `${role}: ${hours} hours × $${ratePerHour}/hr = $${cost.toFixed(2)}\n`;
 		}
@@ -159,14 +188,14 @@
 			Set rates for each role, define payment terms and timeline, then export or copy your quote.
 		</p>
 
-		{#if !paymentTerms && !isEditing && rates.length === 0}
+		{#if !content && !isEditing}
 			<button onclick={startEditing} class="btn btn-primary">
 				<i class="bi bi-plus-lg mr-2"></i>
 				Create Quote
 			</button>
 		{/if}
 
-		{#if (paymentTerms || rates.length > 0) && !isEditing}
+		{#if content && !isEditing}
 			<div class="space-y-6">
 				<div>
 					<h4 class="mb-2 font-semibold text-slate-700">Rates:</h4>
@@ -186,10 +215,10 @@
 							</thead>
 							<tbody>
 								{#each uniqueRoles as role (role)}
-									{@const rate = rates.find((r) => r.role_name === role)}
-									{@const ratePerHour = rate ? rate.rate_per_hour : 0}
+									{@const rate = quoteData.rates.find((r) => r.role === role)}
+									{@const ratePerHour = rate ? rate.rate : 0}
 									{@const totalHoursForRole = tasks
-										.filter((t) => t.assigned_role === role)
+										.filter((t) => t.role === role)
 										.reduce((sum, t) => sum + Number(t.hours), 0)}
 									{@const cost = totalHoursForRole * Number(ratePerHour)}
 									<tr class="border-b border-slate-100">
@@ -208,20 +237,20 @@
 					</div>
 				</div>
 
-				{#if paymentTerms}
+				{#if quoteData.paymentTerms}
 					<div>
 						<h4 class="mb-2 font-semibold text-slate-700">Payment Terms:</h4>
 						<div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-							<p class="text-sm whitespace-pre-wrap">{paymentTerms}</p>
+							<p class="text-sm whitespace-pre-wrap">{quoteData.paymentTerms}</p>
 						</div>
 					</div>
 				{/if}
 
-				{#if timeline}
+				{#if quoteData.timeline}
 					<div>
 						<h4 class="mb-2 font-semibold text-slate-700">Timeline:</h4>
 						<div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-							<p class="text-sm whitespace-pre-wrap">{timeline}</p>
+							<p class="text-sm whitespace-pre-wrap">{quoteData.timeline}</p>
 						</div>
 					</div>
 				{/if}
@@ -248,17 +277,17 @@
 				<div>
 					<p class="mb-2 block text-sm font-semibold">Rates:</p>
 					<div class="space-y-2">
-						{#each editedRates as rate (rate.role_name)}
+						{#each editedRates as rate (rate.role)}
 							<div class="grid grid-cols-2 gap-2">
 								<input
 									type="text"
-									value={rate.role_name}
+									value={rate.role}
 									disabled
 									class="rounded border border-slate-300 bg-slate-50 px-3 py-2 text-sm"
 								/>
 								<input
 									type="number"
-									bind:value={rate.rate_per_hour}
+									bind:value={rate.rate}
 									placeholder="Rate per hour"
 									min="0"
 									step="0.01"

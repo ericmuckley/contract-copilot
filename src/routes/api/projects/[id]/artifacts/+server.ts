@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { put } from '@vercel/blob';
-import { createArtifact, listArtifacts, createProjectHistory } from '$lib/server/projectDb';
+import { createArtifact, getProjectArtifacts } from '$lib/server/db';
 import { BLOB_READ_WRITE_TOKEN } from '$lib/server/settings';
 
 // GET /api/projects/[id]/artifacts - List artifacts for a project
@@ -12,7 +12,7 @@ export async function GET({ params }: RequestEvent) {
 			return json({ error: 'Invalid project ID' }, { status: 400 });
 		}
 
-		const artifacts = await listArtifacts(projectId);
+		const artifacts = await getProjectArtifacts(projectId);
 		return json({ artifacts });
 	} catch (error) {
 		console.error('Error listing artifacts:', error);
@@ -30,8 +30,6 @@ export async function POST({ params, request }: RequestEvent) {
 
 		const formData = await request.formData();
 		const file = formData.get('file') as File;
-		const artifactType = formData.get('artifact_type') as string | null;
-		const approved_by = formData.get('approved_by') as string | null;
 
 		if (!file) {
 			return json({ error: 'File is required' }, { status: 400 });
@@ -46,16 +44,11 @@ export async function POST({ params, request }: RequestEvent) {
 		});
 
 		// Save artifact record in database
-		const artifact = await createArtifact(
-			projectId,
-			file.name,
-			blob.url,
-			approved_by || 'unknown',
-			artifactType || undefined
-		);
-
-		// Log in project history
-		await createProjectHistory(projectId, 'Artifacts', `Artifact uploaded: ${file.name}`);
+		const artifact = await createArtifact({
+			project_id: projectId,
+			file_name: file.name,
+			file_url: blob.url
+		});
 
 		return json({ artifact }, { status: 201 });
 	} catch (error) {

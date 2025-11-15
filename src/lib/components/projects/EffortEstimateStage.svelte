@@ -1,27 +1,27 @@
 <script lang="ts">
 	import { marked } from 'marked';
-	import type { EstimateTask } from '$lib/types/project';
+	import type { ProjectTask } from '$lib/schema';
 	import Spinner from '../Spinner.svelte';
 	import { safeJsonParse } from '$lib/utils';
 	import LLMOutput from '../LLMOutput.svelte';
 
 	let {
 		projectId,
+		stageIndex,
 		assumptions = null,
 		tasks = [],
-		approverName,
 		onRefresh
 	}: {
 		projectId: number;
+		stageIndex: number;
 		assumptions?: string | null;
-		tasks?: EstimateTask[];
-		approverName: string;
+		tasks?: ProjectTask[];
 		onRefresh: () => void;
 	} = $props();
 
 	let isEditing = $state(false);
 	let editedAssumptions = $state(assumptions || '');
-	let editedTasks = $state<EstimateTask[]>([...tasks]);
+	let editedTasks = $state<ProjectTask[]>([...tasks]);
 	let isGenerating = $state(false);
 	let isSaving = $state(false);
 	let error = $state('');
@@ -38,7 +38,7 @@
 			const response = await fetch(`/api/projects/${projectId}/generate`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ stage: 'EffortEstimate' })
+				body: JSON.stringify({ stage: 'estimate' })
 			});
 
 			if (!response.ok) {
@@ -99,12 +99,9 @@
 			try {
 				const parsedTasks = safeJsonParse(segments[1].trim(), []);
 				if (Array.isArray(parsedTasks)) {
-					editedTasks = parsedTasks.map((t, index) => ({
-						id: -(index + 1), // Temporary negative ID for new tasks
-						estimate_id: 0,
-						task_description: t.task_description,
-						assigned_role: t.assigned_role,
-						approved_by: approverName.trim(),
+					editedTasks = parsedTasks.map((t) => ({
+						role: t.role || t.assigned_role,
+						description: t.description || t.task_description,
 						hours: Number(t.hours)
 					}));
 				}
@@ -121,17 +118,13 @@
 		error = '';
 
 		try {
-			const response = await fetch(`/api/projects/${projectId}/effort-estimate`, {
+			const response = await fetch(`/api/projects/${projectId}/stage-content`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					assumptions: editedAssumptions,
-					tasks: editedTasks.map((t) => ({
-						task_description: t.task_description,
-						assigned_role: t.assigned_role,
-						approved_by: approverName.trim(),
-						hours: t.hours
-					}))
+					stageIndex,
+					content: editedAssumptions,
+					tasks: editedTasks
 				})
 			});
 
@@ -165,11 +158,8 @@
 		editedTasks = [
 			...editedTasks,
 			{
-				id: -(editedTasks.length + 1),
-				estimate_id: 0,
-				task_description: '',
-				assigned_role: '',
-				approved_by: approverName.trim(),
+				role: '',
+				description: '',
 				hours: 0
 			}
 		];
@@ -182,7 +172,7 @@
 
 <div class="space-y-4">
 	<div class="card bg-white">
-		<h3 class="mb-4 text-lg font-semibold text-slate-800">Effort Estimate (WBS)</h3>
+		<h1 class="mb-4">Effort Estimate (WBS)</h1>
 		<p class="mb-4 text-sm text-slate-600">
 			Generate a detailed Work Breakdown Structure with tasks, assigned roles, and estimated hours
 			based on all previous stages.
@@ -197,7 +187,7 @@
 		{#if !assumptions && !isEditing && !isGenerating}
 			<button onclick={generateEstimate} disabled={isGenerating} class="btn btn-primary">
 				<i class="bi bi-stars mr-2"></i>
-				Generate Effort Estimate with AI
+				Generate Effort Estimate
 			</button>
 		{/if}
 
@@ -221,10 +211,10 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each tasks as task (task.id)}
+							{#each tasks as task, index (index)}
 								<tr class="border-b border-slate-100">
-									<td class="px-4 py-2 text-sm">{task.task_description}</td>
-									<td class="px-4 py-2 text-sm">{task.assigned_role}</td>
+									<td class="px-4 py-2 text-sm">{task.description}</td>
+									<td class="px-4 py-2 text-sm">{task.role}</td>
 									<td class="px-4 py-2 text-right text-sm">{task.hours}</td>
 								</tr>
 							{/each}
@@ -238,13 +228,20 @@
 			</div>
 
 			<div class="flex space-x-2">
-				<button onclick={startEditing} class="btn bg-slate-500 text-white hover:bg-slate-600">
+				<button
+					onclick={startEditing}
+					class="btn flex w-full justify-center space-x-1 bg-slate-500 text-white hover:bg-slate-600"
+				>
 					<i class="bi bi-pencil mr-2"></i>
-					Edit
+					<span>Edit</span>
 				</button>
-				<button onclick={generateEstimate} disabled={isGenerating} class="btn btn-primary">
+				<button
+					onclick={generateEstimate}
+					disabled={isGenerating}
+					class="btn btn-primary flex w-full justify-center space-x-1"
+				>
 					<i class="bi bi-arrow-clockwise mr-2"></i>
-					Regenerate
+					<span>Regenerate</span>
 				</button>
 			</div>
 		{/if}
@@ -270,18 +267,18 @@
 						</button>
 					</div>
 					<div class="space-y-2">
-						{#each editedTasks as task, index (task.id)}
+						{#each editedTasks as task, index (index)}
 							<div class="rounded-lg border border-slate-200 p-3">
 								<div class="grid grid-cols-12 gap-2">
 									<input
 										type="text"
-										bind:value={task.task_description}
+										bind:value={task.description}
 										placeholder="Task description"
 										class="col-span-6 rounded border border-slate-300 px-2 py-1 text-sm"
 									/>
 									<input
 										type="text"
-										bind:value={task.assigned_role}
+										bind:value={task.role}
 										placeholder="Role"
 										class="col-span-3 rounded border border-slate-300 px-2 py-1 text-sm"
 									/>
@@ -331,7 +328,7 @@
 		{/if}
 
 		{#if isGenerating && generatedContent}
-			<div class="mt-4">
+			<div class="mt-4 overflow-x-auto">
 				<LLMOutput text={generatedContent} />
 			</div>
 		{/if}

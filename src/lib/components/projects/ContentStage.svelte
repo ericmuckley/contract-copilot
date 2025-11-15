@@ -2,21 +2,21 @@
 	import { marked } from 'marked';
 	import LLMOutput from '../LLMOutput.svelte';
 	import Spinner from '../Spinner.svelte';
-	import type { ProjectStage } from '$lib/types/project';
+	import { STAGES } from '$lib/schema';
 
 	let {
 		projectId,
-		stage,
+		stageIndex,
 		content = null,
-		approverName,
 		onRefresh
 	}: {
 		projectId: number;
-		stage: ProjectStage;
+		stageIndex: number;
 		content?: string | null;
-		approverName: string;
 		onRefresh: () => void;
 	} = $props();
+
+	const stage = STAGES[stageIndex];
 
 	let isEditing = $state(false);
 	let editedContent = $state(content || '');
@@ -25,28 +25,22 @@
 	let error = $state('');
 	let generatedContent = $state('');
 
-	const stageInfo: Record<string, { title: string; description: string; endpoint: string }> = {
-		BusinessCase: {
-			title: 'Business Case',
+	const stageInfo: Record<string, { description: string }> = {
+		business_case: {
 			description:
-				'Generate a comprehensive business case including scope, outcomes, constraints, and risks.',
-			endpoint: 'business-case'
+				'Generate a comprehensive business case including scope, outcomes, constraints, and risks.'
 		},
-		Requirements: {
-			title: 'Requirements',
+		requirements: {
 			description:
-				'Generate detailed functional and non-functional requirements based on the business case.',
-			endpoint: 'requirements'
+				'Generate detailed functional and non-functional requirements based on the business case.'
 		},
-		SolutionArchitecture: {
-			title: 'Solution/Architecture',
+		architecture: {
 			description:
-				'Document the technical approach, architecture, tech stack, and risk mitigation strategies.',
-			endpoint: 'solution-architecture'
+				'Document the technical approach, architecture, tech stack, and risk mitigation strategies.'
 		}
 	};
 
-	const info = $derived(stageInfo[stage]);
+	const info = $derived(stageInfo[stage.name]);
 
 	async function generateContent() {
 		isGenerating = true;
@@ -57,7 +51,7 @@
 			const response = await fetch(`/api/projects/${projectId}/generate`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ stage })
+				body: JSON.stringify({ stage: stage.name })
 			});
 
 			if (!response.ok) {
@@ -105,10 +99,13 @@
 		error = '';
 
 		try {
-			const response = await fetch(`/api/projects/${projectId}/${info.endpoint}`, {
+			const response = await fetch(`/api/projects/${projectId}/stage-content`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ content: editedContent, approved_by: approverName.trim() })
+				body: JSON.stringify({
+					stageIndex,
+					content: editedContent
+				})
 			});
 
 			if (!response.ok) {
@@ -138,19 +135,30 @@
 
 <div class="space-y-4">
 	<div class="card bg-white">
-		<h3 class="mb-4 text-lg font-semibold text-slate-800">{info.title}</h3>
+		<h1 class="mb-4">{stage.label}</h1>
 		<p class="mb-4 text-sm text-slate-600">{info.description}</p>
+
+		{#if error}
+			<div class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+				<i class="bi bi-exclamation-triangle-fill mr-2"></i>
+				{error}
+			</div>
+		{/if}
 
 		{#if isGenerating}
 			<div class="mb-2 flex justify-center">
 				<Spinner />
 			</div>
-		{/if}
 
-		{#if !content && !isEditing && !isGenerating}
+			{#if generatedContent}
+				<div class="mt-8 overflow-x-auto">
+					<LLMOutput text={generatedContent} />
+				</div>
+			{/if}
+		{:else if !content && !isEditing}
 			<button onclick={generateContent} disabled={isGenerating} class="btn btn-primary">
 				<i class="bi bi-stars mr-2"></i>
-				Generate {info.title} with AI
+				Generate {stage.label}
 			</button>
 		{/if}
 
@@ -160,13 +168,20 @@
 			</div>
 
 			<div class="flex space-x-2">
-				<button onclick={startEditing} class="btn bg-slate-500 text-white hover:bg-slate-600">
+				<button
+					onclick={startEditing}
+					class="btn flex w-full justify-center bg-slate-500 text-white hover:bg-slate-600"
+				>
 					<i class="bi bi-pencil mr-2"></i>
-					Edit
+					<span>Edit</span>
 				</button>
-				<button onclick={generateContent} disabled={isGenerating} class="btn btn-primary">
+				<button
+					onclick={generateContent}
+					disabled={isGenerating}
+					class="btn btn-primary flex w-full justify-center space-x-1 whitespace-nowrap"
+				>
 					<i class="bi bi-arrow-clockwise mr-2"></i>
-					Regenerate
+					<span>Regenerate</span>
 				</button>
 			</div>
 		{/if}
@@ -192,21 +207,6 @@
 					<button onclick={cancelEditing} disabled={isSaving} class="btn bg-slate-500 text-white">
 						Cancel
 					</button>
-				</div>
-			</div>
-		{/if}
-
-		{#if error}
-			<div class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-				<i class="bi bi-exclamation-triangle-fill mr-2"></i>
-				{error}
-			</div>
-		{/if}
-
-		{#if isGenerating && generatedContent}
-			<div class="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-4">
-				<div class="mt-4">
-					<LLMOutput text={generatedContent} />
 				</div>
 			</div>
 		{/if}

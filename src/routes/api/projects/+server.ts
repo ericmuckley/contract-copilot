@@ -2,7 +2,6 @@ import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { createProject, listProjects } from '$lib/server/db';
 
-
 // GET /api/projects - List all projects
 export async function GET() {
 	try {

@@ -1,4 +1,3 @@
-
 Create these tables in Postgres:
 
 ```sql
