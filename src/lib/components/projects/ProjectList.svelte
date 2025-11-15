@@ -36,8 +36,8 @@
 			bind:value={stageFilter}
 			class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
 		>
-			{#each [{ name: 'all' }, ...STAGES] as stage (stage.name)}
-				<option value={stage.name}>{cleanString(stage.name)}</option>
+			{#each [{ name: 'all', label: 'All' }, ...STAGES] as stage (stage.name)}
+				<option value={stage.name}>{cleanString(stage.label)}</option>
 			{/each}
 		</select>
 		<span class="text-sm text-slate-500">
@@ -57,7 +57,7 @@
 			</p>
 		</div>
 	{:else}
-		<div class="flex flex-wrap">
+		<div class="flex flex-wrap gap-4">
 			{#each filteredProjects as project (project.id)}
 				<ProjectCard {project} />
 			{/each}

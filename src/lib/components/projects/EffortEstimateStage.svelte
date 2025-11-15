@@ -10,14 +10,12 @@
 		stageIndex,
 		assumptions = null,
 		tasks = [],
-		approverName,
 		onRefresh
 	}: {
 		projectId: number;
 		stageIndex: number;
 		assumptions?: string | null;
 		tasks?: ProjectTask[];
-		approverName: string;
 		onRefresh: () => void;
 	} = $props();
 
@@ -174,7 +172,7 @@
 
 <div class="space-y-4">
 	<div class="card bg-white">
-		<h3 class="mb-4 text-lg font-semibold text-slate-800">Effort Estimate (WBS)</h3>
+		<h1 class="mb-4">Effort Estimate (WBS)</h1>
 		<p class="mb-4 text-sm text-slate-600">
 			Generate a detailed Work Breakdown Structure with tasks, assigned roles, and estimated hours
 			based on all previous stages.
@@ -189,7 +187,7 @@
 		{#if !assumptions && !isEditing && !isGenerating}
 			<button onclick={generateEstimate} disabled={isGenerating} class="btn btn-primary">
 				<i class="bi bi-stars mr-2"></i>
-				Generate Effort Estimate with AI
+				Generate Effort Estimate
 			</button>
 		{/if}
 
@@ -230,13 +228,20 @@
 			</div>
 
 			<div class="flex space-x-2">
-				<button onclick={startEditing} class="btn bg-slate-500 text-white hover:bg-slate-600">
+				<button
+					onclick={startEditing}
+					class="btn flex w-full justify-center space-x-1 bg-slate-500 text-white hover:bg-slate-600"
+				>
 					<i class="bi bi-pencil mr-2"></i>
-					Edit
+					<span>Edit</span>
 				</button>
-				<button onclick={generateEstimate} disabled={isGenerating} class="btn btn-primary">
+				<button
+					onclick={generateEstimate}
+					disabled={isGenerating}
+					class="btn btn-primary flex w-full justify-center space-x-1"
+				>
 					<i class="bi bi-arrow-clockwise mr-2"></i>
-					Regenerate
+					<span>Regenerate</span>
 				</button>
 			</div>
 		{/if}
@@ -323,7 +328,7 @@
 		{/if}
 
 		{#if isGenerating && generatedContent}
-			<div class="mt-4">
+			<div class="mt-4 overflow-x-auto">
 				<LLMOutput text={generatedContent} />
 			</div>
 		{/if}
