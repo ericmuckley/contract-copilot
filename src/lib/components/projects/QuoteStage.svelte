@@ -293,7 +293,7 @@
 					<button
 						onclick={saveQuote}
 						disabled={isSaving}
-						class="btn btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+						class="btn btn-primary"
 					>
 						{#if isSaving}
 							<i class="bi bi-hourglass-split mr-2 animate-spin"></i>

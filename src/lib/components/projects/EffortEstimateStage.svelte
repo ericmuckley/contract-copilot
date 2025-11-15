@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { marked } from 'marked';
 	import type { EstimateTask } from '$lib/types/project';
+	import Spinner from '../Spinner.svelte';
+	import { safeJsonParse } from '$lib/utils';
 
 	let {
 		projectId,
@@ -69,6 +71,8 @@
 				}
 			}
 
+			console.log(generatedContent);
+
 			// Parse the generated content to extract assumptions and tasks
 			parseGeneratedContent(generatedContent);
 			isEditing = true;
@@ -81,16 +85,18 @@
 
 	function parseGeneratedContent(content: string) {
 		// Extract assumptions (everything before the JSON block)
-		const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+		const segments = content.split("```json");
 
-		if (jsonMatch) {
+		console.log(segments);
+
+		if (segments.length > 1) {
 			// Get assumptions (everything before the JSON block)
-			const assumptionsText = content.substring(0, jsonMatch.index).trim();
+			const assumptionsText = segments[0].trim();
 			editedAssumptions = assumptionsText;
 
 			// Parse JSON tasks
 			try {
-				const parsedTasks = JSON.parse(jsonMatch[1]);
+				const parsedTasks = safeJsonParse(segments[1].trim(), []);
 				if (Array.isArray(parsedTasks)) {
 					editedTasks = parsedTasks.map((t, index) => ({
 						id: -(index + 1), // Temporary negative ID for new tasks
@@ -183,19 +189,21 @@
 			based on all previous stages.
 		</p>
 
-		{#if !assumptions && !isEditing}
+
+		{#if isGenerating}
+			<div class="flex justify-center mb-2">
+				<Spinner />
+			</div>
+		{/if}
+
+		{#if !assumptions && !isEditing && !isGenerating}
 			<button
 				onclick={generateEstimate}
 				disabled={isGenerating}
-				class="btn btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+				class="btn btn-primary"
 			>
-				{#if isGenerating}
-					<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
-					Generating...
-				{:else}
-					<i class="bi bi-stars mr-2"></i>
-					Generate Effort Estimate with AI
-				{/if}
+				<i class="bi bi-stars mr-2"></i>
+				Generate Effort Estimate with AI
 			</button>
 		{/if}
 
@@ -312,7 +320,7 @@
 					<button
 						onclick={saveEstimate}
 						disabled={isSaving}
-						class="btn btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+						class="btn btn-primary"
 					>
 						{#if isSaving}
 							<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
@@ -338,9 +346,8 @@
 
 		{#if isGenerating && generatedContent}
 			<div class="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-4">
-				<div class="mb-2 text-sm font-semibold text-sky-700">
-					<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
-					Generating estimate...
+				<div class="flex justify-center mb-2">
+					<Spinner />
 				</div>
 				<div class="boilerplate prose max-w-none text-slate-700">
 					{@html marked(generatedContent)}

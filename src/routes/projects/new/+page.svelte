@@ -91,7 +91,7 @@
 				<button
 					type="submit"
 					disabled={isCreating}
-					class="btn btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+					class="btn btn-primary flex-1"
 				>
 					{#if isCreating}
 						<i class="bi bi-hourglass-split mr-2 animate-spin"></i>

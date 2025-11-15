@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
+	import Spinner from '../Spinner.svelte';
 	import type { ProjectStage } from '$lib/types/project';
 
 	let {
@@ -145,11 +146,12 @@
 			<button
 				onclick={generateContent}
 				disabled={isGenerating}
-				class="btn btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+				class="btn btn-primary"
 			>
 				{#if isGenerating}
-					<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
-					Generating...
+					<div class="flex justify-center">
+						<Spinner />
+					</div>
 				{:else}
 					<i class="bi bi-stars mr-2"></i>
 					Generate {info.title} with AI
@@ -187,7 +189,7 @@
 					<button
 						onclick={saveContent}
 						disabled={isSaving}
-						class="btn btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+						class="btn btn-primary"
 					>
 						{#if isSaving}
 							<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
@@ -213,9 +215,8 @@
 
 		{#if isGenerating && generatedContent}
 			<div class="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-4">
-				<div class="mb-2 text-sm font-semibold text-sky-700">
-					<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
-					Generating content...
+				<div class="flex justify-center mb-2">
+					<Spinner />
 				</div>
 				<div class="boilerplate prose max-w-none text-slate-700">
 					{@html marked(generatedContent)}

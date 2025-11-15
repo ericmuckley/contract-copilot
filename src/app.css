@@ -1,11 +1,10 @@
 @import 'tailwindcss';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
-/*
 body {
-	@apply bg-black;
+	@apply bg-slate-100;
 }
-*/
+
 h1,
 h2,
 h3,
@@ -34,7 +33,7 @@ button {
 }
 
 .card {
-	@apply rounded-xl px-6 py-4;
+	@apply rounded-xl px-6 py-4 bg-white;
 }
 .btn {
 	@apply rounded px-4 py-2 text-white;
