@@ -37,7 +37,7 @@ export async function fetchBedrockStream(
 	messages: Message[],
 	useTools: boolean
 ): Promise<Response> {
-	const response = await fetch('/bedrock', {
+	const response = await fetch('/api/bedrock', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
