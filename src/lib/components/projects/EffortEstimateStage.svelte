@@ -25,57 +25,27 @@
 	let isGenerating = $state(false);
 	let isSaving = $state(false);
 	let error = $state('');
-	let generatedContent = $state('');
+	let generatedAssumptions = $state('');
+	let generatedTasks = $state('');
 
 	const totalHours = $derived(tasks.reduce((sum, task) => sum + Number(task.hours), 0));
 
 	async function generateEstimate() {
 		isGenerating = true;
-		generatedContent = '';
+		generatedAssumptions = '';
+		generatedTasks = '';
 		error = '';
 
 		try {
-			const response = await fetch(`/api/projects/${projectId}/generate`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ stage: 'estimate' })
-			});
+			// First call: Generate assumptions
+			await generateAssumptions();
 
-			if (!response.ok) {
-				throw new Error('Failed to generate estimate');
-			}
+			// Second call: Generate tasks
+			await generateTasks();
 
-			const reader = response.body?.getReader();
-			if (!reader) throw new Error('No response body');
-
-			const decoder = new TextDecoder();
-			let buffer = '';
-
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-
-				buffer += decoder.decode(value, { stream: true });
-				const lines = buffer.split('\n');
-				buffer = lines.pop() || '';
-
-				for (const line of lines) {
-					if (!line.trim()) continue;
-					try {
-						const data = JSON.parse(line);
-						if (data.type === 'text') {
-							generatedContent += data.text;
-						}
-					} catch {
-						console.error('Failed to parse line:', line);
-					}
-				}
-			}
-
-			console.log(generatedContent);
-
-			// Parse the generated content to extract assumptions and tasks
-			parseGeneratedContent(generatedContent);
+			// Parse the generated tasks
+			parseGeneratedTasks(generatedTasks);
+			editedAssumptions = generatedAssumptions;
 			isEditing = true;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Generation failed';
@@ -84,32 +54,98 @@
 		}
 	}
 
-	function parseGeneratedContent(content: string) {
-		// Extract assumptions (everything before the JSON block)
-		const segments = content.split('```json');
+	async function generateAssumptions() {
+		const response = await fetch(`/api/projects/${projectId}/generate`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ stage: 'estimate', type: 'assumptions' })
+		});
 
-		console.log(segments);
+		if (!response.ok) {
+			throw new Error('Failed to generate assumptions');
+		}
 
-		if (segments.length > 1) {
-			// Get assumptions (everything before the JSON block)
-			const assumptionsText = segments[0].trim();
-			editedAssumptions = assumptionsText;
+		const reader = response.body?.getReader();
+		if (!reader) throw new Error('No response body');
 
-			// Parse JSON tasks
-			try {
-				const parsedTasks = safeJsonParse(segments[1].trim(), []);
-				if (Array.isArray(parsedTasks)) {
-					editedTasks = parsedTasks.map((t) => ({
-						role: t.role || t.assigned_role,
-						description: t.description || t.task_description,
-						hours: Number(t.hours)
-					}));
+		const decoder = new TextDecoder();
+		let buffer = '';
+
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+
+			buffer += decoder.decode(value, { stream: true });
+			const lines = buffer.split('\n');
+			buffer = lines.pop() || '';
+
+			for (const line of lines) {
+				if (!line.trim()) continue;
+				try {
+					const data = JSON.parse(line);
+					if (data.type === 'text') {
+						generatedAssumptions += data.text;
+					}
+				} catch {
+					console.error('Failed to parse line:', line);
 				}
-			} catch (e) {
-				console.error('Failed to parse tasks JSON:', e);
 			}
-		} else {
-			editedAssumptions = content;
+		}
+	}
+
+	async function generateTasks() {
+		const response = await fetch(`/api/projects/${projectId}/generate`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ stage: 'estimate', type: 'tasks' })
+		});
+
+		if (!response.ok) {
+			throw new Error('Failed to generate tasks');
+		}
+
+		const reader = response.body?.getReader();
+		if (!reader) throw new Error('No response body');
+
+		const decoder = new TextDecoder();
+		let buffer = '';
+
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+
+			buffer += decoder.decode(value, { stream: true });
+			const lines = buffer.split('\n');
+			buffer = lines.pop() || '';
+
+			for (const line of lines) {
+				if (!line.trim()) continue;
+				try {
+					const data = JSON.parse(line);
+					if (data.type === 'text') {
+						generatedTasks += data.text;
+					}
+				} catch {
+					console.error('Failed to parse line:', line);
+				}
+			}
+		}
+	}
+
+	function parseGeneratedTasks(content: string) {
+		// Parse JSON tasks from the generated content
+		try {
+			const parsedTasks = safeJsonParse(content.trim(), []);
+			if (Array.isArray(parsedTasks)) {
+				editedTasks = parsedTasks.map((t) => ({
+					role: t.role || t.assigned_role,
+					description: t.description || t.task_description,
+					hours: Number(t.hours)
+				}));
+			}
+		} catch (e) {
+			console.error('Failed to parse tasks JSON:', e);
+			error = 'Failed to parse tasks. Please try again.';
 		}
 	}
 
@@ -327,9 +363,22 @@
 			</div>
 		{/if}
 
-		{#if isGenerating && generatedContent}
-			<div class="mt-4 overflow-x-auto">
-				<LLMOutput text={generatedContent} />
+		{#if isGenerating && (generatedAssumptions || generatedTasks)}
+			<div class="mt-4 space-y-4">
+				{#if generatedAssumptions}
+					<div>
+						<h4 class="mb-2 font-semibold text-slate-700">Generating Assumptions:</h4>
+						<LLMOutput text={generatedAssumptions} />
+					</div>
+				{/if}
+				{#if generatedTasks}
+					<div>
+						<h4 class="mb-2 font-semibold text-slate-700">Generating Tasks:</h4>
+						<div class="overflow-x-auto">
+							<pre class="rounded-lg bg-slate-50 p-4 text-xs">{generatedTasks}</pre>
+						</div>
+					</div>
+				{/if}
 			</div>
 		{/if}
 	</div>

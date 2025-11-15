@@ -13,7 +13,7 @@ export async function POST({ params, request }: RequestEvent) {
 			return json({ error: 'Invalid project ID' }, { status: 400 });
 		}
 
-		const { stage } = await request.json();
+		const { stage, type } = await request.json();
 		if (!stage) {
 			return json({ error: 'Stage is required' }, { status: 400 });
 		}
@@ -27,7 +27,7 @@ export async function POST({ params, request }: RequestEvent) {
 		const context = await buildContextForStage(project, stage);
 
 		// Generate the prompt based on the stage
-		const prompt = generatePromptForStage(stage, project.project_name, context);
+		const prompt = generatePromptForStage(stage, project.project_name, context, type);
 
 		// Create message for LLM
 		const messages: Message[] = [
@@ -131,7 +131,12 @@ async function buildContextForStage(project: any, stageName: string): Promise<st
 	return parts.join('\n');
 }
 
-function generatePromptForStage(stageName: string, projectName: string, context: string): string {
+function generatePromptForStage(
+	stageName: string,
+	projectName: string,
+	context: string,
+	type?: string
+): string {
 	switch (stageName) {
 		case 'business_case':
 			return `You are analyzing the project "${projectName}" to create a comprehensive business case.
@@ -181,7 +186,49 @@ Based on all the information provided, create a detailed solution/architecture d
 Format your response in clear sections with markdown formatting.`;
 
 		case 'estimate':
-			return `You are creating a detailed effort estimate (Work Breakdown Structure) for project "${projectName}".
+			if (type === 'assumptions') {
+				return `You are creating key assumptions for an effort estimate (Work Breakdown Structure) for project "${projectName}".
+
+${context}
+
+Based on all the information provided, create a detailed list of assumptions that underlie the effort estimate. These assumptions should include:
+
+- Technology choices and their implications
+- Team composition and skill levels
+- Development methodology (Agile, Waterfall, etc.)
+- Timeline constraints
+- Availability of resources
+- Third-party dependencies
+- Testing and quality assurance approach
+- Deployment and infrastructure considerations
+- Risk factors that could affect estimates
+
+Format your response in clear markdown with bullet points or numbered lists. Be thorough and specific.`;
+			} else if (type === 'tasks') {
+				return `You are creating a detailed Work Breakdown Structure (WBS) for project "${projectName}".
+
+${context}
+
+Based on all the information provided, create a detailed list of tasks in JSON format.
+
+Each task should have:
+- description: Clear description of the task
+- role: Role responsible (e.g., "Backend Developer", "Frontend Developer", "QA Engineer", "DevOps", "Project Manager")
+- hours: Estimated hours for the task
+
+Return ONLY a JSON array with no additional text or markdown formatting:
+[
+  {
+    "description": "Task description here",
+    "role": "Role name",
+    "hours": 8
+  }
+]
+
+Be thorough and include all phases of work: planning, design, development, testing, deployment, and project management, but create a maximum of 20 separate tasks.`;
+			} else {
+				// Backward compatibility: if no type specified, generate combined output
+				return `You are creating a detailed effort estimate (Work Breakdown Structure) for project "${projectName}".
 
 ${context}
 
@@ -207,6 +254,7 @@ After the assumptions section, provide the tasks in this JSON format:
 \`\`\`
 
 Be thorough and include all phases of work: planning, design, development, testing, deployment, and project management, but create a maximum of 20 separate tasks.`;
+			}
 
 		default:
 			return `Generate content for the ${stageName} stage of project "${projectName}".\n\n${context}`;
