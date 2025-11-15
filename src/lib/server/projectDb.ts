@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import { DATABASE_URL } from '$lib/server/settings';
 import type {
-	Project,
+	//Project,
 	Artifact,
 	BusinessCase,
 	Requirements,
@@ -13,6 +13,7 @@ import type {
 	ProjectHistory,
 	ProjectStage
 } from '$lib/types/project';
+import type { Project } from '$lib/schema';
 
 const sql = neon(DATABASE_URL);
 
@@ -31,21 +32,6 @@ export async function getProject(id: number): Promise<Project | null> {
 		SELECT * FROM "Project" WHERE id = ${id}
 	`;
 	return result.length > 0 ? (result[0] as Project) : null;
-}
-
-export async function listProjects(stageFilter?: ProjectStage): Promise<Project[]> {
-	if (stageFilter) {
-		const result = await sql`
-			SELECT * FROM "Project" 
-			WHERE current_stage = ${stageFilter}
-			ORDER BY updated_at DESC
-		`;
-		return result as Project[];
-	}
-	const result = await sql`
-		SELECT * FROM "Project" ORDER BY updated_at DESC
-	`;
-	return result as Project[];
 }
 
 export async function updateProject(

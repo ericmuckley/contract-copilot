@@ -1,13 +1,12 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import { createProject, listProjects, createProjectHistory } from '$lib/server/projectDb';
-import type { ProjectStage } from '$lib/types/project';
+import { createProject, listProjects } from '$lib/server/db';
 
-// GET /api/projects - List all projects with optional stage filter
-export async function GET({ url }: RequestEvent) {
+
+// GET /api/projects - List all projects
+export async function GET() {
 	try {
-		const stageFilter = url.searchParams.get('stage') as ProjectStage | null;
-		const projects = await listProjects(stageFilter || undefined);
+		const projects = await listProjects();
 		return json({ projects });
 	} catch (error) {
 		console.error('Error listing projects:', error);
@@ -18,20 +17,8 @@ export async function GET({ url }: RequestEvent) {
 // POST /api/projects - Create a new project
 export async function POST({ request }: RequestEvent) {
 	try {
-		const { name, approved_by } = await request.json();
-
-		if (!name || typeof name !== 'string' || name.trim().length === 0) {
-			return json({ error: 'Project name is required' }, { status: 400 });
-		}
-
-		if (!approved_by || typeof approved_by !== 'string' || approved_by.trim().length === 0) {
-			return json({ error: 'Approver name is required' }, { status: 400 });
-		}
-
-		const project = await createProject(name.trim(), approved_by.trim());
-
-		// Log creation in project history
-		await createProjectHistory(project.id, 'Artifacts', `Project created by ${approved_by.trim()}`);
+		const _project = await request.json();
+		const project = await createProject(_project);
 
 		return json({ project }, { status: 201 });
 	} catch (error) {
