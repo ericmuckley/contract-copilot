@@ -73,15 +73,17 @@ export async function createProject(project: Project): Promise<Project> {
 export async function updateProject(id: number, project: Project): Promise<Project | null> {
 	const result = await sql`
 		UPDATE "projects"
-		SET data = ${JSON.stringify(project)}, updated_at = NOW()
+		SET sdata = ${JSON.stringify(project.sdata)}, updated_at = NOW()
 		WHERE id = ${id}
-		RETURNING id, data, created_at, updated_at
+		RETURNING id, sdata, created_at, updated_at, project_name, created_by
 	`;
 	if (result.length === 0) return null;
 	const row = result[0];
 	return {
 		id: row.id,
-		...row.data as Omit<Project, 'id'>,
+		project_name: row.project_name,
+		created_by: row.created_by,
+		sdata: row.sdata,
 		updated_at: row.updated_at
 	} as Project;
 }
