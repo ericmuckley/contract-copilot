@@ -6,8 +6,6 @@
 
 	let { projects = [] }: { projects?: Project[] } = $props();
 
-	console.log(projects);
-
 	let stageFilter = $state<string>('all');
 
 	const filteredProjects = $derived(
@@ -31,11 +29,7 @@
 
 	<div class="flex items-center space-x-3">
 		<label for="stage-filter" class="text-sm font-medium text-slate-700">Filter by stage:</label>
-		<select
-			id="stage-filter"
-			bind:value={stageFilter}
-			class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
-		>
+		<select id="stage-filter" bind:value={stageFilter}>
 			{#each [{ name: 'all', label: 'All' }, ...STAGES] as stage (stage.name)}
 				<option value={stage.name}>{cleanString(stage.label)}</option>
 			{/each}

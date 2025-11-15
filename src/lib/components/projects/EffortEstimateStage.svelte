@@ -4,6 +4,7 @@
 	import Spinner from '../Spinner.svelte';
 	import { safeJsonParse } from '$lib/utils';
 	import LLMOutput from '../LLMOutput.svelte';
+	import { PROJECT_PERSONNEL_RATES } from '$lib/schema';
 
 	let {
 		projectId,
@@ -228,15 +229,14 @@
 		{/if}
 
 		{#if assumptions && !isEditing}
-			<div class="mb-6">
-				<h3 class="mb-2 font-semibold text-slate-700">Assumptions:</h3>
+			<div class="mb-6 max-h-96 overflow-y-auto rounded-xl border border-slate-200 px-6 py-4">
 				<LLMOutput text={assumptions} />
 			</div>
 
 			<div class="mb-6">
-				<h4 class="mb-2 font-semibold text-slate-700">
+				<p class="mb-2 font-bold">
 					Tasks ({tasks.length} tasks, {totalHours} hours total):
-				</h4>
+				</p>
 				<div class="overflow-x-auto">
 					<table class="w-full border-collapse">
 						<thead>
@@ -250,13 +250,13 @@
 							{#each tasks as task, index (index)}
 								<tr class="border-b border-slate-100">
 									<td class="px-4 py-2 text-sm">{task.description}</td>
-									<td class="px-4 py-2 text-sm">{task.role}</td>
+									<td class="px-4 py-2 text-sm whitespace-nowrap">{task.role}</td>
 									<td class="px-4 py-2 text-right text-sm">{task.hours}</td>
 								</tr>
 							{/each}
-							<tr class="bg-slate-50 font-semibold">
-								<td class="px-4 py-2 text-sm" colspan="2">Total</td>
-								<td class="px-4 py-2 text-right text-sm">{totalHours} hours</td>
+							<tr class="bg-slate-50 font-bold text-slate-600">
+								<td class="px-4 py-2" colspan="2">Total</td>
+								<td class="px-4 py-2 text-right whitespace-nowrap">{totalHours}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -295,14 +295,22 @@
 				</div>
 
 				<div>
-					<div class="mb-2 flex items-center justify-between">
-						<p class="text-sm font-semibold">Tasks:</p>
-						<button onclick={addTask} class="text-sm text-sky-600 hover:text-sky-700">
-							<i class="bi bi-plus-lg mr-1"></i>
-							Add Task
-						</button>
-					</div>
 					<div class="space-y-2">
+						<div class="grid grid-cols-12 gap-2">
+							{#each ['Task Description', 'Role', 'Hours', ''] as header, index (index)}
+								<div
+									class="col-span-{header === ''
+										? 1
+										: header === 'Task Description'
+											? 6
+											: header === 'Role'
+												? 3
+												: 2} font-semibold text-slate-700"
+								>
+									{header}
+								</div>
+							{/each}
+						</div>
 						{#each editedTasks as task, index (index)}
 							<div class="rounded-lg border border-slate-200 p-3">
 								<div class="grid grid-cols-12 gap-2">
@@ -312,12 +320,15 @@
 										placeholder="Task description"
 										class="col-span-6 rounded border border-slate-300 px-2 py-1 text-sm"
 									/>
-									<input
-										type="text"
+									<select
 										bind:value={task.role}
-										placeholder="Role"
 										class="col-span-3 rounded border border-slate-300 px-2 py-1 text-sm"
-									/>
+									>
+										<option value="">Select role</option>
+										{#each Object.keys(PROJECT_PERSONNEL_RATES) as role}
+											<option value={role}>{role}</option>
+										{/each}
+									</select>
 									<input
 										type="number"
 										bind:value={task.hours}
@@ -336,6 +347,13 @@
 								</div>
 							</div>
 						{/each}
+					</div>
+
+					<div class="my-8 flex justify-center font-bold">
+						<button onclick={addTask} class="link">
+							<i class="bi bi-plus-lg mr-1"></i>
+							Add Task
+						</button>
 					</div>
 				</div>
 

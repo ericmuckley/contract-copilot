@@ -53,8 +53,6 @@
 			await refreshData();
 		} catch (err) {
 			advanceError = err instanceof Error ? err.message : 'Failed to advance';
-		} finally {
-			isAdvancing = false;
 		}
 	}
 

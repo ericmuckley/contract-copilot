@@ -54,6 +54,16 @@ export const STAGES = [
 		bordercolor: 'border-pink-700'
 	}
 ];
+export const PROJECT_PERSONNEL_RATES = {
+	'Backend Dev': 150,
+	'Frontend Dev': 120,
+	'SW Engineer': 180,
+	'SW Architect': 220,
+	'QA Engineer': 100,
+	'DevOps Engineer': 180,
+	'Project Manager': 180,
+	'Business Analyst': 85
+};
 
 export interface Stage {
 	name: string;

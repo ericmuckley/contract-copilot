@@ -3,7 +3,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import type { Message } from '@aws-sdk/client-bedrock-runtime';
 import { streamInference } from '$lib/server/bedrockClient';
 import { getProject, getProjectArtifacts } from '$lib/server/db';
-import { STAGES } from '$lib/schema';
+import { STAGES, PROJECT_PERSONNEL_RATES } from '$lib/schema';
 
 // POST /api/projects/[id]/generate - Generate content for a stage using LLM
 export async function POST({ params, request }: RequestEvent) {
@@ -213,7 +213,7 @@ Based on all the information provided, create a detailed list of tasks in JSON f
 
 Each task should have:
 - description: Clear description of the task
-- role: Role responsible (e.g., "Backend Developer", "Frontend Developer", "QA Engineer", "DevOps", "Project Manager")
+- role: Role responsible. Use only one of these: [${Object.keys(PROJECT_PERSONNEL_RATES).join(', ')}]
 - hours: Estimated hours for the task
 
 Return ONLY a JSON array with no additional text or markdown formatting:
