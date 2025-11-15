@@ -4,6 +4,7 @@
 	import Spinner from '../Spinner.svelte';
 	import { safeJsonParse } from '$lib/utils';
 	import LLMOutput from '../LLMOutput.svelte';
+	import { PROJECT_PERSONNEL_RATES } from '$lib/schema';
 
 	let {
 		projectId,
@@ -25,57 +26,27 @@
 	let isGenerating = $state(false);
 	let isSaving = $state(false);
 	let error = $state('');
-	let generatedContent = $state('');
+	let generatedAssumptions = $state('');
+	let generatedTasks = $state('');
 
 	const totalHours = $derived(tasks.reduce((sum, task) => sum + Number(task.hours), 0));
 
 	async function generateEstimate() {
 		isGenerating = true;
-		generatedContent = '';
+		generatedAssumptions = '';
+		generatedTasks = '';
 		error = '';
 
 		try {
-			const response = await fetch(`/api/projects/${projectId}/generate`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ stage: 'estimate' })
-			});
+			// First call: Generate assumptions
+			await generateAssumptions();
 
-			if (!response.ok) {
-				throw new Error('Failed to generate estimate');
-			}
+			// Second call: Generate tasks
+			await generateTasks();
 
-			const reader = response.body?.getReader();
-			if (!reader) throw new Error('No response body');
-
-			const decoder = new TextDecoder();
-			let buffer = '';
-
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-
-				buffer += decoder.decode(value, { stream: true });
-				const lines = buffer.split('\n');
-				buffer = lines.pop() || '';
-
-				for (const line of lines) {
-					if (!line.trim()) continue;
-					try {
-						const data = JSON.parse(line);
-						if (data.type === 'text') {
-							generatedContent += data.text;
-						}
-					} catch {
-						console.error('Failed to parse line:', line);
-					}
-				}
-			}
-
-			console.log(generatedContent);
-
-			// Parse the generated content to extract assumptions and tasks
-			parseGeneratedContent(generatedContent);
+			// Parse the generated tasks
+			parseGeneratedTasks(generatedTasks);
+			editedAssumptions = generatedAssumptions;
 			isEditing = true;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Generation failed';
@@ -84,32 +55,98 @@
 		}
 	}
 
-	function parseGeneratedContent(content: string) {
-		// Extract assumptions (everything before the JSON block)
-		const segments = content.split('```json');
+	async function generateAssumptions() {
+		const response = await fetch(`/api/projects/${projectId}/generate`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ stage: 'estimate', type: 'assumptions' })
+		});
 
-		console.log(segments);
+		if (!response.ok) {
+			throw new Error('Failed to generate assumptions');
+		}
 
-		if (segments.length > 1) {
-			// Get assumptions (everything before the JSON block)
-			const assumptionsText = segments[0].trim();
-			editedAssumptions = assumptionsText;
+		const reader = response.body?.getReader();
+		if (!reader) throw new Error('No response body');
 
-			// Parse JSON tasks
-			try {
-				const parsedTasks = safeJsonParse(segments[1].trim(), []);
-				if (Array.isArray(parsedTasks)) {
-					editedTasks = parsedTasks.map((t) => ({
-						role: t.role || t.assigned_role,
-						description: t.description || t.task_description,
-						hours: Number(t.hours)
-					}));
+		const decoder = new TextDecoder();
+		let buffer = '';
+
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+
+			buffer += decoder.decode(value, { stream: true });
+			const lines = buffer.split('\n');
+			buffer = lines.pop() || '';
+
+			for (const line of lines) {
+				if (!line.trim()) continue;
+				try {
+					const data = JSON.parse(line);
+					if (data.type === 'text') {
+						generatedAssumptions += data.text;
+					}
+				} catch {
+					console.error('Failed to parse line:', line);
 				}
-			} catch (e) {
-				console.error('Failed to parse tasks JSON:', e);
 			}
-		} else {
-			editedAssumptions = content;
+		}
+	}
+
+	async function generateTasks() {
+		const response = await fetch(`/api/projects/${projectId}/generate`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ stage: 'estimate', type: 'tasks' })
+		});
+
+		if (!response.ok) {
+			throw new Error('Failed to generate tasks');
+		}
+
+		const reader = response.body?.getReader();
+		if (!reader) throw new Error('No response body');
+
+		const decoder = new TextDecoder();
+		let buffer = '';
+
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+
+			buffer += decoder.decode(value, { stream: true });
+			const lines = buffer.split('\n');
+			buffer = lines.pop() || '';
+
+			for (const line of lines) {
+				if (!line.trim()) continue;
+				try {
+					const data = JSON.parse(line);
+					if (data.type === 'text') {
+						generatedTasks += data.text;
+					}
+				} catch {
+					console.error('Failed to parse line:', line);
+				}
+			}
+		}
+	}
+
+	function parseGeneratedTasks(content: string) {
+		// Parse JSON tasks from the generated content
+		try {
+			const parsedTasks = safeJsonParse(content.trim(), []);
+			if (Array.isArray(parsedTasks)) {
+				editedTasks = parsedTasks.map((t) => ({
+					role: t.role || t.assigned_role,
+					description: t.description || t.task_description,
+					hours: Number(t.hours)
+				}));
+			}
+		} catch (e) {
+			console.error('Failed to parse tasks JSON:', e);
+			error = 'Failed to parse tasks. Please try again.';
 		}
 	}
 
@@ -192,15 +229,14 @@
 		{/if}
 
 		{#if assumptions && !isEditing}
-			<div class="mb-6">
-				<h3 class="mb-2 font-semibold text-slate-700">Assumptions:</h3>
+			<div class="mb-6 max-h-96 overflow-y-auto rounded-xl border border-slate-200 px-6 py-4">
 				<LLMOutput text={assumptions} />
 			</div>
 
 			<div class="mb-6">
-				<h4 class="mb-2 font-semibold text-slate-700">
+				<p class="mb-2 font-bold">
 					Tasks ({tasks.length} tasks, {totalHours} hours total):
-				</h4>
+				</p>
 				<div class="overflow-x-auto">
 					<table class="w-full border-collapse">
 						<thead>
@@ -214,13 +250,13 @@
 							{#each tasks as task, index (index)}
 								<tr class="border-b border-slate-100">
 									<td class="px-4 py-2 text-sm">{task.description}</td>
-									<td class="px-4 py-2 text-sm">{task.role}</td>
+									<td class="px-4 py-2 text-sm whitespace-nowrap">{task.role}</td>
 									<td class="px-4 py-2 text-right text-sm">{task.hours}</td>
 								</tr>
 							{/each}
-							<tr class="bg-slate-50 font-semibold">
-								<td class="px-4 py-2 text-sm" colspan="2">Total</td>
-								<td class="px-4 py-2 text-right text-sm">{totalHours} hours</td>
+							<tr class="bg-slate-50 font-bold text-slate-600">
+								<td class="px-4 py-2" colspan="2">Total</td>
+								<td class="px-4 py-2 text-right whitespace-nowrap">{totalHours}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -259,14 +295,22 @@
 				</div>
 
 				<div>
-					<div class="mb-2 flex items-center justify-between">
-						<p class="text-sm font-semibold">Tasks:</p>
-						<button onclick={addTask} class="text-sm text-sky-600 hover:text-sky-700">
-							<i class="bi bi-plus-lg mr-1"></i>
-							Add Task
-						</button>
-					</div>
 					<div class="space-y-2">
+						<div class="grid grid-cols-12 gap-2">
+							{#each ['Task Description', 'Role', 'Hours', ''] as header, index (index)}
+								<div
+									class="col-span-{header === ''
+										? 1
+										: header === 'Task Description'
+											? 6
+											: header === 'Role'
+												? 3
+												: 2} font-semibold text-slate-700"
+								>
+									{header}
+								</div>
+							{/each}
+						</div>
 						{#each editedTasks as task, index (index)}
 							<div class="rounded-lg border border-slate-200 p-3">
 								<div class="grid grid-cols-12 gap-2">
@@ -276,12 +320,15 @@
 										placeholder="Task description"
 										class="col-span-6 rounded border border-slate-300 px-2 py-1 text-sm"
 									/>
-									<input
-										type="text"
+									<select
 										bind:value={task.role}
-										placeholder="Role"
 										class="col-span-3 rounded border border-slate-300 px-2 py-1 text-sm"
-									/>
+									>
+										<option value="">Select role</option>
+										{#each Object.keys(PROJECT_PERSONNEL_RATES) as role}
+											<option value={role}>{role}</option>
+										{/each}
+									</select>
 									<input
 										type="number"
 										bind:value={task.hours}
@@ -300,6 +347,13 @@
 								</div>
 							</div>
 						{/each}
+					</div>
+
+					<div class="my-8 flex justify-center font-bold">
+						<button onclick={addTask} class="link">
+							<i class="bi bi-plus-lg mr-1"></i>
+							Add Task
+						</button>
 					</div>
 				</div>
 
@@ -327,9 +381,22 @@
 			</div>
 		{/if}
 
-		{#if isGenerating && generatedContent}
-			<div class="mt-4 overflow-x-auto">
-				<LLMOutput text={generatedContent} />
+		{#if isGenerating && (generatedAssumptions || generatedTasks)}
+			<div class="mt-4 space-y-4">
+				{#if generatedAssumptions}
+					<div>
+						<h4 class="mb-2 font-semibold text-slate-700">Generating Assumptions:</h4>
+						<LLMOutput text={generatedAssumptions} />
+					</div>
+				{/if}
+				{#if generatedTasks}
+					<div>
+						<h4 class="mb-2 font-semibold text-slate-700">Generating Tasks:</h4>
+						<div class="overflow-x-auto">
+							<pre class="rounded-lg bg-slate-50 p-4 text-xs">{generatedTasks}</pre>
+						</div>
+					</div>
+				{/if}
 			</div>
 		{/if}
 	</div>

@@ -46,6 +46,7 @@
 		isGenerating = true;
 		generatedContent = '';
 		error = '';
+		content = null;
 
 		try {
 			const response = await fetch(`/api/projects/${projectId}/generate`, {
@@ -163,7 +164,7 @@
 		{/if}
 
 		{#if content && !isEditing}
-			<div class="mb-4">
+			<div class="mb-4 max-h-96 overflow-y-auto rounded-xl border border-slate-200 px-6 py-4">
 				<LLMOutput text={content} />
 			</div>
 

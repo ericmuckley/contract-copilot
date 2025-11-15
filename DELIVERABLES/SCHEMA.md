@@ -77,3 +77,13 @@ Your goal is to refactor the project workflow infrastructure in `routes/projects
 [schema.ts](https://github.com/user-attachments/files/23559816/schema.ts)
 
 [db.ts](https://github.com/user-attachments/files/23559824/db.ts)
+
+# Simplifying Quote Stage Component
+
+I want you to drastically simplify my QuoteStage component. It should have no LLM calls or API requests of any kind.
+
+It should create a table of the prokect tasks, along with a column for rate (coming from the PROJECT_PERSONNEL_RATES variable), and another column for total cost.
+
+Then add final rows at the bottom for total project cost and project timeline, based on the number of hours for each task.
+
+Finally, let the user copy or download the take cata to a CSV file.
