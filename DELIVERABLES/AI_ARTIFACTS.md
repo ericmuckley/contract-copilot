@@ -62,6 +62,21 @@ I added a new VARCHAR field called `approved_by` in these database tables: Proje
 
 I need the approved_by field to be populated whenever there is a new record added to the database in these tables. At each project stage, when the user is wants to approve and move to the next stage, add a required text input that they must use to enter their name in. That is the name that will get saved in the `approved_by` column. Make one reusable component for the name so you don't have to replicate it inside each component.
 
+## Separating LLM streams for project estimation
+
+In the module that estimates project effort, the `components/projects/EffortEstimationState.svelte` component, a single LLM inference stream is generated using the `/api/projects/${projectId}/generate` endpoint. The streamed text is then split into two segments: project assumptions, and project tasks. We are currently keeping the project assumptions as unstructured text, and parsing the project tasks as a JSON list of project tasks.
+
+I would like to refactor the `EffortEstimationState.svelte` component so that it actually generates two distinct LLM streams sequentially - one for the project assumptions, which remains unstructured text, and the other for the project tasks, which gets parsed as JSON.
+
+Then, the both the assumptions and tasks data will be saved to the database, using the existing PUT request to the `/api/projects/${projectId}/effort-estimate` endpoint, which is currently being done in the `EffortEstimationState.svelte` component.
+
+Your task:
+- refactor the `EffortEstimationState.svelte` component and the `/api/projects/${projectId}/generate` endpoint, so that the component generates two separate streams sequentially
+- keep the assumptions streamed text as unstructured
+- parse the tasks streamed text as json
+- save assumptions and tasks to the database using the existing PUT request to `/api/projects/${projectId}/effort-estimate` in the component.
+
+
 ### Database
 
 From Google Gemini:
