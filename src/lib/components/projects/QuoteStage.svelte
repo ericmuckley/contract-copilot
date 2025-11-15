@@ -290,11 +290,7 @@
 				</div>
 
 				<div class="flex space-x-2">
-					<button
-						onclick={saveQuote}
-						disabled={isSaving}
-						class="btn btn-primary"
-					>
+					<button onclick={saveQuote} disabled={isSaving} class="btn btn-primary">
 						{#if isSaving}
 							<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
 							Saving...

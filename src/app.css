@@ -33,7 +33,7 @@ button {
 }
 
 .card {
-	@apply rounded-xl px-6 py-4 bg-white;
+	@apply rounded-xl bg-white px-6 py-4;
 }
 .btn {
 	@apply rounded px-4 py-2 text-white;

@@ -3,6 +3,7 @@
 	import type { EstimateTask } from '$lib/types/project';
 	import Spinner from '../Spinner.svelte';
 	import { safeJsonParse } from '$lib/utils';
+	import LLMOutput from '../LLMOutput.svelte';
 
 	let {
 		projectId,
@@ -85,7 +86,7 @@
 
 	function parseGeneratedContent(content: string) {
 		// Extract assumptions (everything before the JSON block)
-		const segments = content.split("```json");
+		const segments = content.split('```json');
 
 		console.log(segments);
 
@@ -177,8 +178,6 @@
 	function removeTask(index: number) {
 		editedTasks = editedTasks.filter((_, i) => i !== index);
 	}
-
-	const renderedAssumptions = $derived(assumptions ? marked(assumptions) : '');
 </script>
 
 <div class="space-y-4">
@@ -189,19 +188,14 @@
 			based on all previous stages.
 		</p>
 
-
 		{#if isGenerating}
-			<div class="flex justify-center mb-2">
+			<div class="mb-2 flex justify-center">
 				<Spinner />
 			</div>
 		{/if}
 
 		{#if !assumptions && !isEditing && !isGenerating}
-			<button
-				onclick={generateEstimate}
-				disabled={isGenerating}
-				class="btn btn-primary"
-			>
+			<button onclick={generateEstimate} disabled={isGenerating} class="btn btn-primary">
 				<i class="bi bi-stars mr-2"></i>
 				Generate Effort Estimate with AI
 			</button>
@@ -209,12 +203,8 @@
 
 		{#if assumptions && !isEditing}
 			<div class="mb-6">
-				<h4 class="mb-2 font-semibold text-slate-700">Assumptions:</h4>
-				<div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-					<div class="boilerplate prose max-w-none">
-						{@html renderedAssumptions}
-					</div>
-				</div>
+				<h3 class="mb-2 font-semibold text-slate-700">Assumptions:</h3>
+				<LLMOutput text={assumptions} />
 			</div>
 
 			<div class="mb-6">
@@ -317,11 +307,7 @@
 				</div>
 
 				<div class="flex space-x-2">
-					<button
-						onclick={saveEstimate}
-						disabled={isSaving}
-						class="btn btn-primary"
-					>
+					<button onclick={saveEstimate} disabled={isSaving} class="btn btn-primary">
 						{#if isSaving}
 							<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
 							Saving...
@@ -345,13 +331,8 @@
 		{/if}
 
 		{#if isGenerating && generatedContent}
-			<div class="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-4">
-				<div class="flex justify-center mb-2">
-					<Spinner />
-				</div>
-				<div class="boilerplate prose max-w-none text-slate-700">
-					{@html marked(generatedContent)}
-				</div>
+			<div class="mt-4">
+				<LLMOutput text={generatedContent} />
 			</div>
 		{/if}
 	</div>

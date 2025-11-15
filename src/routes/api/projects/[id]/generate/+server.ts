@@ -224,7 +224,7 @@ After the assumptions section, provide the tasks in this JSON format:
 ]
 \`\`\`
 
-Be thorough and include all phases of work: planning, design, development, testing, deployment, and project management.`;
+Be thorough and include all phases of work: planning, design, development, testing, deployment, and project management, but create a maximum of 20 separate tasks.`;
 
 		default:
 			return `Generate content for the ${stage} stage of project "${projectName}".\n\n${context}`;

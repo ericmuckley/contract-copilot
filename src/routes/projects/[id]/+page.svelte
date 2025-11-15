@@ -110,7 +110,7 @@
 	{/if}
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-		<div class="card border border-slate-200 lg:col-span-2">
+		<div class="card lg:col-span-2">
 			{#if data.project.current_stage === 'Artifacts'}
 				<ArtifactsStage
 					projectId={data.project.id}
@@ -163,7 +163,7 @@
 			{/if}
 		</div>
 
-		<div class="card space-y-4 border border-slate-200">
+		<div class="card space-y-4">
 			<div class="">
 				<h3 class="mb-4 text-lg font-semibold text-slate-800">Approval</h3>
 

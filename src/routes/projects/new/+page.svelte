@@ -88,11 +88,7 @@
 			{/if}
 
 			<div class="flex space-x-4">
-				<button
-					type="submit"
-					disabled={isCreating}
-					class="btn btn-primary flex-1"
-				>
+				<button type="submit" disabled={isCreating} class="btn btn-primary flex-1">
 					{#if isCreating}
 						<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
 						Creating...

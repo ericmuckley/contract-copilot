@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
+	import LLMOutput from '../LLMOutput.svelte';
 	import Spinner from '../Spinner.svelte';
 	import type { ProjectStage } from '$lib/types/project';
 
@@ -133,8 +134,6 @@
 		isEditing = false;
 		error = '';
 	}
-
-	const renderedContent = $derived(content ? marked(content) : '');
 </script>
 
 <div class="space-y-4">
@@ -142,29 +141,24 @@
 		<h3 class="mb-4 text-lg font-semibold text-slate-800">{info.title}</h3>
 		<p class="mb-4 text-sm text-slate-600">{info.description}</p>
 
-		{#if !content && !isEditing}
-			<button
-				onclick={generateContent}
-				disabled={isGenerating}
-				class="btn btn-primary"
-			>
-				{#if isGenerating}
-					<div class="flex justify-center">
-						<Spinner />
-					</div>
-				{:else}
-					<i class="bi bi-stars mr-2"></i>
-					Generate {info.title} with AI
-				{/if}
+		{#if isGenerating}
+			<div class="mb-2 flex justify-center">
+				<Spinner />
+			</div>
+		{/if}
+
+		{#if !content && !isEditing && !isGenerating}
+			<button onclick={generateContent} disabled={isGenerating} class="btn btn-primary">
+				<i class="bi bi-stars mr-2"></i>
+				Generate {info.title} with AI
 			</button>
 		{/if}
 
 		{#if content && !isEditing}
-			<div class="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-				<div class="boilerplate prose max-w-none">
-					{@html renderedContent}
-				</div>
+			<div class="mb-4">
+				<LLMOutput text={content} />
 			</div>
+
 			<div class="flex space-x-2">
 				<button onclick={startEditing} class="btn bg-slate-500 text-white hover:bg-slate-600">
 					<i class="bi bi-pencil mr-2"></i>
@@ -186,11 +180,7 @@
 					placeholder="Enter content in Markdown format..."
 				></textarea>
 				<div class="flex space-x-2">
-					<button
-						onclick={saveContent}
-						disabled={isSaving}
-						class="btn btn-primary"
-					>
+					<button onclick={saveContent} disabled={isSaving} class="btn btn-primary">
 						{#if isSaving}
 							<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
 							Saving...
@@ -215,11 +205,8 @@
 
 		{#if isGenerating && generatedContent}
 			<div class="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-4">
-				<div class="flex justify-center mb-2">
-					<Spinner />
-				</div>
-				<div class="boilerplate prose max-w-none text-slate-700">
-					{@html marked(generatedContent)}
+				<div class="mt-4">
+					<LLMOutput text={generatedContent} />
 				</div>
 			</div>
 		{/if}

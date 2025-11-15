@@ -23,18 +23,16 @@
 <svelte:window onmousedown={handleMouseDown} />
 
 <aside
-	class="sticky top-0 left-0 border-r border-slate-200 bg-white {isExpanded
+	class="sticky top-0 left-0 bg-white {isExpanded
 		? 'w-96'
 		: 'w-52'} z-10 flex h-screen flex-col transition-all duration-300"
 >
-	<div class="py-4">
-		<div class="muted cursor-default px-4 text-xl leading-none font-light">
-			<span
-				class="bg-linear-to-r from-sky-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
-			>
-				ContractCopilot
-			</span>
-		</div>
+	<div class="cursor-default px-4 py-4 text-xl leading-none font-bold">
+		<span
+			class="bg-linear-to-r from-sky-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+		>
+			ContractCopilot
+		</span>
 	</div>
 	<nav class="mb-2 flex flex-col space-y-1 px-2">
 		{#each links as link}
@@ -51,7 +49,7 @@
 		{/each}
 	</nav>
 
-	<div class="min-h-0 flex-1 border-t border-slate-200 pt-2" bind:this={expandTarget}>
+	<div class="mt-4 min-h-0 flex-1 border-t border-slate-100 pt-2" bind:this={expandTarget}>
 		<div class="flex h-full flex-col">
 			<Chatbot />
 		</div>

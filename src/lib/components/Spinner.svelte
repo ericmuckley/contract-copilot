@@ -1,1 +1,1 @@
-<div class="w-5 h-5 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+<div class="h-5 w-5 animate-spin rounded-full border-4 border-sky-500 border-t-transparent"></div>
