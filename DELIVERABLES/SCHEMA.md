@@ -87,3 +87,24 @@ It should create a table of the prokect tasks, along with a column for rate (com
 Then add final rows at the bottom for total project cost and project timeline, based on the number of hours for each task.
 
 Finally, let the user copy or download the take cata to a CSV file.
+
+
+# Adding project modifications to the copilot
+
+# Purpose
+
+The application has a chatbot with tool-calling capabilities, with one example "check the weather" tool available to it now.
+
+The chatbot needs to turn into a full copilot capable of assisting in the project estimation workflow. It should know which project is active, and which stage the project is in. It should be able to modify the current project stage data (`project.sdata`). Think of it as the command line for the whole app—fast, context-aware, and consistent.
+
+## Example capabilities
+
+- "Increase Backend hours by 10% in the current project"
+- "Add a QA line: 40h at $90/hr, rationale 'regression pass'"
+- "What's the current total for Project Apollo?"
+
+When the copilot chatbot calls server functions/tools to make updates to the current project, it must update the UI accordingly (no manual refresh).
+
+## Your task
+
+You must extend the current chatbot with basic "check weather" tool to include tools for modifying the stage data of the current project. When that data is modified, it should automatically update in the UI. The copilot should also be able to query other projects, based on the project name.
