@@ -71,11 +71,11 @@ I would like to refactor the `EffortEstimationState.svelte` component so that it
 Then, the both the assumptions and tasks data will be saved to the database, using the existing PUT request to the `/api/projects/${projectId}/effort-estimate` endpoint, which is currently being done in the `EffortEstimationState.svelte` component.
 
 Your task:
+
 - refactor the `EffortEstimationState.svelte` component and the `/api/projects/${projectId}/generate` endpoint, so that the component generates two separate streams sequentially
 - keep the assumptions streamed text as unstructured
 - parse the tasks streamed text as json
 - save assumptions and tasks to the database using the existing PUT request to `/api/projects/${projectId}/effort-estimate` in the component.
-
 
 ### Database
 

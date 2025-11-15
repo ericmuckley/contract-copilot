@@ -27,7 +27,9 @@
 				</div>
 			</div>
 			{#if index < STAGES.length - 1}
-				<div class="mx-2 h-0.5 flex-1 {index < currentStageIndex ? 'bg-sky-500' : 'bg-slate-300'}"></div>
+				<div
+					class="mx-2 h-0.5 flex-1 {index < currentStageIndex ? 'bg-sky-500' : 'bg-slate-300'}"
+				></div>
 			{/if}
 		{/each}
 	</div>

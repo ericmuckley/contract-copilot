@@ -19,14 +19,14 @@
 		tasks?: ProjectTask[];
 		onRefresh: () => void;
 	} = $props();
-	
+
 	// Parse content if it exists (should contain payment terms, timeline, and rates as JSON)
 	let quoteData = $state<{ paymentTerms: string; timeline: string; rates: QuoteRate[] }>({
 		paymentTerms: '',
 		timeline: '',
 		rates: []
 	});
-	
+
 	$effect(() => {
 		if (content) {
 			try {
@@ -38,11 +38,20 @@
 	});
 
 	let isEditing = $state(false);
-	let editedPaymentTerms = $state(quoteData.paymentTerms || '');
-	let editedTimeline = $state(quoteData.timeline || '');
-	let editedRates = $state<QuoteRate[]>([...quoteData.rates]);
+	let editedPaymentTerms = $state('');
+	let editedTimeline = $state('');
+	let editedRates = $state<QuoteRate[]>([]);
 	let isSaving = $state(false);
 	let error = $state('');
+
+	// Initialize edited values when quoteData changes
+	$effect(() => {
+		if (!isEditing) {
+			editedPaymentTerms = quoteData.paymentTerms || '';
+			editedTimeline = quoteData.timeline || '';
+			editedRates = [...quoteData.rates];
+		}
+	});
 
 	// Get unique roles from tasks
 	const uniqueRoles = $derived(Array.from(new Set(tasks.map((t) => t.role))).sort());
@@ -79,7 +88,7 @@
 				timeline: editedTimeline,
 				rates: editedRates
 			});
-			
+
 			const response = await fetch(`/api/projects/${projectId}/stage-content`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },

@@ -117,7 +117,7 @@ async function buildContextForStage(project: any, stageName: string): Promise<st
 
 	// Find the stage index
 	const stageIndex = STAGES.findIndex((s) => s.name === stageName);
-	
+
 	// Include previous stage content
 	if (stageIndex > 0) {
 		for (let i = 1; i < stageIndex; i++) {

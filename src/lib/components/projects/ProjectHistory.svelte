@@ -14,13 +14,12 @@
 			minute: '2-digit'
 		});
 	}
-
 </script>
 
 <div class="">
 	<h3 class="mb-4 text-lg font-semibold text-slate-800">Project History</h3>
 
-	{#if sdata.filter(s => s.approved).length === 0}
+	{#if sdata.filter((s) => s.approved).length === 0}
 		<p class="text-sm text-slate-500">No history yet.</p>
 	{:else}
 		<div class="space-y-3">

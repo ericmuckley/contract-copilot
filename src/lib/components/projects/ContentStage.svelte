@@ -17,7 +17,7 @@
 		approverName: string;
 		onRefresh: () => void;
 	} = $props();
-	
+
 	const stage = STAGES[stageIndex];
 
 	let isEditing = $state(false);
@@ -104,7 +104,7 @@
 			const response = await fetch(`/api/projects/${projectId}/stage-content`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ 
+				body: JSON.stringify({
 					stageIndex,
 					content: editedContent
 				})

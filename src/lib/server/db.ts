@@ -2,15 +2,13 @@ import { neon } from '@neondatabase/serverless';
 import { DATABASE_URL } from '$lib/server/settings';
 import type { Project, Artifact } from '$lib/schema';
 
-
 const sql = neon(DATABASE_URL);
-
 
 export async function listProjects(): Promise<Project[]> {
 	const result = await sql`
 		SELECT id, project_name, sdata, created_at, updated_at, created_by FROM "projects" ORDER BY updated_at DESC
 	`;
-	return result.map(row => ({
+	return result.map((row) => ({
 		id: row.id,
 		project_name: row.project_name,
 		sdata: row.sdata,
@@ -19,7 +17,6 @@ export async function listProjects(): Promise<Project[]> {
 		created_by: row.created_by
 	})) as Project[];
 }
-
 
 export async function getProject(id: number): Promise<Project | null> {
 	const result = await sql`
@@ -41,24 +38,25 @@ export async function getProjectArtifacts(project_id: number): Promise<Artifact[
 	const result = await sql`
 		SELECT id, project_id, file_name, file_url FROM "artifacts" WHERE project_id = ${project_id}
 	`;
-	return result.map(row => ({
-		id: row.id,
-		project_id: row.project_id,
-		file_name: row.file_name,
-		file_url: row.file_url
-	}) as Artifact);
+	return result.map(
+		(row) =>
+			({
+				id: row.id,
+				project_id: row.project_id,
+				file_name: row.file_name,
+				file_url: row.file_url
+			}) as Artifact
+	);
 }
 
-
 export async function createProject(project: Project): Promise<Project> {
-
 	const result = await sql`
 		INSERT INTO "projects" (project_name, created_by, sdata)
 		VALUES (${project.project_name}, ${project.created_by}, ${JSON.stringify(project.sdata)})
 		RETURNING id, project_name, created_by, sdata, created_at, updated_at
 	`;
 	const row = result[0];
-	console.log(row)
+	console.log(row);
 	return {
 		id: row.id,
 		project_name: row.project_name,
@@ -69,8 +67,10 @@ export async function createProject(project: Project): Promise<Project> {
 	} as Project;
 }
 
-
-export async function updateProject(id: number, project: Partial<Project>): Promise<Project | null> {
+export async function updateProject(
+	id: number,
+	project: Partial<Project>
+): Promise<Project | null> {
 	// Handle different update scenarios
 	if (project.project_name !== undefined && project.sdata !== undefined) {
 		const result = await sql`
@@ -100,10 +100,9 @@ export async function updateProject(id: number, project: Partial<Project>): Prom
 		if (result.length === 0) return null;
 		return result[0] as Project;
 	}
-	
+
 	return getProject(id);
 }
-
 
 export async function deleteProject(id: number): Promise<boolean> {
 	const result = await sql`

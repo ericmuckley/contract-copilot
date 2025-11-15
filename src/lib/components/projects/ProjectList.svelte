@@ -2,16 +2,21 @@
 	import { cleanString } from '$lib/utils';
 	import type { Project } from '$lib/schema';
 	import ProjectCard from './ProjectCard.svelte';
-	import { STAGES } from '$lib/schema'
+	import { STAGES } from '$lib/schema';
 
 	let { projects = [] }: { projects?: Project[] } = $props();
 
-	console.log(projects)
+	console.log(projects);
 
 	let stageFilter = $state<string>('all');
 
 	const filteredProjects = $derived(
-		stageFilter === 'all' ? projects : projects.filter((p) => STAGES[p.data.stages.filter(s => s.approved).length].name === stageFilter)
+		stageFilter === 'all'
+			? projects
+			: projects.filter((p) => {
+					const stageIdx = p.sdata.filter((s) => s.approved).length;
+					return STAGES[stageIdx].name === stageFilter;
+				})
 	);
 </script>
 
@@ -31,7 +36,7 @@
 			bind:value={stageFilter}
 			class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
 		>
-			{#each [{name: 'all'}, ...STAGES] as stage (stage.name)}
+			{#each [{ name: 'all' }, ...STAGES] as stage (stage.name)}
 				<option value={stage.name}>{cleanString(stage.name)}</option>
 			{/each}
 		</select>
@@ -46,7 +51,9 @@
 				<i class="bi bi-folder-x"></i>
 			</div>
 			<p class="text-slate-600">
-				{stageFilter === 'all' ? 'No projects yet.' : `No projects in ${cleanString(stageFilter)} stage.`}
+				{stageFilter === 'all'
+					? 'No projects yet.'
+					: `No projects in ${cleanString(stageFilter)} stage.`}
 			</p>
 		</div>
 	{:else}

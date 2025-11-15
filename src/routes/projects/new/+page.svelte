@@ -4,13 +4,11 @@
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { emptyProject, type Project } from '$lib/schema';
 
-
 	let project = $state<Project>(emptyProject);
 	let isCreating = $state(false);
 	let error = $state('');
 
 	async function handleSubmit() {
-
 		console.log($state.snapshot(project));
 		isCreating = true;
 
@@ -25,7 +23,6 @@
 				const { project } = await response.json();
 				goto(`/projects/${project.id}`);
 			}
-
 		} catch (err) {
 			alert(err);
 			isCreating = false;
@@ -75,14 +72,14 @@
 			{/if}
 
 			{#if isCreating}
-				<div class="py-2 flex justify-center">
+				<div class="flex justify-center py-2">
 					<Spinner />
 				</div>
 			{:else}
-
 				<div class="flex space-x-4">
-					<button 
-						disabled={project.project_name.trim().length < 1 || project.created_by.trim().length < 1}
+					<button
+						disabled={project.project_name.trim().length < 1 ||
+							project.created_by.trim().length < 1}
 						class="btn btn-primary flex-1"
 						onclick={handleSubmit}
 					>

@@ -16,9 +16,7 @@
 	let showHistory = $state(false);
 	let approverName = $state('');
 
-	let stageIdx = $derived(
-		data.project.sdata.filter((s) => s.approved).length
-	);
+	let stageIdx = $derived(data.project.sdata.filter((s) => s.approved).length);
 
 	async function refreshData() {
 		// Reload the page data
@@ -77,7 +75,11 @@
 		} else if (stageName === 'architecture') {
 			return data.project.sdata[3].content != null;
 		} else if (stageName === 'estimate') {
-			return data.project.sdata[4].content != null && data.project.sdata[4]?.tasks?.length && data.project.sdata[4].tasks.length > 0;
+			return (
+				data.project.sdata[4].content != null &&
+				data.project.sdata[4]?.tasks?.length &&
+				data.project.sdata[4].tasks.length > 0
+			);
 		} else if (stageName === 'quote') {
 			return false; // Final stage
 		}
@@ -85,8 +87,6 @@
 		return false;
 	});
 </script>
-
-
 
 <div class="card">
 	<div class="flex items-center justify-between">
@@ -106,8 +106,7 @@
 		</button>
 	</div>
 
-
-	<div class="space-y-1 text-xs w-64">
+	<div class="w-64 space-y-1 text-xs">
 		<p class="flex justify-between">
 			<span>Created</span>
 			<span>{new Date(data.project.created_at as string).toLocaleDateString()}</span>
@@ -122,20 +121,16 @@
 		</p>
 	</div>
 
-
 	{#if showHistory}
 		<div in:slide out:slide class="mt-8">
 			<ProjectHistory sdata={data.project.sdata} />
 		</div>
 	{/if}
-
-
 </div>
 
 <div class="mt-4">
 	<StageStepper currentStageIndex={stageIdx} />
 </div>
-
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 	<div class="card lg:col-span-2">
@@ -194,7 +189,7 @@
 		<div class="">
 			<h3 class="mb-4 text-lg font-semibold text-slate-800">Approval</h3>
 
-			{#if stageIdx() < STAGES.length - 1}
+			{#if stageIdx < STAGES.length - 1}
 				<div class="mb-4">
 					<ApproverNameInput bind:value={approverName} />
 				</div>
@@ -269,5 +264,3 @@
 		</div>
 	</div>
 </div>
-
-

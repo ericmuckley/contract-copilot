@@ -29,12 +29,12 @@ export async function PUT({ params, request }: RequestEvent) {
 			content: content,
 			updated_at: new Date().toISOString()
 		};
-		
+
 		// If tasks are provided, update them too
 		if (tasks !== undefined) {
 			updatedStage.tasks = tasks;
 		}
-		
+
 		updatedSdata[stageIndex] = updatedStage;
 
 		// Update project with new sdata

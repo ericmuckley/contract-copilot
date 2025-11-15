@@ -27,7 +27,7 @@ export async function POST({ params, request }: RequestEvent) {
 
 		// Get current stage index (number of approved stages)
 		const currentStageIdx = project.sdata.filter((s) => s.approved).length;
-		
+
 		// Validate we're not at the final stage
 		if (currentStageIdx >= STAGES.length - 1) {
 			return json({ error: 'Project is already at final stage' }, { status: 400 });
@@ -67,7 +67,7 @@ async function validateStageRequirements(
 	project: any
 ): Promise<{ valid: boolean; message?: string }> {
 	const stageName = STAGES[stageIdx].name;
-	
+
 	switch (stageName) {
 		case 'artifacts': {
 			const artifacts = await getProjectArtifacts(projectId);
