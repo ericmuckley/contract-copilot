@@ -18,3 +18,62 @@ CREATE TABLE artifacts (
     file_url TEXT NOT NULL
 );
 ```
+
+# Refactor
+
+## Initial prompt
+
+# Overview
+
+I want to drastically simplify my architecture and schema.
+
+## Original goals
+
+Purpose: take some unstructured documents, and move them through six stages, with LLM processing and user validation at each stage: Artifacts → Business Case → Requirements → Solution/Architecture → Effort Estimate → Quote.
+
+Each stage has entry criteria and approval gates:
+
+1. Artifacts: Create project and attach ≥2 artifacts (transcripts, documents, notes). Advance when ready.
+2. Business Case: LLM generates business case from artifacts (scope, outcomes, constraints). Edit and approve to advance.
+3. Requirements: LLM generates requirements summary from artifacts. Edit and validate to advance.
+4. Solution/Architecture: Document approach and solution architecture, tech stack, risks. Approve to advance.
+5. Effort Estimate: LLM generates WBS with tasks, assigned roles, hours per task, and assumptions from all prior artifacts. Approve to advance.
+6. Quote: Apply rates to roles, add payment terms and timeline. Export CSV or copy-to-clipboard. Mark delivered.
+
+Must-have screens:
+
+- Projects list: Show all projects with current stage indicator, filter by stage. Put this project list on the Dashboard.svelte component.
+- New Project screen: Create a new project by naming it and uploading some artifacts. Then give the option to advance it to the next stage.
+- Project detail: Stage stepper/progress indicator at top, current stage content panel, stage transition history timeline with timestamps/approvers.
+- Stage transitions: Validation before advancing (e.g., artifacts uploaded, approval recorded), clear advance/approve buttons per stage.
+
+## How you should do it:
+
+- Use the existing LLM APIs used by the current Chatbot component, paricularly the `bedrock` API endpoint for LLM interactions.
+- Use the existing Postgres database hosted in vercel. The DB connection URL is available in `src/lib/server/db.ts`. For a look at the DB tables, look at the SQL commands in the `DELIVERABLES/AI_ARTIFACTS.md` file. You may want to create typescript types for those tables and use them in your implementation.
+- For uploading / storing / download files, use the blob storage URL in `lib/server/settings.ts`, along with the `@vercel/blob` package, which is already installed.
+
+## Ground rules:
+
+- Always use Svelte5 syntax with Runes mode. Do NOT use old svelte syntax. If you need to check, look at the existing components and use them as a guide.
+- Use existing packages which are already installed: `@vercel/blob`, `@neondatabase/serverless`, and `@vercel/postgres`, rather than installing new packages.
+- Use the existing tailwindcss styling in the `app.css` file when you can, rather than creating new custom styles on each component.
+- Use the existing resources in the app, but keep your workflow components separate and modular so its easy to integrate or remove them.
+
+## Current implementation
+
+The current implementation is overengineered - there are different interfaces and API endpoints for each stage in the process, and there used to be different database tables for each stage in the process as well. I want to drastically simplify the architecture.
+
+## New requested implementation
+
+Please look at my new schema in `schema.ts`. This contains all the simplified data structures I want for the new architecture. I only have two database tables now - `projects`, and `artifacts`. All the data for the workflow stages is stored as jsonb inside a project object.
+
+The updated database calls I'm using are in `db.ts`. These contain the simplified interactions with the `projects` and `artifacts` tables. You may need to create a new `createArtifact` method in that table to accomplish the goal.
+
+## Your goal
+
+Your goal is to refactor the project workflow infrastructure in `routes/projects/[id]/+page.svelte`, where most of the workflow logic throughout the stages takes place. The system is very complicated now, and uses lots of old components and backend API calls. I want you to simplify these using my new database schema, and remove lots of deprecated methods and endpoints if you can. The goal at the end is to have a full working workflow, where we're only manipulating the `project` and `artifact` objects, and all the information from the workflow stages is contained in jsonb structure in the project stage data, or `sdata` column.
+
+[schema.ts](https://github.com/user-attachments/files/23559816/schema.ts)
+
+[db.ts](https://github.com/user-attachments/files/23559824/db.ts)
