@@ -97,7 +97,7 @@ export class GetCurrentProjectTool {
 
 		return {
 			response: [summary],
-			text: JSON.stringify({ project, currentStageIdx, tasks })
+			text: summary
 		};
 	}
 }
@@ -154,7 +154,7 @@ export class GetProjectByNameTool {
 
 			return {
 				response: [summary],
-				text: JSON.stringify({ project, tasks, totalHours, totalCost })
+				text: summary
 			};
 		}
 
@@ -168,7 +168,7 @@ export class GetProjectByNameTool {
 
 		return {
 			response: [summary],
-			text: JSON.stringify({ matchingProjects })
+			text: summary
 		};
 	}
 }
@@ -373,11 +373,10 @@ export class UpdateProjectTasksTool {
 			return sum + Number(task.hours) * rate;
 		}, 0);
 
+		const resultMessage = `${message}\n\nUpdated estimate: ${tasks.length} tasks, ${totalHours}h total, $${totalCost.toLocaleString()}`;
 		return {
-			response: [
-				`${message}\n\nUpdated estimate: ${tasks.length} tasks, ${totalHours}h total, $${totalCost.toLocaleString()}`
-			],
-			text: JSON.stringify({ tasks, totalHours, totalCost }),
+			response: [resultMessage],
+			text: resultMessage,
 			updateRequired: true
 		};
 	}
