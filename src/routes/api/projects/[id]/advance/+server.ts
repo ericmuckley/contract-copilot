@@ -5,6 +5,7 @@ import {
 	updateProject,
 	createProjectHistory,
 	listArtifacts,
+	updateArtifactsApprover,
 	getBusinessCase,
 	getRequirements,
 	getSolutionArchitecture,
@@ -24,11 +25,20 @@ const STAGE_ORDER: ProjectStage[] = [
 ];
 
 // POST /api/projects/[id]/advance - Advance project to next stage
-export async function POST({ params }: RequestEvent) {
+export async function POST({ params, request }: RequestEvent) {
 	try {
 		const projectId = parseInt(params.id || '');
 		if (isNaN(projectId)) {
 			return json({ error: 'Invalid project ID' }, { status: 400 });
+		}
+
+		// Parse request body
+		const body = await request.json();
+		const approvedBy = body.approved_by;
+
+		// Validate approved_by field
+		if (!approvedBy || typeof approvedBy !== 'string' || approvedBy.trim() === '') {
+			return json({ error: 'Approver name is required' }, { status: 400 });
 		}
 
 		const project = await getProject(projectId);
@@ -50,6 +60,11 @@ export async function POST({ params }: RequestEvent) {
 
 		const nextStage = STAGE_ORDER[currentIndex + 1];
 
+		// If advancing from Artifacts stage, update all artifacts with approver name
+		if (project.current_stage === 'Artifacts') {
+			await updateArtifactsApprover(projectId, approvedBy.trim());
+		}
+
 		// Update project to next stage
 		const updatedProject = await updateProject(projectId, undefined, nextStage);
 		if (!updatedProject) {
@@ -60,7 +75,7 @@ export async function POST({ params }: RequestEvent) {
 		await createProjectHistory(
 			projectId,
 			nextStage,
-			`Advanced from ${project.current_stage} to ${nextStage}`
+			`Advanced from ${project.current_stage} to ${nextStage} (approved by ${approvedBy.trim()})`
 		);
 
 		return json({ project: updatedProject });

@@ -23,7 +23,7 @@
 <svelte:window onmousedown={handleMouseDown} />
 
 <aside
-	class="sticky top-0 left-0 bg-white border-r border-slate-200 {isExpanded
+	class="sticky top-0 left-0 border-r border-slate-200 bg-white {isExpanded
 		? 'w-96'
 		: 'w-52'} z-10 flex h-screen flex-col transition-all duration-300"
 >

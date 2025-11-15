@@ -17,10 +17,10 @@ import type {
 const sql = neon(DATABASE_URL);
 
 // Project operations
-export async function createProject(name: string): Promise<Project> {
+export async function createProject(name: string, approved_by: string): Promise<Project> {
 	const result = await sql`
-		INSERT INTO "Project" (name, current_stage, created_at, updated_at)
-		VALUES (${name}, 'Artifacts', NOW(), NOW())
+		INSERT INTO "Project" (name, current_stage, approved_by, created_at, updated_at)
+		VALUES (${name}, 'Artifacts', ${approved_by}, NOW(), NOW())
 		RETURNING *
 	`;
 	return result[0] as Project;
@@ -93,11 +93,12 @@ export async function createArtifact(
 	project_id: number,
 	file_name: string,
 	file_url: string,
+	approved_by: string,
 	artifact_type?: string
 ): Promise<Artifact> {
 	const result = await sql`
-		INSERT INTO "Artifact" (project_id, file_name, file_url, artifact_type, uploaded_at)
-		VALUES (${project_id}, ${file_name}, ${file_url}, ${artifact_type || null}, NOW())
+		INSERT INTO "Artifact" (project_id, file_name, file_url, approved_by, artifact_type, uploaded_at)
+		VALUES (${project_id}, ${file_name}, ${file_url}, ${approved_by}, ${artifact_type || null}, NOW())
 		RETURNING *
 	`;
 	return result[0] as Artifact;
@@ -115,6 +116,17 @@ export async function deleteArtifact(id: number): Promise<boolean> {
 		DELETE FROM "Artifact" WHERE id = ${id}
 	`;
 	return result.length > 0;
+}
+
+export async function updateArtifactsApprover(
+	project_id: number,
+	approved_by: string
+): Promise<void> {
+	await sql`
+		UPDATE "Artifact" 
+		SET approved_by = ${approved_by}
+		WHERE project_id = ${project_id}
+	`;
 }
 
 // Business Case operations

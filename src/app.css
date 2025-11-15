@@ -40,10 +40,14 @@ button {
 	@apply rounded px-4 py-2 text-white;
 }
 .btn-primary {
-	@apply bg-sky-500 hover:bg-sky-700;
+	@apply w-full bg-sky-500 enabled:hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50;
 }
 .btn-danger {
 	@apply bg-red-500 hover:bg-red-700;
+}
+
+.text-input {
+	@apply w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-sky-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-100;
 }
 
 .boilerplate {
@@ -62,11 +66,11 @@ button {
 	@apply list-disc;
 }
 .boilerplate h1 {
-	@apply mb-10;
+	@apply mb-10 text-2xl;
 }
 .boilerplate h2 {
-	@apply mb-6;
+	@apply mb-6 text-xl;
 }
 .boilerplate h3 {
-	@apply mb-4;
+	@apply mb-4 text-lg;
 }

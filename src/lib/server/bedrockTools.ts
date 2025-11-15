@@ -17,8 +17,8 @@ export class CheckTheWeatherTool {
 			}
 		}
 	};
-	static async run() {
-		const text = 'The weather is 67 degrees and sunny.';
+	static async run({ zip }: { zip: string }) {
+		const text = `The weather is 67 degrees and sunny in ${zip}.`;
 		return {
 			response: [text],
 			text: JSON.stringify(text)

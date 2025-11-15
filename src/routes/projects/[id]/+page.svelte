@@ -6,12 +6,14 @@
 	import EffortEstimateStage from '$lib/components/projects/EffortEstimateStage.svelte';
 	import QuoteStage from '$lib/components/projects/QuoteStage.svelte';
 	import ProjectHistory from '$lib/components/projects/ProjectHistory.svelte';
+	import ApproverNameInput from '$lib/components/ApproverNameInput.svelte';
 
 	let { data } = $props();
 
 	let isAdvancing = $state(false);
 	let advanceError = $state('');
 	let showHistory = $state(false);
+	let approverName = $state('');
 
 	async function refreshData() {
 		// Reload the page data
@@ -19,12 +21,24 @@
 	}
 
 	async function advanceStage() {
+		// Validate approver name
+		if (!approverName || approverName.trim() === '') {
+			advanceError = 'Please enter your name before advancing';
+			return;
+		}
+
 		isAdvancing = true;
 		advanceError = '';
 
 		try {
 			const response = await fetch(`/api/projects/${data.project.id}/advance`, {
-				method: 'POST'
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					approved_by: approverName.trim()
+				})
 			});
 
 			if (!response.ok) {
@@ -43,6 +57,11 @@
 
 	const canAdvance = $derived(() => {
 		const stage = data.project.current_stage;
+
+		// Always require a valid approver name
+		if (!approverName || approverName.trim() === '') {
+			return false;
+		}
 
 		if (stage === 'Artifacts') {
 			return data.artifacts.length >= 2;
@@ -91,12 +110,13 @@
 	{/if}
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-		<div class="lg:col-span-2">
+		<div class="card border border-slate-200 lg:col-span-2">
 			{#if data.project.current_stage === 'Artifacts'}
 				<ArtifactsStage
 					projectId={data.project.id}
 					artifacts={data.artifacts}
 					onRefresh={refreshData}
+					{approverName}
 				/>
 			{:else if data.project.current_stage === 'BusinessCase'}
 				<ContentStage
@@ -104,6 +124,7 @@
 					stage="BusinessCase"
 					content={data.businessCase?.content}
 					onRefresh={refreshData}
+					{approverName}
 				/>
 			{:else if data.project.current_stage === 'Requirements'}
 				<ContentStage
@@ -111,6 +132,7 @@
 					stage="Requirements"
 					content={data.requirements?.content}
 					onRefresh={refreshData}
+					{approverName}
 				/>
 			{:else if data.project.current_stage === 'SolutionArchitecture'}
 				<ContentStage
@@ -118,6 +140,7 @@
 					stage="SolutionArchitecture"
 					content={data.solutionArchitecture?.content}
 					onRefresh={refreshData}
+					{approverName}
 				/>
 			{:else if data.project.current_stage === 'EffortEstimate'}
 				<EffortEstimateStage
@@ -125,6 +148,7 @@
 					assumptions={data.effortEstimate?.assumptions}
 					tasks={data.effortEstimate?.tasks || []}
 					onRefresh={refreshData}
+					{approverName}
 				/>
 			{:else if data.project.current_stage === 'Quote'}
 				<QuoteStage
@@ -139,23 +163,19 @@
 			{/if}
 		</div>
 
-		<div class="space-y-4">
+		<div class="card space-y-4 border border-slate-200">
 			<div class="">
-				<h3 class="mb-4 text-lg font-semibold text-slate-800">Stage Actions</h3>
+				<h3 class="mb-4 text-lg font-semibold text-slate-800">Approval</h3>
 
 				{#if !isLastStage}
-					<p class="mb-4 text-sm text-slate-600">
-						{#if canAdvance()}
-							You've completed this stage. Click below to advance to the next stage.
-						{:else}
-							Complete the requirements for this stage before advancing.
-						{/if}
-					</p>
+					<div class="mb-4">
+						<ApproverNameInput bind:value={approverName} />
+					</div>
 
 					<button
 						onclick={advanceStage}
 						disabled={!canAdvance() || isAdvancing}
-						class="btn btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
+						class="btn btn-primary w-full"
 					>
 						{#if isAdvancing}
 							<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
@@ -183,9 +203,9 @@
 				{/if}
 			</div>
 
-			<div class="card bg-slate-50">
-				<h4 class="mb-2 text-sm font-semibold text-slate-700">Current Stage</h4>
-				<p class="mb-4 text-xs text-slate-600">
+			<div class="mt-8">
+				<p class="font-bold">Current Stage</p>
+				<p class="mb-4 text-xs">
 					{#if data.project.current_stage === 'Artifacts'}
 						Upload at least 2 artifacts (documents, notes, transcripts) to provide context for the
 						project.
@@ -203,21 +223,21 @@
 				</p>
 			</div>
 
-			<div class="card bg-slate-50">
-				<h4 class="mb-2 text-sm font-semibold text-slate-700">Project Info</h4>
-				<div class="space-y-1 text-xs text-slate-600">
-					<div>
-						<strong>Created:</strong>
-						{new Date(data.project.created_at).toLocaleDateString()}
-					</div>
-					<div>
-						<strong>Last Updated:</strong>
-						{new Date(data.project.updated_at).toLocaleDateString()}
-					</div>
-					<div>
-						<strong>Artifacts:</strong>
-						{data.artifacts.length}
-					</div>
+			<div class="mt-8">
+				<p class="font-bold">Project Info</p>
+				<div class="space-y-1 text-xs">
+					<p class="flex justify-between">
+						<span>Created</span>
+						<span>{new Date(data.project.created_at).toLocaleDateString()}</span>
+					</p>
+					<p class="flex justify-between">
+						<span>Last Updated:</span>
+						<span>{new Date(data.project.updated_at).toLocaleDateString()}</span>
+					</p>
+					<p class="flex justify-between">
+						<span>Artifacts:</span>
+						<span>{data.artifacts.length}</span>
+					</p>
 				</div>
 			</div>
 		</div>
