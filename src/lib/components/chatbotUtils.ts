@@ -177,11 +177,14 @@ export function buildAssistantMessage(state: InferenceState): ContentBlock[] {
 /**
  * Executes a single tool call
  */
-export async function executeToolCall(toolUse: ToolUse): Promise<ContentBlock> {
+export async function executeToolCall(
+	toolUse: ToolUse,
+	context?: { activeProjectId?: number }
+): Promise<{ contentBlock: ContentBlock; updateRequired: boolean }> {
 	try {
 		const parsedInput = JSON.parse(toolUse.input);
 
-		const response = await fetch('/tools', {
+		const response = await fetch('/api/tools', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -189,7 +192,8 @@ export async function executeToolCall(toolUse: ToolUse): Promise<ContentBlock> {
 			body: JSON.stringify({
 				toolUseId: toolUse.toolUseId,
 				name: toolUse.name,
-				input: parsedInput
+				input: parsedInput,
+				context
 			})
 		});
 
@@ -200,21 +204,27 @@ export async function executeToolCall(toolUse: ToolUse): Promise<ContentBlock> {
 		const result = await response.json();
 
 		return {
-			toolResult: {
-				toolUseId: toolUse.toolUseId,
-				content: [{ text: result.content }]
-			}
+			contentBlock: {
+				toolResult: {
+					toolUseId: toolUse.toolUseId,
+					content: [{ text: result.content }]
+				}
+			},
+			updateRequired: result.updateRequired || false
 		};
 	} catch (error) {
 		console.error(`Error executing tool ${toolUse.name}:`, error);
 		return {
-			toolResult: {
-				toolUseId: toolUse.toolUseId,
-				content: [
-					{ text: `Error: ${error instanceof Error ? error.message : 'Tool execution failed'}` }
-				],
-				status: 'error'
-			}
+			contentBlock: {
+				toolResult: {
+					toolUseId: toolUse.toolUseId,
+					content: [
+						{ text: `Error: ${error instanceof Error ? error.message : 'Tool execution failed'}` }
+					],
+					status: 'error'
+				}
+			},
+			updateRequired: false
 		};
 	}
 }
@@ -222,13 +232,20 @@ export async function executeToolCall(toolUse: ToolUse): Promise<ContentBlock> {
 /**
  * Executes all tool calls and returns results as content blocks
  */
-export async function executeToolCalls(toolUses: Map<string, ToolUse>): Promise<ContentBlock[]> {
+export async function executeToolCalls(
+	toolUses: Map<string, ToolUse>,
+	context?: { activeProjectId?: number }
+): Promise<{ toolResults: ContentBlock[]; updateRequired: boolean }> {
 	const toolResults: ContentBlock[] = [];
+	let updateRequired = false;
 
 	for (const toolUse of toolUses.values()) {
-		const result = await executeToolCall(toolUse);
-		toolResults.push(result);
+		const result = await executeToolCall(toolUse, context);
+		toolResults.push(result.contentBlock);
+		if (result.updateRequired) {
+			updateRequired = true;
+		}
 	}
 
-	return toolResults;
+	return { toolResults, updateRequired };
 }

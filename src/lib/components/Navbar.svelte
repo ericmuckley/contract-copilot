@@ -51,7 +51,7 @@
 
 	<div class="mt-4 min-h-0 flex-1 border-t border-slate-100 pt-2" bind:this={expandTarget}>
 		<div class="flex h-full flex-col">
-			<Chatbot />
+			<Chatbot activeProjectId={page.params.id ? parseInt(page.params.id) : undefined} />
 		</div>
 	</div>
 

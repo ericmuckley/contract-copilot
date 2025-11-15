@@ -16,7 +16,8 @@
 	let isStreaming = $state(false);
 	let toolCallsInProgress: string[] = $state([]);
 
-	let { useTools = true }: { useTools?: boolean } = $props();
+	let { useTools = true, activeProjectId }: { useTools?: boolean; activeProjectId?: number } =
+		$props();
 
 	const handleSubmit = async () => {
 		if (!chatInputValue.trim()) return;
@@ -74,8 +75,15 @@
 
 				// If there are tool calls, execute them and continue the loop
 				if (state.toolUses.size > 0) {
-					const toolResults = await executeToolCalls(state.toolUses);
+					const { toolResults, updateRequired } = await executeToolCalls(state.toolUses, {
+						activeProjectId
+					});
 					toolCallsInProgress = [];
+
+					// If the tool call requires a UI update, dispatch an event
+					if (updateRequired) {
+						window.dispatchEvent(new CustomEvent('project-updated'));
+					}
 
 					// Add tool results as a user message (required by Bedrock API)
 					if (toolResults.length > 0) {

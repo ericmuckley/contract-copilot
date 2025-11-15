@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { cleanString } from '$lib/utils';
 	import StageStepper from '$lib/components/projects/StageStepper.svelte';
 	import ArtifactsStage from '$lib/components/projects/ArtifactsStage.svelte';
@@ -22,6 +21,19 @@
 		// Reload the page data
 		window.location.reload();
 	}
+
+	// Listen for project updates from chatbot
+	$effect(() => {
+		const handleUpdate = () => {
+			refreshData();
+		};
+
+		window.addEventListener('project-updated', handleUpdate);
+
+		return () => {
+			window.removeEventListener('project-updated', handleUpdate);
+		};
+	});
 
 	async function advanceStage() {
 		// Validate approver name
