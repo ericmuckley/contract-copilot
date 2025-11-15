@@ -6,11 +6,13 @@
 		projectId,
 		stage,
 		content = null,
+		approverName,
 		onRefresh
 	}: {
 		projectId: number;
 		stage: ProjectStage;
 		content?: string | null;
+		approverName: string;
 		onRefresh: () => void;
 	} = $props();
 
@@ -104,7 +106,7 @@
 			const response = await fetch(`/api/projects/${projectId}/${info.endpoint}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ content: editedContent })
+				body: JSON.stringify({ content: editedContent, approved_by: approverName.trim() })
 			});
 
 			if (!response.ok) {

@@ -47,16 +47,13 @@
 	</div>
 
 	{#if filteredProjects.length === 0}
-		<div class="card bg-slate-50 py-12 text-center">
+		<div class="py-24 text-center">
 			<div class="mb-4 text-4xl text-slate-300">
 				<i class="bi bi-folder-x"></i>
 			</div>
 			<p class="text-slate-600">
 				{stageFilter === 'all' ? 'No projects yet.' : `No projects in ${stageFilter} stage.`}
 			</p>
-			{#if stageFilter === 'all'}
-				<a href="/projects/new" class="link mt-2 inline-block">Create your first project</a>
-			{/if}
 		</div>
 	{:else}
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

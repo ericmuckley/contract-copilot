@@ -23,6 +23,7 @@ export interface Artifact {
 	file_name: string;
 	file_url: string;
 	artifact_type?: string;
+	approved_by: string | null;
 	uploaded_at: string;
 }
 
@@ -128,7 +129,7 @@ export interface AdvanceStageRequest {
 	project_id: number;
 	current_stage: ProjectStage;
 	action: string;
-	approved_by: string;
+	approved_by: string | null;
 }
 
 export interface GenerateContentRequest {

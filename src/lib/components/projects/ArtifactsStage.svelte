@@ -4,11 +4,13 @@
 	let {
 		projectId,
 		artifacts = [],
-		onRefresh
+		onRefresh,
+		approverName
 	}: {
 		projectId: number;
 		artifacts?: Artifact[];
 		onRefresh: () => void;
+		approverName: string;
 	} = $props();
 
 	let isUploading = $state(false);
@@ -29,6 +31,7 @@
 				const formData = new FormData();
 				formData.append('file', file);
 				formData.append('artifact_type', 'document');
+				formData.append('approved_by', approverName);
 
 				const response = await fetch(`/api/projects/${projectId}/artifacts`, {
 					method: 'POST',
@@ -65,7 +68,7 @@
 </script>
 
 <div class="space-y-4">
-	<div class="card bg-white">
+	<div class="">
 		<h3 class="mb-4 text-lg font-semibold text-slate-800">Upload Artifacts</h3>
 		<p class="mb-4 text-sm text-slate-600">
 			Upload documents, transcripts, notes, or any other files that provide context for this
@@ -75,9 +78,9 @@
 		<div class="mb-4">
 			<label
 				for="artifact-upload"
-				class="inline-flex cursor-pointer items-center space-x-2 rounded-lg bg-sky-500 px-4 py-2 text-white transition-colors hover:bg-sky-600 {isUploading
+				class="inline-flex items-center space-x-2 rounded-lg bg-sky-500 px-4 py-2 text-white transition-colors {isUploading
 					? 'cursor-not-allowed opacity-50'
-					: ''}"
+					: 'cursor-pointer hover:bg-sky-600'}"
 			>
 				<i class="bi bi-upload"></i>
 				<span>{isUploading ? 'Uploading...' : 'Upload Files'}</span>
@@ -110,10 +113,7 @@
 	</div>
 
 	{#if artifacts.length > 0}
-		<div class="card bg-white">
-			<h3 class="mb-4 text-lg font-semibold text-slate-800">
-				Uploaded Artifacts ({artifacts.length})
-			</h3>
+		<div class="">
 			<div class="space-y-2">
 				{#each artifacts as artifact (artifact.id)}
 					<div

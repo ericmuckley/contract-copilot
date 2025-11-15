@@ -246,7 +246,7 @@
 		{#if isEditing}
 			<div class="space-y-6">
 				<div>
-					<label class="mb-2 block text-sm font-semibold text-slate-700">Rates:</label>
+					<p class="mb-2 block text-sm font-semibold">Rates:</p>
 					<div class="space-y-2">
 						{#each editedRates as rate (rate.role_name)}
 							<div class="grid grid-cols-2 gap-2">
@@ -270,7 +270,7 @@
 				</div>
 
 				<div>
-					<label class="mb-2 block text-sm font-semibold text-slate-700">Payment Terms:</label>
+					<p class="mb-2 block text-sm font-semibold">Payment Terms:</p>
 					<textarea
 						bind:value={editedPaymentTerms}
 						rows="4"
@@ -280,7 +280,7 @@
 				</div>
 
 				<div>
-					<label class="mb-2 block text-sm font-semibold text-slate-700">Timeline:</label>
+					<p class="mb-2 block text-sm font-semibold">Timeline:</p>
 					<textarea
 						bind:value={editedTimeline}
 						rows="4"

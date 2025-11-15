@@ -91,7 +91,7 @@ CREATE TABLE "Project" (
     "current_stage" project_stage NOT NULL DEFAULT 'Artifacts',
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255) NOT NULL
+    "approved_by" VARCHAR(255)
 );
 
 -- Stores file references (from Vercel Blob Storage) for each project [cite: 18]
@@ -101,6 +101,7 @@ CREATE TABLE "Artifact" (
     "file_name" VARCHAR(255) NOT NULL,
     "file_url" VARCHAR(1024) NOT NULL, -- This would be the Vercel Blob URL
     "artifact_type" VARCHAR(100), -- e.g., 'transcript', 'notes', 'document' [cite: 18]
+    "approved_by" VARCHAR(255),
     "uploaded_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -111,7 +112,7 @@ CREATE TABLE "BusinessCase" (
     "content" TEXT, -- LLM-generated scope, outcomes, constraints [cite: 19]
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255) NOT NULL
+    "approved_by" VARCHAR(255)
 );
 
 -- Stores the content for the Requirements stage [cite: 20]
@@ -121,7 +122,7 @@ CREATE TABLE "Requirements" (
     "content" TEXT, -- LLM-generated requirements summary [cite: 20]
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255) NOT NULL
+    "approved_by" VARCHAR(255)
 );
 
 -- Stores the content for the Solution/Architecture stage [cite: 21]
@@ -131,7 +132,7 @@ CREATE TABLE "SolutionArchitecture" (
     "content" TEXT, -- Documented approach, tech stack, risks [cite: 21]
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255) NOT NULL
+    "approved_by" VARCHAR(255)
 );
 
 -- Stores the high-level effort estimate details [cite: 22]
@@ -141,7 +142,7 @@ CREATE TABLE "EffortEstimate" (
     "assumptions" TEXT, -- WBS assumptions [cite: 22]
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255) NOT NULL
+    "approved_by" VARCHAR(255)
 );
 
 -- Stores individual line items (WBS) for an estimate [cite: 22]
@@ -151,7 +152,7 @@ CREATE TABLE "EstimateTask" (
     "task_description" TEXT NOT NULL,
     "assigned_role" VARCHAR(255) NOT NULL, -- "Backend", "QA" [cite: 22, 72]
     "hours" DECIMAL(10, 2) NOT NULL,
-    "approved_by" VARCHAR(255) NOT NULL
+    "approved_by" VARCHAR(255)
 );
 
 -- Stores the final Quote details [cite: 24]
@@ -163,7 +164,7 @@ CREATE TABLE "Quote" (
     "is_delivered" BOOLEAN NOT NULL DEFAULT FALSE,
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255) NOT NULL
+    "approved_by" VARCHAR(255)
 );
 
 -- Stores the rates applied to roles for a specific quote [cite: 24]

@@ -6,11 +6,13 @@
 		projectId,
 		assumptions = null,
 		tasks = [],
+		approverName,
 		onRefresh
 	}: {
 		projectId: number;
 		assumptions?: string | null;
 		tasks?: EstimateTask[];
+		approverName: string;
 		onRefresh: () => void;
 	} = $props();
 
@@ -95,6 +97,7 @@
 						estimate_id: 0,
 						task_description: t.task_description,
 						assigned_role: t.assigned_role,
+						approved_by: approverName.trim(),
 						hours: Number(t.hours)
 					}));
 				}
@@ -119,6 +122,7 @@
 					tasks: editedTasks.map((t) => ({
 						task_description: t.task_description,
 						assigned_role: t.assigned_role,
+						approved_by: approverName.trim(),
 						hours: t.hours
 					}))
 				})
@@ -158,6 +162,7 @@
 				estimate_id: 0,
 				task_description: '',
 				assigned_role: '',
+				approved_by: approverName.trim(),
 				hours: 0
 			}
 		];
@@ -249,7 +254,7 @@
 		{#if isEditing}
 			<div class="space-y-6">
 				<div>
-					<label class="mb-2 block text-sm font-semibold text-slate-700">Assumptions:</label>
+					<p class="mb-2 block text-sm font-semibold">Assumptions:</p>
 					<textarea
 						bind:value={editedAssumptions}
 						rows="10"
@@ -260,7 +265,7 @@
 
 				<div>
 					<div class="mb-2 flex items-center justify-between">
-						<label class="text-sm font-semibold text-slate-700">Tasks:</label>
+						<p class="text-sm font-semibold">Tasks:</p>
 						<button onclick={addTask} class="text-sm text-sky-600 hover:text-sky-700">
 							<i class="bi bi-plus-lg mr-1"></i>
 							Add Task
@@ -292,6 +297,7 @@
 									/>
 									<button
 										onclick={() => removeTask(index)}
+										aria-label="Remove Task"
 										class="col-span-1 text-red-600 hover:text-red-700"
 									>
 										<i class="bi bi-trash"></i>

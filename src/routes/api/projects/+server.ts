@@ -18,16 +18,20 @@ export async function GET({ url }: RequestEvent) {
 // POST /api/projects - Create a new project
 export async function POST({ request }: RequestEvent) {
 	try {
-		const { name } = await request.json();
+		const { name, approved_by } = await request.json();
 
 		if (!name || typeof name !== 'string' || name.trim().length === 0) {
 			return json({ error: 'Project name is required' }, { status: 400 });
 		}
 
-		const project = await createProject(name.trim());
+		if (!approved_by || typeof approved_by !== 'string' || approved_by.trim().length === 0) {
+			return json({ error: 'Approver name is required' }, { status: 400 });
+		}
+
+		const project = await createProject(name.trim(), approved_by.trim());
 
 		// Log creation in project history
-		await createProjectHistory(project.id, 'Artifacts', 'Project created');
+		await createProjectHistory(project.id, 'Artifacts', `Project created by ${approved_by.trim()}`);
 
 		return json({ project }, { status: 201 });
 	} catch (error) {

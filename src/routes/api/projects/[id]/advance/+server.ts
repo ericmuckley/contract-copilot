@@ -5,19 +5,13 @@ import {
 	updateProject,
 	createProjectHistory,
 	listArtifacts,
+	updateArtifactsApprover,
 	getBusinessCase,
 	getRequirements,
 	getSolutionArchitecture,
 	getEffortEstimate,
 	listEstimateTasks,
-	getQuote,
-	updateProjectApprovedBy,
-	updateBusinessCaseApprovedBy,
-	updateRequirementsApprovedBy,
-	updateSolutionArchitectureApprovedBy,
-	updateEffortEstimateApprovedBy,
-	updateQuoteApprovedBy,
-	updateEstimateTasksApprovedBy
+	getQuote
 } from '$lib/server/projectDb';
 import type { ProjectStage } from '$lib/types/project';
 
@@ -66,8 +60,10 @@ export async function POST({ params, request }: RequestEvent) {
 
 		const nextStage = STAGE_ORDER[currentIndex + 1];
 
-		// Update the approved_by field for the current stage
-		await updateStageApprovedBy(projectId, project.current_stage, approvedBy.trim());
+		// If advancing from Artifacts stage, update all artifacts with approver name
+		if (project.current_stage === 'Artifacts') {
+			await updateArtifactsApprover(projectId, approvedBy.trim());
+		}
 
 		// Update project to next stage
 		const updatedProject = await updateProject(projectId, undefined, nextStage);
@@ -164,38 +160,5 @@ async function validateStageRequirements(
 		}
 		default:
 			return { valid: true };
-	}
-}
-
-async function updateStageApprovedBy(
-	projectId: number,
-	stage: ProjectStage,
-	approvedBy: string
-): Promise<void> {
-	switch (stage) {
-		case 'Artifacts':
-			await updateProjectApprovedBy(projectId, approvedBy);
-			break;
-		case 'BusinessCase':
-			await updateBusinessCaseApprovedBy(projectId, approvedBy);
-			break;
-		case 'Requirements':
-			await updateRequirementsApprovedBy(projectId, approvedBy);
-			break;
-		case 'SolutionArchitecture':
-			await updateSolutionArchitectureApprovedBy(projectId, approvedBy);
-			break;
-		case 'EffortEstimate': {
-			await updateEffortEstimateApprovedBy(projectId, approvedBy);
-			// Also update all tasks in the effort estimate
-			const estimate = await getEffortEstimate(projectId);
-			if (estimate) {
-				await updateEstimateTasksApprovedBy(estimate.id, approvedBy);
-			}
-			break;
-		}
-		case 'Quote':
-			await updateQuoteApprovedBy(projectId, approvedBy);
-			break;
 	}
 }

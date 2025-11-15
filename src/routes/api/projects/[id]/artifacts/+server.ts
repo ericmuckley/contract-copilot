@@ -31,6 +31,7 @@ export async function POST({ params, request }: RequestEvent) {
 		const formData = await request.formData();
 		const file = formData.get('file') as File;
 		const artifactType = formData.get('artifact_type') as string | null;
+		const approved_by = formData.get('approved_by') as string | null;
 
 		if (!file) {
 			return json({ error: 'File is required' }, { status: 400 });
@@ -39,7 +40,9 @@ export async function POST({ params, request }: RequestEvent) {
 		// Upload to Vercel Blob storage
 		const blob = await put(file.name, file, {
 			access: 'public',
-			token: BLOB_READ_WRITE_TOKEN
+			token: BLOB_READ_WRITE_TOKEN,
+			addRandomSuffix: false,
+			allowOverwrite: true
 		});
 
 		// Save artifact record in database
@@ -47,6 +50,7 @@ export async function POST({ params, request }: RequestEvent) {
 			projectId,
 			file.name,
 			blob.url,
+			approved_by || 'unknown',
 			artifactType || undefined
 		);
 
