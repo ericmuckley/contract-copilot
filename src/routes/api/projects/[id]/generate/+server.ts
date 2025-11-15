@@ -2,14 +2,8 @@ import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { Message } from '@aws-sdk/client-bedrock-runtime';
 import { streamInference } from '$lib/server/bedrockClient';
-import {
-	getProject,
-	listArtifacts,
-	getBusinessCase,
-	getRequirements,
-	getSolutionArchitecture
-} from '$lib/server/projectDb';
-import type { ProjectStage } from '$lib/types/project';
+import { getProject, getProjectArtifacts } from '$lib/server/db';
+import { STAGES } from '$lib/schema';
 
 // POST /api/projects/[id]/generate - Generate content for a stage using LLM
 export async function POST({ params, request }: RequestEvent) {
@@ -30,10 +24,10 @@ export async function POST({ params, request }: RequestEvent) {
 		}
 
 		// Build the context from artifacts and previous stages
-		const context = await buildContextForStage(projectId, stage as ProjectStage);
+		const context = await buildContextForStage(project, stage);
 
 		// Generate the prompt based on the stage
-		const prompt = generatePromptForStage(stage as ProjectStage, project.name, context);
+		const prompt = generatePromptForStage(stage, project.project_name, context);
 
 		// Create message for LLM
 		const messages: Message[] = [
@@ -106,52 +100,40 @@ export async function POST({ params, request }: RequestEvent) {
 	}
 }
 
-async function buildContextForStage(projectId: number, stage: ProjectStage): Promise<string> {
+async function buildContextForStage(project: any, stageName: string): Promise<string> {
 	const parts: string[] = [];
 
 	// Always include artifacts
-	const artifacts = await listArtifacts(projectId);
+	const artifacts = await getProjectArtifacts(project.id);
 	if (artifacts.length > 0) {
 		parts.push('### Uploaded Artifacts:');
 		artifacts.forEach((artifact) => {
-			parts.push(`- ${artifact.file_name} (${artifact.artifact_type || 'document'})`);
+			parts.push(`- ${artifact.file_name}`);
 		});
 		parts.push(
 			'\nNote: The actual content of these artifacts would be analyzed, but for this generation we will work with the context provided.'
 		);
 	}
 
-	// Include previous stage content based on current stage
-	if (stage === 'Requirements' || stage === 'SolutionArchitecture' || stage === 'EffortEstimate') {
-		const businessCase = await getBusinessCase(projectId);
-		if (businessCase?.content) {
-			parts.push('\n### Business Case:');
-			parts.push(businessCase.content);
-		}
-	}
-
-	if (stage === 'SolutionArchitecture' || stage === 'EffortEstimate') {
-		const requirements = await getRequirements(projectId);
-		if (requirements?.content) {
-			parts.push('\n### Requirements:');
-			parts.push(requirements.content);
-		}
-	}
-
-	if (stage === 'EffortEstimate') {
-		const solution = await getSolutionArchitecture(projectId);
-		if (solution?.content) {
-			parts.push('\n### Solution/Architecture:');
-			parts.push(solution.content);
+	// Find the stage index
+	const stageIndex = STAGES.findIndex((s) => s.name === stageName);
+	
+	// Include previous stage content
+	if (stageIndex > 0) {
+		for (let i = 1; i < stageIndex; i++) {
+			if (project.sdata[i].content) {
+				parts.push(`\n### ${STAGES[i].label}:`);
+				parts.push(project.sdata[i].content);
+			}
 		}
 	}
 
 	return parts.join('\n');
 }
 
-function generatePromptForStage(stage: ProjectStage, projectName: string, context: string): string {
-	switch (stage) {
-		case 'BusinessCase':
+function generatePromptForStage(stageName: string, projectName: string, context: string): string {
+	switch (stageName) {
+		case 'business_case':
 			return `You are analyzing the project "${projectName}" to create a comprehensive business case.
 
 ${context}
@@ -166,7 +148,7 @@ Based on the artifacts and context provided, generate a detailed business case t
 
 Format your response in clear sections with markdown formatting.`;
 
-		case 'Requirements':
+		case 'requirements':
 			return `You are analyzing the project "${projectName}" to create a detailed requirements summary.
 
 ${context}
@@ -181,7 +163,7 @@ Based on the artifacts and business case, generate a comprehensive requirements 
 
 Format your response in clear sections with markdown formatting.`;
 
-		case 'SolutionArchitecture':
+		case 'architecture':
 			return `You are designing the solution architecture for project "${projectName}".
 
 ${context}
@@ -198,7 +180,7 @@ Based on all the information provided, create a detailed solution/architecture d
 
 Format your response in clear sections with markdown formatting.`;
 
-		case 'EffortEstimate':
+		case 'estimate':
 			return `You are creating a detailed effort estimate (Work Breakdown Structure) for project "${projectName}".
 
 ${context}
@@ -209,16 +191,16 @@ Based on all the information provided, create a detailed effort estimate that in
 2. **Work Breakdown Structure**: A detailed list of tasks
 
 For the WBS, format it as a JSON array where each task has:
-- task_description: Clear description of the task
-- assigned_role: Role responsible (e.g., "Backend Developer", "Frontend Developer", "QA Engineer", "DevOps", "Project Manager")
+- description: Clear description of the task
+- role: Role responsible (e.g., "Backend Developer", "Frontend Developer", "QA Engineer", "DevOps", "Project Manager")
 - hours: Estimated hours for the task
 
 After the assumptions section, provide the tasks in this JSON format:
 \`\`\`json
 [
   {
-    "task_description": "Task description here",
-    "assigned_role": "Role name",
+    "description": "Task description here",
+    "role": "Role name",
     "hours": 8
   }
 ]
@@ -227,6 +209,6 @@ After the assumptions section, provide the tasks in this JSON format:
 Be thorough and include all phases of work: planning, design, development, testing, deployment, and project management, but create a maximum of 20 separate tasks.`;
 
 		default:
-			return `Generate content for the ${stage} stage of project "${projectName}".\n\n${context}`;
+			return `Generate content for the ${stageName} stage of project "${projectName}".\n\n${context}`;
 	}
 }

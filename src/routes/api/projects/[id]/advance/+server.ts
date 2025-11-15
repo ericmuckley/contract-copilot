@@ -1,28 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import {
-	getProject,
-	updateProject,
-	createProjectHistory,
-	listArtifacts,
-	updateArtifactsApprover,
-	getBusinessCase,
-	getRequirements,
-	getSolutionArchitecture,
-	getEffortEstimate,
-	listEstimateTasks,
-	getQuote
-} from '$lib/server/projectDb';
-import type { ProjectStage } from '$lib/types/project';
-
-const STAGE_ORDER: ProjectStage[] = [
-	'Artifacts',
-	'BusinessCase',
-	'Requirements',
-	'SolutionArchitecture',
-	'EffortEstimate',
-	'Quote'
-];
+import { getProject, updateProject, getProjectArtifacts } from '$lib/server/db';
+import { STAGES } from '$lib/schema';
 
 // POST /api/projects/[id]/advance - Advance project to next stage
 export async function POST({ params, request }: RequestEvent) {
@@ -46,37 +25,34 @@ export async function POST({ params, request }: RequestEvent) {
 			return json({ error: 'Project not found' }, { status: 404 });
 		}
 
+		// Get current stage index (number of approved stages)
+		const currentStageIdx = project.sdata.filter((s) => s.approved).length;
+		
+		// Validate we're not at the final stage
+		if (currentStageIdx >= STAGES.length - 1) {
+			return json({ error: 'Project is already at final stage' }, { status: 400 });
+		}
+
 		// Validate current stage requirements before advancing
-		const validation = await validateStageRequirements(projectId, project.current_stage);
+		const validation = await validateStageRequirements(projectId, currentStageIdx, project);
 		if (!validation.valid) {
 			return json({ error: validation.message }, { status: 400 });
 		}
 
-		// Get next stage
-		const currentIndex = STAGE_ORDER.indexOf(project.current_stage);
-		if (currentIndex === STAGE_ORDER.length - 1) {
-			return json({ error: 'Project is already at final stage' }, { status: 400 });
-		}
+		// Mark current stage as approved
+		const updatedSdata = [...project.sdata];
+		updatedSdata[currentStageIdx] = {
+			...updatedSdata[currentStageIdx],
+			approved: true,
+			approved_by: approvedBy.trim(),
+			updated_at: new Date().toISOString()
+		};
 
-		const nextStage = STAGE_ORDER[currentIndex + 1];
-
-		// If advancing from Artifacts stage, update all artifacts with approver name
-		if (project.current_stage === 'Artifacts') {
-			await updateArtifactsApprover(projectId, approvedBy.trim());
-		}
-
-		// Update project to next stage
-		const updatedProject = await updateProject(projectId, undefined, nextStage);
+		// Update project with new sdata
+		const updatedProject = await updateProject(projectId, { sdata: updatedSdata });
 		if (!updatedProject) {
 			return json({ error: 'Failed to update project' }, { status: 500 });
 		}
-
-		// Log in project history
-		await createProjectHistory(
-			projectId,
-			nextStage,
-			`Advanced from ${project.current_stage} to ${nextStage} (approved by ${approvedBy.trim()})`
-		);
 
 		return json({ project: updatedProject });
 	} catch (error) {
@@ -87,11 +63,14 @@ export async function POST({ params, request }: RequestEvent) {
 
 async function validateStageRequirements(
 	projectId: number,
-	stage: ProjectStage
+	stageIdx: number,
+	project: any
 ): Promise<{ valid: boolean; message?: string }> {
-	switch (stage) {
-		case 'Artifacts': {
-			const artifacts = await listArtifacts(projectId);
+	const stageName = STAGES[stageIdx].name;
+	
+	switch (stageName) {
+		case 'artifacts': {
+			const artifacts = await getProjectArtifacts(projectId);
 			if (artifacts.length < 2) {
 				return {
 					valid: false,
@@ -100,60 +79,37 @@ async function validateStageRequirements(
 			}
 			return { valid: true };
 		}
-		case 'BusinessCase': {
-			const businessCase = await getBusinessCase(projectId);
-			if (!businessCase || !businessCase.content) {
+		case 'business_case':
+		case 'requirements':
+		case 'architecture': {
+			if (!project.sdata[stageIdx].content) {
 				return {
 					valid: false,
-					message: 'Business case content is required to advance from BusinessCase stage'
+					message: `Content is required to advance from ${STAGES[stageIdx].label} stage`
 				};
 			}
 			return { valid: true };
 		}
-		case 'Requirements': {
-			const requirements = await getRequirements(projectId);
-			if (!requirements || !requirements.content) {
+		case 'estimate': {
+			if (!project.sdata[stageIdx].content) {
 				return {
 					valid: false,
-					message: 'Requirements content is required to advance from Requirements stage'
+					message: 'Assumptions are required to advance from Effort Estimate stage'
+				};
+			}
+			if (!project.sdata[stageIdx].tasks || project.sdata[stageIdx].tasks.length === 0) {
+				return {
+					valid: false,
+					message: 'At least one task is required to advance from Effort Estimate stage'
 				};
 			}
 			return { valid: true };
 		}
-		case 'SolutionArchitecture': {
-			const solution = await getSolutionArchitecture(projectId);
-			if (!solution || !solution.content) {
+		case 'quote': {
+			if (!project.sdata[stageIdx].content) {
 				return {
 					valid: false,
-					message:
-						'Solution/Architecture content is required to advance from SolutionArchitecture stage'
-				};
-			}
-			return { valid: true };
-		}
-		case 'EffortEstimate': {
-			const estimate = await getEffortEstimate(projectId);
-			if (!estimate) {
-				return {
-					valid: false,
-					message: 'Effort estimate is required to advance from EffortEstimate stage'
-				};
-			}
-			const tasks = await listEstimateTasks(estimate.id);
-			if (tasks.length === 0) {
-				return {
-					valid: false,
-					message: 'At least one estimate task is required to advance from EffortEstimate stage'
-				};
-			}
-			return { valid: true };
-		}
-		case 'Quote': {
-			const quote = await getQuote(projectId);
-			if (!quote) {
-				return {
-					valid: false,
-					message: 'Quote is required to complete the project'
+					message: 'Quote details are required'
 				};
 			}
 			return { valid: true };

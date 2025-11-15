@@ -70,26 +70,66 @@ export async function createProject(project: Project): Promise<Project> {
 }
 
 
-export async function updateProject(id: number, project: Project): Promise<Project | null> {
-	const result = await sql`
-		UPDATE "projects"
-		SET data = ${JSON.stringify(project)}, updated_at = NOW()
-		WHERE id = ${id}
-		RETURNING id, data, created_at, updated_at
-	`;
-	if (result.length === 0) return null;
-	const row = result[0];
-	return {
-		id: row.id,
-		...row.data as Omit<Project, 'id'>,
-		updated_at: row.updated_at
-	} as Project;
+export async function updateProject(id: number, project: Partial<Project>): Promise<Project | null> {
+	// Handle different update scenarios
+	if (project.project_name !== undefined && project.sdata !== undefined) {
+		const result = await sql`
+			UPDATE "projects"
+			SET project_name = ${project.project_name}, sdata = ${JSON.stringify(project.sdata)}, updated_at = NOW()
+			WHERE id = ${id}
+			RETURNING id, project_name, created_by, sdata, created_at, updated_at
+		`;
+		if (result.length === 0) return null;
+		return result[0] as Project;
+	} else if (project.project_name !== undefined) {
+		const result = await sql`
+			UPDATE "projects"
+			SET project_name = ${project.project_name}, updated_at = NOW()
+			WHERE id = ${id}
+			RETURNING id, project_name, created_by, sdata, created_at, updated_at
+		`;
+		if (result.length === 0) return null;
+		return result[0] as Project;
+	} else if (project.sdata !== undefined) {
+		const result = await sql`
+			UPDATE "projects"
+			SET sdata = ${JSON.stringify(project.sdata)}, updated_at = NOW()
+			WHERE id = ${id}
+			RETURNING id, project_name, created_by, sdata, created_at, updated_at
+		`;
+		if (result.length === 0) return null;
+		return result[0] as Project;
+	}
+	
+	return getProject(id);
 }
 
 
 export async function deleteProject(id: number): Promise<boolean> {
 	const result = await sql`
 		DELETE FROM "projects" WHERE id = ${id}
+	`;
+	return result.length > 0;
+}
+
+export async function createArtifact(artifact: Omit<Artifact, 'id'>): Promise<Artifact> {
+	const result = await sql`
+		INSERT INTO "artifacts" (project_id, file_name, file_url)
+		VALUES (${artifact.project_id}, ${artifact.file_name}, ${artifact.file_url})
+		RETURNING id, project_id, file_name, file_url
+	`;
+	const row = result[0];
+	return {
+		id: row.id,
+		project_id: row.project_id,
+		file_name: row.file_name,
+		file_url: row.file_url
+	} as Artifact;
+}
+
+export async function deleteArtifact(id: number): Promise<boolean> {
+	const result = await sql`
+		DELETE FROM "artifacts" WHERE id = ${id}
 	`;
 	return result.length > 0;
 }

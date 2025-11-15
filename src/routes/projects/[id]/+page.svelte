@@ -17,7 +17,7 @@
 	let approverName = $state('');
 
 	let stageIdx = $derived(
-		() => data.project.sdata.filter((s) => s.approved).length
+		data.project.sdata.filter((s) => s.approved).length
 	);
 
 	async function refreshData() {
@@ -60,36 +60,30 @@
 		}
 	}
 
-	/*
 	const canAdvance = $derived(() => {
-		//const stage = data.project.current_stage;
-
 		// Always require a valid approver name
 		if (!approverName || approverName.trim() === '') {
 			return false;
 		}
 
-		const stageName = STAGES[stageIdx()].name;
+		const stageName = STAGES[stageIdx].name;
 
 		if (stageName === 'artifacts') {
 			return data.artifacts.length >= 2;
-		} else if (stageName === 'BusinessCase') {
+		} else if (stageName === 'business_case') {
 			return data.project.sdata[1].content != null;
-		} else if (stageName === 'Requirements') {
+		} else if (stageName === 'requirements') {
 			return data.project.sdata[2].content != null;
-		} else if (stageName === 'SolutionArchitecture') {
+		} else if (stageName === 'architecture') {
 			return data.project.sdata[3].content != null;
-		} else if (stageName === 'EffortEstimate') {
-			return data.project.sdata[4].content != null && data.project.sdata[4]?.tasks?.length > 0;
-		} else if (stageName === 'Quote') {
+		} else if (stageName === 'estimate') {
+			return data.project.sdata[4].content != null && data.project.sdata[4]?.tasks?.length && data.project.sdata[4].tasks.length > 0;
+		} else if (stageName === 'quote') {
 			return false; // Final stage
 		}
 
 		return false;
 	});
-	*/
-
-	//const isLastStage = $derived(data.project.data.current_stage === 'Quote');
 </script>
 
 
@@ -139,59 +133,58 @@
 </div>
 
 <div class="mt-4">
-	<StageStepper currentStageIndex={stageIdx()} />
+	<StageStepper currentStageIndex={stageIdx} />
 </div>
 
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 	<div class="card lg:col-span-2">
-		{#if STAGES[stageIdx()].name === 'artifacts'}
+		{#if STAGES[stageIdx].name === 'artifacts'}
 			<ArtifactsStage
 				projectId={data.project.id as number}
 				artifacts={data.artifacts as Artifact[]}
 				onRefresh={refreshData}
 				{approverName}
 			/>
-		{:else if STAGES[stageIdx()].name === 'business_case'}
+		{:else if STAGES[stageIdx].name === 'business_case'}
 			<ContentStage
-				projectId={data.project.id}
-				stage="BusinessCase"
-				content={data.businessCase?.content}
+				projectId={data.project.id as number}
+				stageIndex={stageIdx}
+				content={data.project.sdata[stageIdx].content}
 				onRefresh={refreshData}
 				{approverName}
 			/>
-		{:else if STAGES[stageIdx()].name === 'requirements'}
+		{:else if STAGES[stageIdx].name === 'requirements'}
 			<ContentStage
-				projectId={data.project.id}
-				stage="Requirements"
-				content={data.requirements?.content}
+				projectId={data.project.id as number}
+				stageIndex={stageIdx}
+				content={data.project.sdata[stageIdx].content}
 				onRefresh={refreshData}
 				{approverName}
 			/>
-		{:else if STAGES[stageIdx()].name === 'architecture'}
+		{:else if STAGES[stageIdx].name === 'architecture'}
 			<ContentStage
-				projectId={data.project.id}
-				stage="SolutionArchitecture"
-				content={data.solutionArchitecture?.content}
+				projectId={data.project.id as number}
+				stageIndex={stageIdx}
+				content={data.project.sdata[stageIdx].content}
 				onRefresh={refreshData}
 				{approverName}
 			/>
-		{:else if STAGES[stageIdx()].name === 'estimate'}
+		{:else if STAGES[stageIdx].name === 'estimate'}
 			<EffortEstimateStage
-				projectId={data.project.id}
-				assumptions={data.effortEstimate?.assumptions}
-				tasks={data.effortEstimate?.tasks || []}
+				projectId={data.project.id as number}
+				stageIndex={stageIdx}
+				assumptions={data.project.sdata[stageIdx].content}
+				tasks={data.project.sdata[stageIdx].tasks || []}
 				onRefresh={refreshData}
 				{approverName}
 			/>
-		{:else if STAGES[stageIdx()].name === 'quote'}
+		{:else if STAGES[stageIdx].name === 'quote'}
 			<QuoteStage
-				projectId={data.project.id}
-				paymentTerms={data.quote?.payment_terms}
-				timeline={data.quote?.timeline}
-				isDelivered={data.quote?.is_delivered || false}
-				rates={data.quote?.rates || []}
-				tasks={data.effortEstimate?.tasks || []}
+				projectId={data.project.id as number}
+				stageIndex={stageIdx}
+				content={data.project.sdata[stageIdx].content}
+				tasks={data.project.sdata[4].tasks || []}
 				onRefresh={refreshData}
 			/>
 		{/if}
@@ -240,18 +233,18 @@
 		<div class="mt-8">
 			<p class="font-bold">Current Stage</p>
 			<p class="mb-4 text-xs">
-				{#if data.project.current_stage === 'Artifacts'}
+				{#if STAGES[stageIdx].name === 'artifacts'}
 					Upload at least 2 artifacts (documents, notes, transcripts) to provide context for the
 					project.
-				{:else if data.project.current_stage === 'BusinessCase'}
+				{:else if STAGES[stageIdx].name === 'business_case'}
 					Generate and review the business case, including scope, outcomes, and constraints.
-				{:else if data.project.current_stage === 'Requirements'}
+				{:else if STAGES[stageIdx].name === 'requirements'}
 					Generate and review the functional and non-functional requirements.
-				{:else if data.project.current_stage === 'SolutionArchitecture'}
+				{:else if STAGES[stageIdx].name === 'architecture'}
 					Document the technical approach, architecture, and risks.
-				{:else if data.project.current_stage === 'EffortEstimate'}
+				{:else if STAGES[stageIdx].name === 'estimate'}
 					Generate the Work Breakdown Structure with tasks, roles, and hours.
-				{:else if data.project.current_stage === 'Quote'}
+				{:else if STAGES[stageIdx].name === 'quote'}
 					Set rates, payment terms, and timeline. Export or copy your quote.
 				{/if}
 			</p>

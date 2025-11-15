@@ -2,21 +2,23 @@
 	import { marked } from 'marked';
 	import LLMOutput from '../LLMOutput.svelte';
 	import Spinner from '../Spinner.svelte';
-	import type { ProjectStage } from '$lib/types/project';
+	import { STAGES } from '$lib/schema';
 
 	let {
 		projectId,
-		stage,
+		stageIndex,
 		content = null,
 		approverName,
 		onRefresh
 	}: {
 		projectId: number;
-		stage: ProjectStage;
+		stageIndex: number;
 		content?: string | null;
 		approverName: string;
 		onRefresh: () => void;
 	} = $props();
+	
+	const stage = STAGES[stageIndex];
 
 	let isEditing = $state(false);
 	let editedContent = $state(content || '');
@@ -25,28 +27,22 @@
 	let error = $state('');
 	let generatedContent = $state('');
 
-	const stageInfo: Record<string, { title: string; description: string; endpoint: string }> = {
-		BusinessCase: {
-			title: 'Business Case',
+	const stageInfo: Record<string, { description: string }> = {
+		business_case: {
 			description:
-				'Generate a comprehensive business case including scope, outcomes, constraints, and risks.',
-			endpoint: 'business-case'
+				'Generate a comprehensive business case including scope, outcomes, constraints, and risks.'
 		},
-		Requirements: {
-			title: 'Requirements',
+		requirements: {
 			description:
-				'Generate detailed functional and non-functional requirements based on the business case.',
-			endpoint: 'requirements'
+				'Generate detailed functional and non-functional requirements based on the business case.'
 		},
-		SolutionArchitecture: {
-			title: 'Solution/Architecture',
+		architecture: {
 			description:
-				'Document the technical approach, architecture, tech stack, and risk mitigation strategies.',
-			endpoint: 'solution-architecture'
+				'Document the technical approach, architecture, tech stack, and risk mitigation strategies.'
 		}
 	};
 
-	const info = $derived(stageInfo[stage]);
+	const info = $derived(stageInfo[stage.name]);
 
 	async function generateContent() {
 		isGenerating = true;
@@ -57,7 +53,7 @@
 			const response = await fetch(`/api/projects/${projectId}/generate`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ stage })
+				body: JSON.stringify({ stage: stage.name })
 			});
 
 			if (!response.ok) {
@@ -105,10 +101,13 @@
 		error = '';
 
 		try {
-			const response = await fetch(`/api/projects/${projectId}/${info.endpoint}`, {
+			const response = await fetch(`/api/projects/${projectId}/stage-content`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ content: editedContent, approved_by: approverName.trim() })
+				body: JSON.stringify({ 
+					stageIndex,
+					content: editedContent
+				})
 			});
 
 			if (!response.ok) {
@@ -138,7 +137,7 @@
 
 <div class="space-y-4">
 	<div class="card bg-white">
-		<h3 class="mb-4 text-lg font-semibold text-slate-800">{info.title}</h3>
+		<h3 class="mb-4 text-lg font-semibold text-slate-800">{stage.label}</h3>
 		<p class="mb-4 text-sm text-slate-600">{info.description}</p>
 
 		{#if isGenerating}
@@ -150,7 +149,7 @@
 		{#if !content && !isEditing && !isGenerating}
 			<button onclick={generateContent} disabled={isGenerating} class="btn btn-primary">
 				<i class="bi bi-stars mr-2"></i>
-				Generate {info.title} with AI
+				Generate {stage.label} with AI
 			</button>
 		{/if}
 

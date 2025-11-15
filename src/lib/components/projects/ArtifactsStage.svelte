@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Artifact } from '$lib/types/project';
+	import type { Artifact } from '$lib/schema';
 
 	let {
 		projectId,
@@ -30,8 +30,6 @@
 				const file = files[i];
 				const formData = new FormData();
 				formData.append('file', file);
-				formData.append('artifact_type', 'document');
-				formData.append('approved_by', approverName);
 
 				const response = await fetch(`/api/projects/${projectId}/artifacts`, {
 					method: 'POST',
@@ -55,16 +53,7 @@
 		}
 	}
 
-	function formatDate(dateString: string): string {
-		const date = new Date(dateString);
-		return date.toLocaleString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
-		});
-	}
+
 </script>
 
 <div class="space-y-4">
@@ -123,12 +112,6 @@
 							<i class="bi bi-file-earmark-text text-2xl text-slate-400"></i>
 							<div>
 								<div class="font-medium text-slate-800">{artifact.file_name}</div>
-								<div class="text-xs text-slate-500">
-									Uploaded {formatDate(artifact.uploaded_at)}
-									{#if artifact.artifact_type}
-										• {artifact.artifact_type}
-									{/if}
-								</div>
 							</div>
 						</div>
 						<div class="flex items-center space-x-2">
