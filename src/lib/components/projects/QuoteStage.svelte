@@ -1,10 +1,13 @@
 <script lang="ts">
 	import type { ProjectTask } from '$lib/schema';
 	import { PROJECT_PERSONNEL_RATES } from '$lib/schema';
+	import Spinner from '../Spinner.svelte';
 
 	let {
 		projectId,
-		tasks = []
+		tasks = [],
+		content = null,
+		onRefresh
 	}: {
 		projectId: number;
 		stageIndex: number;
@@ -13,27 +16,71 @@
 		onRefresh: () => void;
 	} = $props();
 
-	// Calculate total hours
-	const totalHours = $derived(tasks.reduce((sum, task) => sum + Number(task.hours), 0));
+	let isGenerating = $state(false);
+	let error = $state('');
 
-	// Calculate total cost
-	const totalCost = $derived(
-		tasks.reduce((sum, task) => {
-			const rate = PROJECT_PERSONNEL_RATES[task.role as keyof typeof PROJECT_PERSONNEL_RATES] || 0;
-			return sum + Number(task.hours) * rate;
-		}, 0)
-	);
+	// Parse CSV content from database or generate from tasks
+	let csvData = $derived.by(() => {
+		if (content) {
+			return content;
+		}
+		return generateCSV(tasks);
+	});
 
-	// Calculate project timeline (assuming 40-hour work weeks)
-	const timelineWeeks = $derived(Math.ceil(totalHours / 40));
+	// Parse tasks from CSV
+	const parsedData = $derived.by(() => {
+		const lines = csvData.split('\n');
+		const dataRows: ProjectTask[] = [];
+		let totalHours = 0;
+		let totalCost = 0;
+		let timelineWeeks = 0;
 
-	function exportToCSV() {
+		// Skip header row and parse task rows
+		for (let i = 1; i < lines.length; i++) {
+			const line = lines[i].trim();
+			if (!line) continue;
+
+			// Parse CSV (handle quoted values)
+			const values = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)?.map((v) => v.replace(/^"|"$/g, ''));
+			if (!values || values.length < 5) continue;
+
+			const [description, role, hours, rate, cost] = values;
+
+			// Check if this is a summary row
+			if (description === 'Total Hours') {
+				totalHours = Number(hours);
+			} else if (description === 'Total Cost') {
+				totalCost = Number(cost);
+			} else if (description === 'Timeline (weeks)') {
+				timelineWeeks = Number(hours);
+			} else if (description && role && hours) {
+				// Regular task row
+				dataRows.push({
+					description,
+					role,
+					hours: Number(hours)
+				});
+			}
+		}
+
+		return { tasks: dataRows, totalHours, totalCost, timelineWeeks };
+	});
+
+	function generateCSV(taskList: ProjectTask[]): string {
 		const headers = ['Task', 'Role', 'Hours', 'Rate/Hour', 'Total Cost'];
-		const rows = tasks.map((task) => {
+		const rows = taskList.map((task) => {
 			const rate = PROJECT_PERSONNEL_RATES[task.role as keyof typeof PROJECT_PERSONNEL_RATES] || 0;
 			const cost = Number(task.hours) * rate;
-			return [task.description, task.role, task.hours, rate, cost.toFixed(2)];
+			return [task.description, task.role, task.hours.toString(), rate.toString(), cost.toFixed(2)];
 		});
+
+		// Calculate totals
+		const totalHours = taskList.reduce((sum, task) => sum + Number(task.hours), 0);
+		const totalCost = taskList.reduce((sum, task) => {
+			const rate = PROJECT_PERSONNEL_RATES[task.role as keyof typeof PROJECT_PERSONNEL_RATES] || 0;
+			return sum + Number(task.hours) * rate;
+		}, 0);
+		const timelineWeeks = Math.ceil(totalHours / 40);
 
 		// Add summary rows
 		rows.push(['', '', '', '', '']);
@@ -41,11 +88,41 @@
 		rows.push(['Total Cost', '', '', '', totalCost.toFixed(2)]);
 		rows.push(['Timeline (weeks)', '', timelineWeeks.toString(), '', '']);
 
-		const csv = [headers, ...rows]
-			.map((row) => row.map((cell) => `"${cell}"`).join(','))
-			.join('\n');
+		return [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+	}
 
-		const blob = new Blob([csv], { type: 'text/csv' });
+	async function regenerateQuote() {
+		isGenerating = true;
+		error = '';
+
+		try {
+			// Generate new CSV from current tasks
+			const newCSV = generateCSV(tasks);
+
+			// Save to database
+			const response = await fetch(`/api/projects/${projectId}/stage-content`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					stageIndex: 5,
+					content: newCSV
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to save quote');
+			}
+
+			onRefresh();
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Failed to regenerate quote';
+		} finally {
+			isGenerating = false;
+		}
+	}
+
+	function exportToCSV() {
+		const blob = new Blob([csvData], { type: 'text/csv' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
@@ -55,24 +132,9 @@
 	}
 
 	function copyToClipboard() {
-		const headers = ['Task', 'Role', 'Hours', 'Rate/Hour', 'Total Cost'];
-		const rows = tasks.map((task) => {
-			const rate = PROJECT_PERSONNEL_RATES[task.role as keyof typeof PROJECT_PERSONNEL_RATES] || 0;
-			const cost = Number(task.hours) * rate;
-			return [
-				task.description,
-				task.role,
-				task.hours.toString(),
-				`$${rate}`,
-				`$${cost.toFixed(2)}`
-			];
-		});
+		const summaryText = `\n\nTotal Hours: ${parsedData.totalHours}\nTotal Cost: $${parsedData.totalCost.toFixed(2)}\nTimeline: ${parsedData.timelineWeeks} weeks`;
 
-		const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
-
-		const summaryText = `\n\nTotal Hours: ${totalHours}\nTotal Cost: $${totalCost.toFixed(2)}\nTimeline: ${timelineWeeks} weeks`;
-
-		navigator.clipboard.writeText(csv + summaryText).then(() => {
+		navigator.clipboard.writeText(csvData + summaryText).then(() => {
 			alert('Quote data copied to clipboard!');
 		});
 	}
@@ -85,7 +147,18 @@
 			Review the project tasks with rates and costs. Export to CSV or copy to clipboard.
 		</p>
 
-		{#if tasks.length === 0}
+		{#if error}
+			<div class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+				<i class="bi bi-exclamation-triangle-fill mr-2"></i>
+				{error}
+			</div>
+		{/if}
+
+		{#if isGenerating}
+			<div class="mb-2 flex justify-center">
+				<Spinner />
+			</div>
+		{:else if parsedData.tasks.length === 0}
 			<div class="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
 				No tasks available. Please complete the Effort Estimate stage first.
 			</div>
@@ -98,6 +171,14 @@
 				<button onclick={copyToClipboard} class="btn btn-primary">
 					<i class="bi bi-clipboard mr-2"></i>
 					Copy to Clipboard
+				</button>
+				<button
+					onclick={regenerateQuote}
+					disabled={isGenerating}
+					class="btn flex space-x-1 bg-slate-500 whitespace-nowrap text-white hover:bg-slate-600"
+				>
+					<i class="bi bi-arrow-clockwise mr-2"></i>
+					<span>Regenerate</span>
 				</button>
 			</div>
 
@@ -118,7 +199,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each tasks as task, t (t)}
+							{#each parsedData.tasks as task, t (t)}
 								{@const rate =
 									PROJECT_PERSONNEL_RATES[task.role as keyof typeof PROJECT_PERSONNEL_RATES] || 0}
 								{@const cost = Number(task.hours) * rate}
@@ -132,13 +213,13 @@
 							{/each}
 							<tr class="border-t-2 border-slate-300 bg-slate-50 font-bold text-slate-600">
 								<td class="px-4 py-3 text-sm" colspan="2">Total Project Cost</td>
-								<td class="px-4 py-3 text-right text-sm">{totalHours} hrs</td>
+								<td class="px-4 py-3 text-right text-sm">{parsedData.totalHours} hrs</td>
 								<td class="px-4 py-3 text-right text-sm">—</td>
-								<td class="px-4 py-3 text-right text-sm">${totalCost.toFixed(2)}</td>
+								<td class="px-4 py-3 text-right text-sm">${parsedData.totalCost.toFixed(2)}</td>
 							</tr>
 							<tr class="border-b border-slate-200 bg-slate-50 font-bold text-slate-600">
 								<td class="px-4 py-3 text-sm" colspan="4">Project Timeline (at 40 hrs/week)</td>
-								<td class="px-4 py-3 text-right text-sm">{timelineWeeks} weeks</td>
+								<td class="px-4 py-3 text-right text-sm">{parsedData.timelineWeeks} weeks</td>
 							</tr>
 						</tbody>
 					</table>

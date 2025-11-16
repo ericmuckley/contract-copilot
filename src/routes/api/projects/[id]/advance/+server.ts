@@ -1,7 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { getProject, updateProject, getProjectArtifacts } from '$lib/server/db';
-import { STAGES } from '$lib/schema';
+import { STAGES, PROJECT_PERSONNEL_RATES } from '$lib/schema';
+import type { ProjectTask } from '$lib/schema';
 
 // POST /api/projects/[id]/advance - Advance project to next stage
 export async function POST({ params, request }: RequestEvent) {
@@ -48,6 +49,17 @@ export async function POST({ params, request }: RequestEvent) {
 			updated_at: new Date().toISOString()
 		};
 
+		// If advancing from Effort Estimate to Quote stage, generate the CSV content
+		if (currentStageIdx === 4 && updatedSdata.length > 5) {
+			const tasks = project.sdata[4].tasks || [];
+			const quoteCSV = generateQuoteCSV(tasks);
+			updatedSdata[5] = {
+				...updatedSdata[5],
+				content: quoteCSV,
+				updated_at: new Date().toISOString()
+			};
+		}
+
 		// Update project with new sdata
 		const updatedProject = await updateProject(projectId, { sdata: updatedSdata });
 		if (!updatedProject) {
@@ -59,6 +71,34 @@ export async function POST({ params, request }: RequestEvent) {
 		console.error('Error advancing project:', error);
 		return json({ error: 'Failed to advance project' }, { status: 500 });
 	}
+}
+
+function generateQuoteCSV(tasks: ProjectTask[]): string {
+	const headers = ['Task', 'Role', 'Hours', 'Rate/Hour', 'Total Cost'];
+	const rows = tasks.map((task) => {
+		const rate = PROJECT_PERSONNEL_RATES[task.role as keyof typeof PROJECT_PERSONNEL_RATES] || 0;
+		const cost = Number(task.hours) * rate;
+		return [task.description, task.role, task.hours.toString(), rate.toString(), cost.toFixed(2)];
+	});
+
+	// Calculate totals
+	const totalHours = tasks.reduce((sum, task) => sum + Number(task.hours), 0);
+	const totalCost = tasks.reduce((sum, task) => {
+		const rate = PROJECT_PERSONNEL_RATES[task.role as keyof typeof PROJECT_PERSONNEL_RATES] || 0;
+		return sum + Number(task.hours) * rate;
+	}, 0);
+	const timelineWeeks = Math.ceil(totalHours / 40);
+
+	// Add summary rows
+	rows.push(['', '', '', '', '']);
+	rows.push(['Total Hours', '', totalHours.toString(), '', '']);
+	rows.push(['Total Cost', '', '', '', totalCost.toFixed(2)]);
+	rows.push(['Timeline (weeks)', '', timelineWeeks.toString(), '', '']);
+
+	// Generate CSV string
+	const csv = [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+
+	return csv;
 }
 
 async function validateStageRequirements(

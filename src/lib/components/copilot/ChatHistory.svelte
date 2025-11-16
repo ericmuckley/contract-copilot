@@ -104,8 +104,9 @@
 						<div class="mt-2 space-y-1">
 							{#each toolCalls as tool}
 								<div class="rounded-lg bg-purple-100 px-3 py-2 text-sm">
-									<p class="font-semibold">
-										{cleanString(tool.name)}
+									<p class="space-x-1 font-bold">
+										<i class="bi bi-stars"></i>
+										<span>{cleanString(tool.name)}</span>
 									</p>
 									<div class="mt-1 max-h-32 overflow-x-auto overflow-y-auto text-xs text-gray-600">
 										Input: {JSON.stringify(tool.input)}
@@ -120,7 +121,7 @@
 	{/each}
 
 	{#if isStreaming}
-		<div class="flex justify-start">
+		<div class="flex justify-center">
 			<div class="max-w-[80%]">
 				{#if streamingContent}
 					<LLMOutput text={streamingContent} />
@@ -140,7 +141,7 @@
 						{/each}
 					</div>
 				{:else}
-					<div class="my-2 justify-center">
+					<div class="my-2 flex justify-center">
 						<Ping />
 					</div>
 				{/if}
