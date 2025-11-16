@@ -13,12 +13,12 @@ import {
 } from '@aws-sdk/client-bedrock-runtime';
 import type { LLMInferencePayload } from '$lib/types';
 import { AWS_REGION, LLM_MODEL_ID, LLM_MAX_TOKENS, LLM_TEMPERATURE } from '$lib/server/settings';
-import { GetProjectDetailsTool } from './bedrockTools';
+import { GetProjectDetailsTool, UpdateProjectTasksTool } from './bedrockTools';
 import { getCopilotSystemPrompt } from '$lib/server/bedrockPrompts';
 
 export const bedrockClient = new BedrockRuntimeClient({ region: AWS_REGION });
 
-const TOOLS = [GetProjectDetailsTool];
+const TOOLS = [GetProjectDetailsTool, UpdateProjectTasksTool];
 
 // Full streaming of LLM response with optional tool calls
 export const streamInference = async (payload: LLMInferencePayload) => {

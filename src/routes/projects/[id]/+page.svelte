@@ -10,6 +10,7 @@
 	import { STAGES, type Artifact } from '$lib/schema';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { activeProjectId } from '$lib/stores.js';
+	import { invalidate } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -22,8 +23,8 @@
 	let stageIdx = $derived(data.project.sdata.filter((s) => s.approved).length);
 
 	async function refreshData() {
-		// Reload the page data
-		window.location.reload();
+		// Use SvelteKit's invalidate for smoother reload
+		await invalidate('project:data');
 	}
 
 	async function advanceStage() {
@@ -211,5 +212,12 @@
 			<div class="font-bold text-green-600">Project Complete!</div>
 		</div>
 		<p class="mt-4 text-center">Your quote is ready to be delivered to the client.</p>
+	{/if}
+
+	<!-- TODO: remove for production -->
+	{#if 1}
+		<div class="max-w-[500px] overflow-x-auto">
+			<pre class="text-xs">{JSON.stringify(data.project.sdata, null, 2)}</pre>
+		</div>
 	{/if}
 </div>
