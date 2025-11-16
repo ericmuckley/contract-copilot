@@ -87,7 +87,7 @@ Build my `readFileContent` function in `readFileContent.ts`. The function should
 
 This was my original prompt to start probing options for the architecture:
 
-```
+```md
 Look at my LLM tools in `bedrockTools.ts`. Currently, the existing tool uses a project ID to look up project details in a database.
 
 Now I need a tool that can also write to the database. The tool should take as input the project ID and a request from the user. Likeiy, it would be to modify the projects tasks, which are stored as JSONB in Postgres. For example, if the user says "increase the backend effort by 10%", the agent would pull up the project, modify the projects tasks, and save the modified tasks to the database.
@@ -97,49 +97,12 @@ What would be your plan for implementing this? Its a little challenging because 
 
 Then I simplified the scope here so it could be implemented quickly:
 
-```
+```md
 Ok, look at the project interfaces and my schema. The project has stage data. The last stage, the quote stage, contains a task array.  I want you to build an LLM tool that takes as input the project ID and a request from the user about how to modify the tasks array in the project quote stage. An LLM in the tool should take the existing tasks array, modify it according to the user's request, then save it back to the project in the database. Let me know if you have questions or concerns about this.
 ```
 
 Then I modified the chatbot so that the UI would reflect changes caused by teh tool calling without a manual refresh:
 
-```
-great, and now i need to make sure that when this tool runs in my chatbot, the frontend automatically re-fetches the projects (and active project, if any) from the database so that the updated tasks change as soon as they've been modified, without the user having to manually refresh
-```
-
-
-```
-# Title
-
-Here's some text  and formatting with nothing
-```
-
 ```md
-# Title
-
-Here's some text  and formatting with md.
-```
-
-```markdown
-# Title
-
-Here's some text  and formatting with markdown.
-```
-
-```text
-# Title
-
-Here's some text  and formatting with text.
-```
-
-```txt
-# Title
-
-Here's some text  and formatting with txt.
-```
-
-```raw
-# Title
-
-Here's some text  and formatting with raw.
+great, and now i need to make sure that when this tool runs in my chatbot, the frontend automatically re-fetches the projects (and active project, if any) from the database so that the updated tasks change as soon as they've been modified, without the user having to manually refresh
 ```
