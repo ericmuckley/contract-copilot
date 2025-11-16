@@ -5,7 +5,7 @@
 	let { project }: { project: Project } = $props();
 
 	const stageIdx = $derived(project.sdata.filter((s) => s.approved).length);
-	const progressPercentage = $derived((stageIdx / STAGES.length) * 100);
+	const progressPercentage = $derived((stageIdx / (STAGES.length - 1)) * 100);
 
 	function formatDate(dateString: string): string {
 		const date = new Date(dateString);
