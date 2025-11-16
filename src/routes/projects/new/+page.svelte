@@ -86,14 +86,7 @@
 						<i class="bi bi-plus-lg mr-2"></i>
 						Create Project
 					</button>
-					<a
-						href="/"
-						class="btn flex-1 bg-slate-500 text-center text-white hover:bg-slate-700 {isCreating
-							? 'pointer-events-none opacity-50'
-							: ''}"
-					>
-						Cancel
-					</a>
+					<a href="/" class="btn btn-outline flex-1 text-center"> Cancel </a>
 				</div>
 			{/if}
 		</div>

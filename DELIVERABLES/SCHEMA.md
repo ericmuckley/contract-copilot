@@ -15,7 +15,8 @@ CREATE TABLE artifacts (
     id SERIAL PRIMARY KEY,
     project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
     file_name TEXT NOT NULL,
-    file_url TEXT NOT NULL
+    file_url TEXT NOT NULL,
+    file_content TEXT
 );
 ```
 

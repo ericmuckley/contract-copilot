@@ -106,3 +106,54 @@ Then I modified the chatbot so that the UI would reflect changes caused by teh t
 ```md
 great, and now i need to make sure that when this tool runs in my chatbot, the frontend automatically re-fetches the projects (and active project, if any) from the database so that the updated tasks change as soon as they've been modified, without the user having to manually refresh
 ```
+
+# Contracts architecture
+
+```md
+# Contracts Workflow Overview
+
+The application needs to have a built-in workflow for creating, analyzing, and modifying contracts. We will start with policy rules and example agreements. Then, the applicatino will use an LLM to draft new MSAs/SOWs that follow those rules. When a client sends their own draft, we can run a
+review that proposes only the material changes, showing exact before → after text with a one-line why. We can apply the selected changes to produce a new version and keep a simple timeline of versions and notes.
+
+## Contract capabilities
+
+Policy setup (do this first): Add Policy Rules and Example Agreements (MSA, SOW, NDA, etc).
+
+Then handle contracts in any order:
+
+- Create new agreement: Generate LLM-powered agreement from policies
+- Choose type (MSA or SOW) + counterparty
+- System feeds Policy Rules + Example Agreements to LLM
+- Save as Agreement v1
+- Review client draft: Upload/paste client's agreement → save as incoming v1 → run policy-based review
+- LLM returns material change proposals based on your policies
+- Each proposal shows exact before → after text + rationale
+- Apply selected changes to create new version
+- Validate against estimate: Link SOW to an estimate to check alignment
+- Agent validates against WBS (tasks, roles, hours) and quote (rates, totals, terms)
+- Returns discrepancies (e.g., missing WBS tasks, payment mismatch)
+- Version management: Add new versions and notes; view timeline of all changes.
+
+## Must-have screens
+
+- Policy management: List of policy rules and example agreements, add/edit/delete functionality.
+- Agreements list: Show all agreements with type (MSA/SOW/NDA), counterparty, current version number.
+- Agreement detail: Current agreement text, version selector/timeline on side, linked estimate indicator if applicable.
+- Review screen: Side-by-side view showing proposed changes with before/after text, checkboxes to accept/reject each change.
+
+## Nice-to-have (optional)
+
+- Redline/diff preview (as enhancement to Review screen)
+- DOCX/PDF generation (export feature from Agreement detail)
+- "Send for signature" mock/adapter (action from Agreement detail).
+
+## Goal
+
+Your job is to help architect the schema, models, and patterns needed for these capabilities. Specifically:
+
+- Determine which new database tables we need, and which fields in each table. Generate the SQL for creating those tables. Keep things as simple as you can. For example, make use of JSONB when it makes sense, rather than using lots of different tables. We are using Postgres for a db, with Vercel blob storage for file storage.
+- Make a plan for which main UI components we need, how they should interact, and which data will be shown on each.
+- Look at the existing app architecture, and determine whether we need any additional capabilities, like LLM patterns, file parsing, etc, or whether we can reuse capabilities we already have.
+- If we need specialized LLM prompts for any of these tasks, write out the Typescript functions that will generate those prompts and include the proper context in each prompt.
+- Generate a succinct, informative plan for implementing the changes, along with the amount of effort you estimate needed for each change.
+```
