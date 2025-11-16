@@ -88,8 +88,8 @@
 
 <div class="card">
 	<div class="mb-1 flex text-sm">
-		<a href="/projects" class="link">
-			<span>All Projects</span>
+		<a href="/" class="link">
+			<span>Dashboard</span>
 		</a>
 		<span class="muted mx-1">/</span>
 		<span>{data.project.project_name}</span>

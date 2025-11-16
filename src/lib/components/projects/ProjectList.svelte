@@ -19,14 +19,6 @@
 </script>
 
 <div class="space-y-4">
-	<div class="flex items-center justify-between">
-		<h2 class="text-2xl font-bold text-slate-800">Project Estimates</h2>
-		<a href="/projects/new" class="btn btn-primary">
-			<i class="bi bi-plus-lg"></i>
-			New Project
-		</a>
-	</div>
-
 	<div class="flex items-center space-x-3">
 		<label for="stage-filter" class="text-sm font-medium text-slate-700">Filter by stage:</label>
 		<select id="stage-filter" bind:value={stageFilter}>

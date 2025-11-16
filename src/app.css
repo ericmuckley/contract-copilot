@@ -12,19 +12,19 @@ p {
 	@apply text-slate-600;
 }
 h1 {
-	@apply mb-4 text-2xl font-bold;
+	@apply mb-4 text-4xl font-bold;
 }
 h2 {
-	@apply mb-3 text-xl font-semibold;
+	@apply mb-3 text-2xl font-semibold;
 }
 h3 {
-	@apply mb-2 text-lg font-semibold;
+	@apply mb-2 text-xl font-semibold;
 }
 button {
 	@apply cursor-pointer;
 }
 select {
-	@apply rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500;
+	@apply rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none;
 }
 
 .muted {

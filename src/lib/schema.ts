@@ -86,6 +86,7 @@ export interface Project {
 	project_name: string;
 	created_by: string;
 	sdata: StageData[];
+	artifacts?: Artifact[];
 }
 
 export interface StageData {
@@ -115,3 +116,17 @@ export const emptyProject: Project = {
 		tasks: stage.name === 'estimate' ? [] : null
 	}))
 };
+
+
+
+export interface Contract {
+    id?: number | string | null;
+    created_at?: string | null;
+    updated_at?: string | null;
+    contract_name: string;
+    party_a: string;
+    party_b: string;
+    effective_date: string;
+    expiration_date: string;
+    terms: string;
+}

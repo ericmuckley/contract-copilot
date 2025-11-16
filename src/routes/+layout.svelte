@@ -2,8 +2,14 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.ico';
 	import Navbar from '$lib/components/Navbar.svelte';
+	import { allProjects } from '$lib/stores';
 
-	let { children } = $props();
+	let { children, data } = $props();
+	
+	$effect(() => {
+		allProjects.set(data.projects);
+		console.log($allProjects)
+	});
 </script>
 
 <svelte:head>

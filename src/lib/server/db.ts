@@ -6,16 +6,51 @@ const sql = neon(DATABASE_URL);
 
 export async function listProjects(): Promise<Project[]> {
 	const result = await sql`
-		SELECT id, project_name, sdata, created_at, updated_at, created_by FROM "projects" ORDER BY updated_at DESC
+		SELECT 
+			p.id, 
+			p.project_name, 
+			p.sdata, 
+			p.created_at, 
+			p.updated_at, 
+			p.created_by,
+			a.id as artifact_id,
+			a.file_name,
+			a.file_url
+		FROM "projects" p
+		LEFT JOIN "artifacts" a ON p.id = a.project_id
+		ORDER BY p.updated_at DESC
 	`;
-	return result.map((row) => ({
-		id: row.id,
-		project_name: row.project_name,
-		sdata: row.sdata,
-		updated_at: row.updated_at,
-		created_at: row.created_at,
-		created_by: row.created_by
-	})) as Project[];
+
+	// Group artifacts by project
+	const projectsMap = new Map<number, Project>();
+	
+	for (const row of result) {
+		const projectId = row.id;
+		
+		if (!projectsMap.has(projectId)) {
+			projectsMap.set(projectId, {
+				id: row.id,
+				project_name: row.project_name,
+				sdata: row.sdata,
+				updated_at: row.updated_at,
+				created_at: row.created_at,
+				created_by: row.created_by,
+				artifacts: []
+			});
+		}
+		
+		// Add artifact if it exists
+		if (row.artifact_id) {
+			projectsMap.get(projectId)!.artifacts!.push({
+				id: row.artifact_id,
+				project_id: projectId,
+				file_name: row.file_name,
+				file_url: row.file_url
+			});
+		}
+	}
+	
+	return Array.from(projectsMap.values());
 }
 
 export async function getProject(id: number): Promise<Project | null> {

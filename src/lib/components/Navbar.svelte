@@ -34,20 +34,6 @@
 			ContractCopilot
 		</span>
 	</div>
-	<nav class="mb-2 flex flex-col space-y-1 px-2">
-		{#each links as link}
-			<a
-				href={link.href}
-				class="flex items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium {page.url
-					.pathname === link.href
-					? 'bg-slate-200'
-					: 'tex-slate-600 hover:bg-slate-100'}"
-			>
-				<i class={link.icon}></i>
-				<span>{link.label}</span>
-			</a>
-		{/each}
-	</nav>
 
 	<div class="mt-4 min-h-0 flex-1 border-t border-slate-100 pt-2" bind:this={expandTarget}>
 		<div class="flex h-full flex-col">
