@@ -15,6 +15,22 @@ For additional artifacts, please see the [./DELIVERABLES](DELIVERABLES) director
 
 ## Running locally
 
-1. **Set environment variables**: Copy the `.env.example` file, rename to `.env`, and populate with correct values.
-1. **Install dependencies**: `npm i`
-1. **Run local development server**: `npm run dev -- --open`
+### 1. Set environment variables
+
+Copy the `.env.example` file, rename to `.env`, and populate with values.
+
+### 2. Install dependencies
+
+```bash
+
+npm i
+
+```
+
+### 3. Run local development server
+
+```bash
+
+npm run dev -- --open
+
+```

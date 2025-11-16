@@ -8,7 +8,6 @@
 
 	$effect(() => {
 		allProjects.set(data.projects);
-		console.log($allProjects);
 	});
 </script>
 

@@ -77,127 +77,32 @@ Your task:
 - parse the tasks streamed text as json
 - save assumptions and tasks to the database using the existing PUT request to `/api/projects/${projectId}/effort-estimate` in the component.
 
-### Database
+# Text extraction from uploaded files
 
-From Google Gemini:
+Look how im uploading files to Vercel blob storage in my server.ts file. Now I need to be able to read the text content out of these files.
 
-```sql
--- Create a custom ENUM type for the fixed project stages [cite: 15]
-CREATE TYPE project_stage AS ENUM (
-    'Artifacts',
-    'BusinessCase',
-    'Requirements',
-    'SolutionArchitecture',
-    'EffortEstimate',
-    'Quote'
-);
+Build my `readFileContent` function in `readFileContent.ts`. The function should accept a filename as input. This is the filename that has been uploaded to Vercel blob storage. The function should return all the text content extracted from the file. It must must work for docx files, pdf files, txt, md, and json files. If you need to install additional libraries to do this, let me know and I will install them for you.
 
--- A simple User table for tracking "approvers" [cite: 29]
-CREATE TABLE "User" (
-    "id" SERIAL PRIMARY KEY,
-    "name" VARCHAR(255) NOT NULL,
-    "email" VARCHAR(255) UNIQUE NOT NULL
-);
+# LLM tools with write capability
 
--- The main Project table, which tracks the current stage [cite: 18, 26]
-CREATE TABLE "Project" (
-    "id" SERIAL PRIMARY KEY,
-    "name" VARCHAR(255) NOT NULL,
-    "current_stage" project_stage NOT NULL DEFAULT 'Artifacts',
-    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255)
-);
+This was my original prompt to start probing options for the architecture:
 
--- Stores file references (from Vercel Blob Storage) for each project [cite: 18]
-CREATE TABLE "Artifact" (
-    "id" SERIAL PRIMARY KEY,
-    "project_id" INTEGER NOT NULL REFERENCES "Project"("id") ON DELETE CASCADE,
-    "file_name" VARCHAR(255) NOT NULL,
-    "file_url" VARCHAR(1024) NOT NULL, -- This would be the Vercel Blob URL
-    "artifact_type" VARCHAR(100), -- e.g., 'transcript', 'notes', 'document' [cite: 18]
-    "approved_by" VARCHAR(255),
-    "uploaded_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+```md
+Look at my LLM tools in `bedrockTools.ts`. Currently, the existing tool uses a project ID to look up project details in a database.
 
--- Stores the content for the Business Case stage [cite: 19]
-CREATE TABLE "BusinessCase" (
-    "id" SERIAL PRIMARY KEY,
-    "project_id" INTEGER NOT NULL UNIQUE REFERENCES "Project"("id") ON DELETE CASCADE,
-    "content" TEXT, -- LLM-generated scope, outcomes, constraints [cite: 19]
-    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255)
-);
+Now I need a tool that can also write to the database. The tool should take as input the project ID and a request from the user. Likeiy, it would be to modify the projects tasks, which are stored as JSONB in Postgres. For example, if the user says "increase the backend effort by 10%", the agent would pull up the project, modify the projects tasks, and save the modified tasks to the database.
 
--- Stores the content for the Requirements stage [cite: 20]
-CREATE TABLE "Requirements" (
-    "id" SERIAL PRIMARY KEY,
-    "project_id" INTEGER NOT NULL UNIQUE REFERENCES "Project"("id") ON DELETE CASCADE,
-    "content" TEXT, -- LLM-generated requirements summary [cite: 20]
-    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255)
-);
+What would be your plan for implementing this? Its a little challenging because the user could ask to modify the project in many different ways, so there may need to be an LLM layer inside the tool that determines which part (database column) of the project to modify, and what the new value should be.
+```
 
--- Stores the content for the Solution/Architecture stage [cite: 21]
-CREATE TABLE "SolutionArchitecture" (
-    "id" SERIAL PRIMARY KEY,
-    "project_id" INTEGER NOT NULL UNIQUE REFERENCES "Project"("id") ON DELETE CASCADE,
-    "content" TEXT, -- Documented approach, tech stack, risks [cite: 21]
-    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255)
-);
+Then I simplified the scope here so it could be implemented quickly:
 
--- Stores the high-level effort estimate details [cite: 22]
-CREATE TABLE "EffortEstimate" (
-    "id" SERIAL PRIMARY KEY,
-    "project_id" INTEGER NOT NULL UNIQUE REFERENCES "Project"("id") ON DELETE CASCADE,
-    "assumptions" TEXT, -- WBS assumptions [cite: 22]
-    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255)
-);
+```md
+Ok, look at the project interfaces and my schema. The project has stage data. The last stage, the quote stage, contains a task array. I want you to build an LLM tool that takes as input the project ID and a request from the user about how to modify the tasks array in the project quote stage. An LLM in the tool should take the existing tasks array, modify it according to the user's request, then save it back to the project in the database. Let me know if you have questions or concerns about this.
+```
 
--- Stores individual line items (WBS) for an estimate [cite: 22]
-CREATE TABLE "EstimateTask" (
-    "id" SERIAL PRIMARY KEY,
-    "estimate_id" INTEGER NOT NULL REFERENCES "EffortEstimate"("id") ON DELETE CASCADE,
-    "task_description" TEXT NOT NULL,
-    "assigned_role" VARCHAR(255) NOT NULL, -- "Backend", "QA" [cite: 22, 72]
-    "hours" DECIMAL(10, 2) NOT NULL,
-    "approved_by" VARCHAR(255)
-);
+Then I modified the chatbot so that the UI would reflect changes caused by teh tool calling without a manual refresh:
 
--- Stores the final Quote details [cite: 24]
-CREATE TABLE "Quote" (
-    "id" SERIAL PRIMARY KEY,
-    "project_id" INTEGER NOT NULL UNIQUE REFERENCES "Project"("id") ON DELETE CASCADE,
-    "payment_terms" TEXT,
-    "timeline" TEXT,
-    "is_delivered" BOOLEAN NOT NULL DEFAULT FALSE,
-    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "approved_by" VARCHAR(255)
-);
-
--- Stores the rates applied to roles for a specific quote [cite: 24]
-CREATE TABLE "QuoteRate" (
-    "id" SERIAL PRIMARY KEY,
-    "quote_id" INTEGER NOT NULL REFERENCES "Quote"("id") ON DELETE CASCADE,
-    "role_name" VARCHAR(255) NOT NULL,
-    "rate_per_hour" DECIMAL(10, 2) NOT NULL,
-    UNIQUE("quote_id", "role_name") -- Ensures one rate per role per quote
-);
-
--- Tracks all stage transitions, approvals, and history [cite: 29]
-CREATE TABLE "ProjectHistory" (
-    "id" SERIAL PRIMARY KEY,
-    "project_id" INTEGER NOT NULL REFERENCES "Project"("id") ON DELETE CASCADE,
-    "stage" project_stage NOT NULL,
-    "user_id" INTEGER REFERENCES "User"("id"), -- The "approver" [cite: 29]
-    "action" VARCHAR(255) NOT NULL, -- e.g., 'Approved', 'Advanced', 'Artifact Uploaded'
-    "timestamp" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+```md
+great, and now i need to make sure that when this tool runs in my chatbot, the frontend automatically re-fetches the projects (and active project, if any) from the database so that the updated tasks change as soon as they've been modified, without the user having to manually refresh
 ```

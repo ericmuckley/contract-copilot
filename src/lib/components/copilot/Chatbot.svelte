@@ -12,6 +12,7 @@
 		executeToolCalls
 	} from './chatbotUtils';
 	import { activeProjectId, chatMessages } from '$lib/stores';
+	import { invalidate } from '$app/navigation';
 
 	let messages: Message[] = $state([]);
 	let chatInputValue = $state('');
@@ -99,6 +100,9 @@
 				if (state.toolUses.size > 0) {
 					const toolResults = await executeToolCalls(state.toolUses);
 					toolCallsInProgress = [];
+
+					// Refresh project data after tool execution (in case data was modified)
+					await invalidate('project:data');
 
 					// Add tool results as a user message (required by Bedrock API)
 					if (toolResults.length > 0) {

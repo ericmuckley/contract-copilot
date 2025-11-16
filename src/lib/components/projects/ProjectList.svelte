@@ -16,10 +16,41 @@
 					return STAGES[stageIdx].name === stageFilter;
 				})
 	);
+
+	const lastUpdated = $derived(() => {
+		let latestDate: Date | null = null;
+
+		for (const project of projects) {
+			for (const stage of project.sdata) {
+				if (stage.updated_at) {
+					const date = new Date(stage.updated_at);
+					if (!latestDate || date > latestDate) {
+						latestDate = date;
+					}
+				}
+			}
+		}
+
+		return latestDate;
+	});
 </script>
 
-<div class="space-y-4">
-	<div class="flex items-center space-x-3">
+<div>
+	{#if lastUpdated()}
+		<div class="mb-6 text-sm text-slate-600">
+			<span class="font-medium">Last project update:</span>
+			{lastUpdated()?.toLocaleString('en-US', {
+				month: 'short',
+				day: 'numeric',
+				year: 'numeric',
+				hour: 'numeric',
+				minute: '2-digit',
+				hour12: true
+			})}
+		</div>
+	{/if}
+
+	<div class="mb-6 flex items-center space-x-3">
 		<label for="stage-filter" class="text-sm font-medium text-slate-700">Filter by stage:</label>
 		<select id="stage-filter" bind:value={stageFilter}>
 			{#each [{ name: 'all', label: 'All' }, ...STAGES] as stage (stage.name)}

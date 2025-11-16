@@ -10,6 +10,7 @@
 	import { STAGES, type Artifact } from '$lib/schema';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { activeProjectId } from '$lib/stores.js';
+	import { invalidate } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -22,8 +23,8 @@
 	let stageIdx = $derived(data.project.sdata.filter((s) => s.approved).length);
 
 	async function refreshData() {
-		// Reload the page data
-		window.location.reload();
+		// Use SvelteKit's invalidate for smoother reload
+		await invalidate('project:data');
 	}
 
 	async function advanceStage() {
@@ -98,9 +99,18 @@
 		<span>{data.project.project_name}</span>
 	</div>
 
-	<h1 class="mb-0 text-5xl!">{data.project.project_name}</h1>
+	<div class="flex items-center justify-between">
+		<h1 class="mb-0 text-5xl!">{data.project.project_name}</h1>
 
-	<div class="flex justify-between">
+		{#if data.project.sdata[stageIdx]?.name === 'quote'}
+			<div class="rounded-full bg-green-200 px-4 py-2 font-bold text-green-800">
+				<i class="bi bi-check-circle-fill mr-1"></i>
+				Complete
+			</div>
+		{/if}
+	</div>
+
+	<div class="mt-4 flex justify-between">
 		<div class="w-56 space-y-1">
 			<p>
 				Created by {data.project.created_by}
@@ -211,5 +221,12 @@
 			<div class="font-bold text-green-600">Project Complete!</div>
 		</div>
 		<p class="mt-4 text-center">Your quote is ready to be delivered to the client.</p>
+	{/if}
+
+	<!-- TODO: remove for production -->
+	{#if 1}
+		<div class="max-w-[500px] overflow-x-auto">
+			<pre class="text-xs">{JSON.stringify(data.project.sdata, null, 2)}</pre>
+		</div>
 	{/if}
 </div>

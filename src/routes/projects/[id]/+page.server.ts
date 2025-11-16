@@ -2,7 +2,10 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getProject, getProjectArtifacts } from '$lib/server/db';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, depends }) => {
+	// Register dependency for invalidation
+	depends('project:data');
+
 	const projectId = parseInt(params.id);
 
 	if (isNaN(projectId)) {

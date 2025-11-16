@@ -80,7 +80,7 @@
 					multiple
 					onchange={handleFileUpload}
 					disabled={isUploading}
-					accept=".pdf,.doc,.docx,.txt,.md"
+					accept=".pdf,.docx,.txt,.md,.json"
 					class="hidden"
 				/>
 			</div>

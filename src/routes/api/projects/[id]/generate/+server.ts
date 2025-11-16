@@ -4,6 +4,7 @@ import type { Message } from '@aws-sdk/client-bedrock-runtime';
 import { streamInference } from '$lib/server/bedrockClient';
 import { getProject, getProjectArtifacts } from '$lib/server/db';
 import { STAGES, PROJECT_PERSONNEL_RATES } from '$lib/schema';
+import { readFileContent } from '$lib/server/readFileContent';
 
 // POST /api/projects/[id]/generate - Generate content for a stage using LLM
 export async function POST({ params, request }: RequestEvent) {
@@ -106,13 +107,12 @@ async function buildContextForStage(project: any, stageName: string): Promise<st
 	// Always include artifacts
 	const artifacts = await getProjectArtifacts(project.id);
 	if (artifacts.length > 0) {
-		parts.push('### Uploaded Artifacts:');
-		artifacts.forEach((artifact) => {
-			parts.push(`- ${artifact.file_name}`);
-		});
-		parts.push(
-			'\nNote: The actual content of these artifacts would be analyzed, but for this generation we will work with the context provided.'
-		);
+		parts.push('# Uploaded Artifacts\n\n');
+		for (const artifact of artifacts) {
+			parts.push(`## ${artifact.file_name} Content\n\n`);
+			const artifactText = await readFileContent(artifact.file_url);
+			parts.push(artifactText + '\n\n\n\n');
+		}
 	}
 
 	// Find the stage index
@@ -128,6 +128,7 @@ async function buildContextForStage(project: any, stageName: string): Promise<st
 		}
 	}
 
+	console.log(parts);
 	return parts.join('\n');
 }
 
@@ -140,8 +141,9 @@ function generatePromptForStage(
 	switch (stageName) {
 		case 'business_case':
 			return `You are analyzing the project "${projectName}" to create a comprehensive business case.
-
+<CONTEXT>
 ${context}
+</CONTEXT>
 
 Based on the artifacts and context provided, generate a detailed business case that includes:
 
@@ -156,7 +158,11 @@ Format your response in clear sections with markdown formatting.`;
 		case 'requirements':
 			return `You are analyzing the project "${projectName}" to create a detailed requirements summary.
 
+		
+<CONTEXT>
 ${context}
+</CONTEXT>
+
 
 Based on the artifacts and business case, generate a comprehensive requirements summary that includes:
 
@@ -171,7 +177,10 @@ Format your response in clear sections with markdown formatting.`;
 		case 'architecture':
 			return `You are designing the solution architecture for project "${projectName}".
 
+<CONTEXT>
 ${context}
+</CONTEXT>
+
 
 Based on all the information provided, create a detailed solution/architecture document that includes:
 
@@ -189,7 +198,10 @@ Format your response in clear sections with markdown formatting.`;
 			if (type === 'assumptions') {
 				return `You are creating key assumptions for an effort estimate (Work Breakdown Structure) for project "${projectName}".
 
+<CONTEXT>
 ${context}
+</CONTEXT>
+
 
 Based on all the information provided, create a detailed list of assumptions that underlie the effort estimate. These assumptions should include:
 
@@ -207,7 +219,10 @@ Format your response in clear markdown with bullet points or numbered lists. Be 
 			} else if (type === 'tasks') {
 				return `You are creating a detailed Work Breakdown Structure (WBS) for project "${projectName}".
 
+<CONTEXT>
 ${context}
+</CONTEXT>
+
 
 Based on all the information provided, create a detailed list of tasks in JSON format.
 
@@ -225,37 +240,8 @@ Return ONLY a JSON array with no additional text or markdown formatting:
   }
 ]
 
-Be thorough and include all phases of work: planning, design, development, testing, deployment, and project management, but create a maximum of 20 separate tasks.`;
-			} else {
-				// Backward compatibility: if no type specified, generate combined output
-				return `You are creating a detailed effort estimate (Work Breakdown Structure) for project "${projectName}".
-
-${context}
-
-Based on all the information provided, create a detailed effort estimate that includes:
-
-1. **Assumptions**: Key assumptions underlying this estimate
-2. **Work Breakdown Structure**: A detailed list of tasks
-
-For the WBS, format it as a JSON array where each task has:
-- description: Clear description of the task
-- role: Role responsible (e.g., "Backend Developer", "Frontend Developer", "QA Engineer", "DevOps", "Project Manager")
-- hours: Estimated hours for the task
-
-After the assumptions section, provide the tasks in this JSON format:
-\`\`\`json
-[
-  {
-    "description": "Task description here",
-    "role": "Role name",
-    "hours": 8
-  }
-]
-\`\`\`
-
-Be thorough and include all phases of work: planning, design, development, testing, deployment, and project management, but create a maximum of 20 separate tasks.`;
+Be thorough and include all phases of work: planning, design, development, testing, deployment, and project management, but create a maximum of 16 separate tasks.`;
 			}
-
 		default:
 			return `Generate content for the ${stageName} stage of project "${projectName}".\n\n${context}`;
 	}

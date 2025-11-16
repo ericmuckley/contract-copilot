@@ -22,14 +22,25 @@
 	class="card block border border-slate-200 bg-white transition-shadow hover:shadow-lg"
 >
 	<div class="mb-3 flex items-start justify-between">
-		<h3 class="text-xl font-semibold text-slate-800">{project.project_name}</h3>
-		<span
-			class="rounded-full px-3 py-1 text-xs font-semibold {STAGES[stageIdx].bgcolor} {STAGES[
-				stageIdx
-			].textcolor}"
-		>
-			{STAGES[stageIdx].label}
-		</span>
+		<h3 class="text-xl font-semibold text-slate-800">
+			{project.project_name}
+
+			{#if project.sdata[stageIdx]?.name === 'quote'}
+				<span class="text-green-600">
+					<i class="bi bi-check-circle-fill"></i>
+				</span>
+			{/if}
+		</h3>
+
+		<div>
+			<span
+				class="rounded-full px-3 py-1 text-xs font-semibold {STAGES[stageIdx].bgcolor} {STAGES[
+					stageIdx
+				].textcolor}"
+			>
+				{STAGES[stageIdx].label}
+			</span>
+		</div>
 	</div>
 	<div class="flex items-center justify-between space-x-6 text-xs text-slate-500">
 		<span>Created: {formatDate(project.created_at as string)}</span>

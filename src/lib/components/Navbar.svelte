@@ -1,8 +1,7 @@
 <script lang="ts">
 	import Chatbot from './copilot/Chatbot.svelte';
 
-	// TODO: make closed by default
-	let isExpanded = $state(true);
+	let isExpanded = $state(false);
 	let expandTarget: HTMLElement | null = null;
 
 	function handleMouseDown(e: MouseEvent) {
@@ -18,7 +17,7 @@
 
 <aside
 	bind:this={expandTarget}
-	class="sticky top-0 right-0 {isExpanded
+	class="sticky top-0 right-0 border-r border-slate-200 shadow-lg {isExpanded
 		? 'w-full bg-white md:w-[500px]'
 		: 'w-12 cursor-pointer bg-white hover:bg-sky-200'} z-10 flex h-screen flex-col transition-all duration-300"
 >
