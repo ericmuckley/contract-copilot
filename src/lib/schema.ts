@@ -117,6 +117,7 @@ export const emptyProject: Project = {
 	}))
 };
 
+// Legacy contract interface (deprecated - kept for backward compatibility)
 export interface Contract {
 	id?: number | string | null;
 	created_at?: string | null;
@@ -127,4 +128,85 @@ export interface Contract {
 	effective_date: string;
 	expiration_date: string;
 	terms: string;
+}
+
+// New Contracts Workflow Interfaces
+
+export interface Policy {
+	id?: number | null;
+	policy_type: 'rule' | 'example';
+	agreement_type?: string | null; // 'MSA', 'SOW', 'NDA', etc. (for examples only)
+	title: string;
+	content: string;
+	metadata?: Record<string, unknown>;
+	created_at?: string | null;
+	updated_at?: string | null;
+}
+
+export interface Agreement {
+	id?: number | null;
+	agreement_type: string; // 'MSA', 'SOW', 'NDA', etc.
+	title: string;
+	counterparty: string;
+	linked_project_id?: number | null;
+	current_version_number?: number;
+	status?: 'draft' | 'in_review' | 'approved' | 'signed' | 'archived';
+	metadata?: Record<string, unknown>;
+	created_at?: string | null;
+	updated_at?: string | null;
+	// Included from joins
+	versions?: AgreementVersion[];
+	current_version?: AgreementVersion;
+}
+
+export interface AgreementVersion {
+	id?: number | null;
+	agreement_id: number;
+	version_number: number;
+	content: string;
+	notes?: string | null;
+	created_by?: string | null;
+	changes_summary?: ChangesSummary | null;
+	created_at?: string | null;
+}
+
+export interface ChangesSummary {
+	added?: number;
+	removed?: number;
+	modified?: number;
+	sections_changed?: string[];
+}
+
+export interface AgreementReview {
+	id?: number | null;
+	agreement_id: number;
+	source_version_number: number;
+	review_type: 'policy_review' | 'estimate_validation' | 'manual';
+	proposed_changes: ProposedChange[];
+	applied_changes?: number[]; // IDs of changes that were applied
+	notes?: string | null;
+	created_at?: string | null;
+}
+
+export interface ProposedChange {
+	id?: number; // Local ID for tracking which changes were applied
+	section: string;
+	before: string;
+	after: string;
+	rationale: string;
+	applied?: boolean;
+}
+
+export interface EstimateValidationResult {
+	discrepancies: Discrepancy[];
+	alignment_score: number; // 0-100
+	summary: string;
+}
+
+export interface Discrepancy {
+	category: 'scope' | 'cost' | 'timeline' | 'deliverables';
+	severity: 'low' | 'medium' | 'high';
+	description: string;
+	sow_reference?: string;
+	estimate_reference?: string;
 }
