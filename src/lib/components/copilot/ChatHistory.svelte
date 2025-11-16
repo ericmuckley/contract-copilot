@@ -75,7 +75,9 @@
 					<div class="message flex justify-end">
 						<div class="max-w-[80%] rounded-xl bg-sky-100 px-4 py-2 text-sm">
 							<div class="font-semibold text-sky-800">🔧 Tool Result</div>
-							<div class="mt-1 text-gray-700">{result.content}</div>
+							<div class="mt-1 max-h-32 overflow-x-auto overflow-y-auto text-slate-600">
+								{result.content}
+							</div>
 						</div>
 					</div>
 				{/each}
@@ -105,7 +107,7 @@
 									<p class="font-semibold">
 										{cleanString(tool.name)}
 									</p>
-									<div class="mt-1 text-xs text-gray-600">
+									<div class="mt-1 max-h-32 overflow-x-auto overflow-y-auto text-xs text-gray-600">
 										Input: {JSON.stringify(tool.input)}
 									</div>
 								</div>
@@ -131,12 +133,16 @@
 								<p class="font-semibold">
 									{cleanString(toolName)}
 								</p>
-								<Ping />
+								<div class="my-2 flex justify-center">
+									<Ping />
+								</div>
 							</div>
 						{/each}
 					</div>
 				{:else}
-					<Ping />
+					<div class="my-2 justify-center">
+						<Ping />
+					</div>
 				{/if}
 			</div>
 		</div>

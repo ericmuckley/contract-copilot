@@ -4,4 +4,5 @@ export interface LLMInferencePayload {
 	messages: Message[];
 	systemMessages?: { text: string }[];
 	useTools?: boolean;
+	activeProjectId?: number | null;
 }

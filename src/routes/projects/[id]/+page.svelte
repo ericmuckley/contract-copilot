@@ -9,8 +9,11 @@
 	import ApproverNameInput from '$lib/components/ApproverNameInput.svelte';
 	import { STAGES, type Artifact } from '$lib/schema';
 	import Spinner from '$lib/components/Spinner.svelte';
+	import { activeProjectId } from '$lib/stores.js';
 
 	let { data } = $props();
+
+	activeProjectId.set(data?.project?.id ? Number(data.project.id) : null);
 
 	let isAdvancing = $state(false);
 	let advanceError = $state('');

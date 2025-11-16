@@ -55,18 +55,46 @@ export async function listProjects(): Promise<Project[]> {
 
 export async function getProject(id: number): Promise<Project | null> {
 	const result = await sql`
-		SELECT id, project_name, created_by, sdata, created_at, updated_at FROM "projects" WHERE id = ${id}
+		SELECT 
+			p.id, 
+			p.project_name, 
+			p.created_by, 
+			p.sdata, 
+			p.created_at, 
+			p.updated_at,
+			a.id as artifact_id,
+			a.file_name,
+			a.file_url
+		FROM "projects" p
+		LEFT JOIN "artifacts" a ON p.id = a.project_id
+		WHERE p.id = ${id}
 	`;
 	if (result.length === 0) return null;
+
 	const row = result[0];
-	return {
+	const project: Project = {
 		id: row.id,
 		project_name: row.project_name,
 		created_by: row.created_by,
 		sdata: row.sdata,
 		created_at: row.created_at,
-		updated_at: row.updated_at
-	} as Project;
+		updated_at: row.updated_at,
+		artifacts: []
+	};
+
+	// Add all artifacts
+	for (const row of result) {
+		if (row.artifact_id) {
+			project.artifacts!.push({
+				id: row.artifact_id,
+				project_id: row.id,
+				file_name: row.file_name,
+				file_url: row.file_url
+			});
+		}
+	}
+
+	return project;
 }
 
 export async function getProjectArtifacts(project_id: number): Promise<Artifact[]> {

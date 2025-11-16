@@ -2,7 +2,7 @@
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
 body {
-	@apply bg-slate-700;
+	@apply bg-slate-200;
 }
 
 h1,
