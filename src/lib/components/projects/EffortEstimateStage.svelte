@@ -3,7 +3,7 @@
 	import type { ProjectTask } from '$lib/schema';
 	import Spinner from '../Spinner.svelte';
 	import { safeJsonParse } from '$lib/utils';
-	import LLMOutput from '../LLMOutput.svelte';
+	import LLMOutput from '$lib/components/copilot/LLMOutput.svelte';
 	import { PROJECT_PERSONNEL_RATES } from '$lib/schema';
 
 	let {

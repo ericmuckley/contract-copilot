@@ -76,3 +76,7 @@ select {
 .boilerplate h3 {
 	@apply mb-4 text-lg;
 }
+
+.text-gradient {
+	@apply bg-linear-to-r from-sky-500 via-purple-500 to-pink-500 bg-clip-text text-transparent;
+}

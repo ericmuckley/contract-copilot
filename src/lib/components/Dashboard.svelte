@@ -10,18 +10,17 @@
 
 <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 	<div class="card">
-
 		<div class="mb-8">
-			<ProjectListHeading projects={projects} />
+			<ProjectListHeading {projects} />
 		</div>
-		
+
 		<ProjectList {projects} />
 	</div>
 	<div class="card">
 		<div class="mb-8">
 			<ContractListHeading contracts={[]} />
 		</div>
-		
+
 		<p>Coming soon</p>
 	</div>
 </div>

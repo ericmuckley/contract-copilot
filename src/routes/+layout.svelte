@@ -5,10 +5,10 @@
 	import { allProjects } from '$lib/stores';
 
 	let { children, data } = $props();
-	
+
 	$effect(() => {
 		allProjects.set(data.projects);
-		console.log($allProjects)
+		console.log($allProjects);
 	});
 </script>
 
@@ -17,8 +17,8 @@
 </svelte:head>
 
 <div class="flex min-h-screen">
-	<Navbar />
 	<main class="flex-1 px-6 py-6">
 		{@render children()}
 	</main>
+	<Navbar />
 </div>

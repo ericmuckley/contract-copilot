@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
-	import LLMOutput from '../LLMOutput.svelte';
+	import LLMOutput from '$lib/components/copilot/LLMOutput.svelte';
 	import Spinner from '../Spinner.svelte';
 	import { STAGES } from '$lib/schema';
 

@@ -23,10 +23,10 @@ export async function listProjects(): Promise<Project[]> {
 
 	// Group artifacts by project
 	const projectsMap = new Map<number, Project>();
-	
+
 	for (const row of result) {
 		const projectId = row.id;
-		
+
 		if (!projectsMap.has(projectId)) {
 			projectsMap.set(projectId, {
 				id: row.id,
@@ -38,7 +38,7 @@ export async function listProjects(): Promise<Project[]> {
 				artifacts: []
 			});
 		}
-		
+
 		// Add artifact if it exists
 		if (row.artifact_id) {
 			projectsMap.get(projectId)!.artifacts!.push({
@@ -49,7 +49,7 @@ export async function listProjects(): Promise<Project[]> {
 			});
 		}
 	}
-	
+
 	return Array.from(projectsMap.values());
 }
 

@@ -88,7 +88,6 @@ Then add final rows at the bottom for total project cost and project timeline, b
 
 Finally, let the user copy or download the take cata to a CSV file.
 
-
 # Adding project modifications to the copilot
 
 # Purpose

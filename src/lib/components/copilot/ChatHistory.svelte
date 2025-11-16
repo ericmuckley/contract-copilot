@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Message, ContentBlock } from '@aws-sdk/client-bedrock-runtime';
 	import LLMOutput from './LLMOutput.svelte';
-	import Ping from './Ping.svelte';
+	import Ping from '../Ping.svelte';
 	import { cleanString } from '$lib/utils';
 
 	let {
