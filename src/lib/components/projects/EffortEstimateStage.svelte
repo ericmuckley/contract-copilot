@@ -264,10 +264,7 @@
 			</div>
 
 			<div class="flex space-x-2">
-				<button
-					onclick={startEditing}
-					class="btn flex w-full justify-center space-x-1 bg-slate-500 text-white hover:bg-slate-600"
-				>
+				<button onclick={startEditing} class="btn btn-outline flex w-full justify-center space-x-1">
 					<i class="bi bi-pencil mr-2"></i>
 					<span>Edit</span>
 				</button>

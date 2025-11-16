@@ -58,6 +58,7 @@
 		} catch (err) {
 			advanceError = err instanceof Error ? err.message : 'Failed to advance';
 		}
+		isAdvancing = false;
 	}
 
 	const canAdvance = $derived(() => {
@@ -91,11 +92,11 @@
 </script>
 
 <div class="card">
-	<div class="mb-1 flex text-sm">
+	<div class="mb-1 flex text-sm text-slate-600">
 		<a href="/" class="link">
 			<span>Dashboard</span>
 		</a>
-		<span class="muted mx-1">/</span>
+		<span class="mx-1">/</span>
 		<span>{data.project.project_name}</span>
 	</div>
 
@@ -224,7 +225,7 @@
 	{/if}
 
 	<!-- TODO: remove for production -->
-	{#if 1}
+	{#if 0}
 		<div class="max-w-[500px] overflow-x-auto">
 			<pre class="text-xs">{JSON.stringify(data.project.sdata, null, 2)}</pre>
 		</div>

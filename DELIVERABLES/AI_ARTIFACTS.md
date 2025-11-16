@@ -107,12 +107,9 @@ Then I modified the chatbot so that the UI would reflect changes caused by teh t
 great, and now i need to make sure that when this tool runs in my chatbot, the frontend automatically re-fetches the projects (and active project, if any) from the database so that the updated tasks change as soon as they've been modified, without the user having to manually refresh
 ```
 
-
 # Contracts architecture
 
-
 ```md
-
 # Contracts Workflow Overview
 
 The application needs to have a built-in workflow for creating, analyzing, and modifying contracts. We will start with policy rules and example agreements. Then, the applicatino will use an LLM to draft new MSAs/SOWs that follow those rules. When a client sends their own draft, we can run a
@@ -137,7 +134,6 @@ Then handle contracts in any order:
 - Returns discrepancies (e.g., missing WBS tasks, payment mismatch)
 - Version management: Add new versions and notes; view timeline of all changes.
 
-
 ## Must-have screens
 
 - Policy management: List of policy rules and example agreements, add/edit/delete functionality.
@@ -160,6 +156,4 @@ Your job is to help architect the schema, models, and patterns needed for these 
 - Look at the existing app architecture, and determine whether we need any additional capabilities, like LLM patterns, file parsing, etc, or whether we can reuse capabilities we already have.
 - If we need specialized LLM prompts for any of these tasks, write out the Typescript functions that will generate those prompts and include the proper context in each prompt.
 - Generate a succinct, informative plan for implementing the changes, along with the amount of effort you estimate needed for each change.
-
 ```
-

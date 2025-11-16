@@ -151,7 +151,7 @@
 				<button
 					onclick={regenerateQuote}
 					disabled={isGenerating}
-					class="btn flex space-x-1 bg-slate-500 whitespace-nowrap text-white hover:bg-slate-600"
+					class="btn btn-outline flex space-x-1 whitespace-nowrap"
 				>
 					<i class="bi bi-arrow-clockwise mr-2"></i>
 					<span>Regenerate</span>

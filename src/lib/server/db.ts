@@ -97,17 +97,31 @@ export async function getProject(id: number): Promise<Project | null> {
 	return project;
 }
 
-export async function getProjectArtifacts(project_id: number): Promise<Artifact[]> {
-	const result = await sql`
-		SELECT id, project_id, file_name, file_url FROM "artifacts" WHERE project_id = ${project_id}
-	`;
+export async function getProjectArtifacts(
+	project_id: number | null | undefined
+): Promise<Artifact[]> {
+	let result;
+
+	if (project_id === null || project_id === undefined) {
+		// Get artifacts without a project_id (orphaned artifacts)
+		result = await sql`
+			SELECT id, project_id, file_name, file_url, file_content FROM "artifacts" WHERE project_id IS NULL
+		`;
+	} else {
+		// Get artifacts for a specific project
+		result = await sql`
+			SELECT id, project_id, file_name, file_url, file_content FROM "artifacts" WHERE project_id = ${project_id}
+		`;
+	}
+
 	return result.map(
 		(row) =>
 			({
 				id: row.id,
 				project_id: row.project_id,
 				file_name: row.file_name,
-				file_url: row.file_url
+				file_url: row.file_url,
+				file_content: row.file_content
 			}) as Artifact
 	);
 }
@@ -176,22 +190,38 @@ export async function deleteProject(id: number): Promise<boolean> {
 
 export async function createArtifact(artifact: Omit<Artifact, 'id'>): Promise<Artifact> {
 	const result = await sql`
-		INSERT INTO "artifacts" (project_id, file_name, file_url)
-		VALUES (${artifact.project_id}, ${artifact.file_name}, ${artifact.file_url})
-		RETURNING id, project_id, file_name, file_url
+		INSERT INTO "artifacts" (project_id, file_name, file_url, file_content)
+		VALUES (${artifact.project_id}, ${artifact.file_name}, ${artifact.file_url}, ${artifact.file_content || null})
+		RETURNING id, project_id, file_name, file_url, file_content
 	`;
 	const row = result[0];
 	return {
 		id: row.id,
 		project_id: row.project_id,
 		file_name: row.file_name,
-		file_url: row.file_url
+		file_url: row.file_url,
+		file_content: row.file_content
 	} as Artifact;
 }
 
-export async function deleteArtifact(id: number): Promise<boolean> {
+export async function updateArtifact(
+	id: number,
+	updates: { file_content?: string }
+): Promise<Artifact | null> {
 	const result = await sql`
+		UPDATE "artifacts"
+		SET file_content = ${updates.file_content}
+		WHERE id = ${id}
+		RETURNING id, project_id, file_name, file_url, file_content
+	`;
+	if (result.length === 0) return null;
+	return result[0] as Artifact;
+}
+
+export async function deleteArtifact(id: number): Promise<boolean> {
+	await sql`
 		DELETE FROM "artifacts" WHERE id = ${id}
 	`;
-	return result.length > 0;
+	// If no error is thrown, the deletion succeeded
+	return true;
 }

@@ -7,8 +7,12 @@
 
 	function autoExpandTextarea(event: Event) {
 		const textarea = event.target as HTMLTextAreaElement;
-		textarea.style.height = 'auto';
-		textarea.style.height = textarea.scrollHeight + 'px';
+		const currentHeight = textarea.offsetHeight;
+		// Temporarily shrink to get true scrollHeight
+		textarea.style.height = '0px';
+		const newHeight = textarea.scrollHeight;
+		// Set to the larger of current or new height to prevent visual shrinking
+		textarea.style.height = Math.max(currentHeight, newHeight) + 'px';
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -25,5 +29,6 @@
 	oninput={autoExpandTextarea}
 	onkeydown={handleKeyDown}
 	placeholder="Type your message..."
-	class="placeholder-muted max-h-48 w-full resize-none overflow-y-auto rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm transition-colors focus:border-sky-400 focus:outline-none"
+	rows="1"
+	class="text-input max-h-48 resize-none overflow-y-auto"
 ></textarea>
