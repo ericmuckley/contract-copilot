@@ -84,3 +84,9 @@ Look how im uploading files to Vercel blob storage in my server.ts file. Now I n
 Build my `readFileContent` function in `readFileContent.ts`. The function should accept a filename as input. This is the filename that has been uploaded to Vercel blob storage. The function should return all the text content extracted from the file. It must must work for docx files, pdf files, txt, md, and json files. If you need to install additional libraries to do this, let me know and I will install them for you.
 
 # LLM tools with write capability
+
+Look at my LLM tools in `bedrockTools.ts`. Currently, the existing tool uses a project ID to look up project details in a database.
+
+Now I need a tool that can also write to the database. The tool should take as input the project ID and a request from the user. Likeiy, it would be to modify the projects tasks, which are stored as JSONB in Postgres. For example, if the user says "increase the backend effort by 10%", the agent would pull up the project, modify the projects tasks, and save the modified tasks to the database.
+
+What would be your plan for implementing this? Its a little challenging because the user could ask to modify the project in many different ways, so there may need to be an LLM layer inside the tool that determines which part (database column) of the project to modify, and what the new value should be. 
