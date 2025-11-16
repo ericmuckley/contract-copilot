@@ -99,9 +99,18 @@
 		<span>{data.project.project_name}</span>
 	</div>
 
-	<h1 class="mb-0 text-5xl!">{data.project.project_name}</h1>
+	<div class="flex items-center justify-between">
+		<h1 class="mb-0 text-5xl!">{data.project.project_name}</h1>
 
-	<div class="flex justify-between">
+		{#if data.project.sdata[stageIdx]?.name === 'quote'}
+			<div class="rounded-full bg-green-200 px-4 py-2 font-bold text-green-800">
+				<i class="bi bi-check-circle-fill mr-1"></i>
+				Complete
+			</div>
+		{/if}
+	</div>
+
+	<div class="mt-4 flex justify-between">
 		<div class="w-56 space-y-1">
 			<p>
 				Created by {data.project.created_by}
