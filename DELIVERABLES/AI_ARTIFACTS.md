@@ -98,7 +98,7 @@ What would be your plan for implementing this? Its a little challenging because 
 Then I simplified the scope here so it could be implemented quickly:
 
 ```md
-Ok, look at the project interfaces and my schema. The project has stage data. The last stage, the quote stage, contains a task array.  I want you to build an LLM tool that takes as input the project ID and a request from the user about how to modify the tasks array in the project quote stage. An LLM in the tool should take the existing tasks array, modify it according to the user's request, then save it back to the project in the database. Let me know if you have questions or concerns about this.
+Ok, look at the project interfaces and my schema. The project has stage data. The last stage, the quote stage, contains a task array. I want you to build an LLM tool that takes as input the project ID and a request from the user about how to modify the tasks array in the project quote stage. An LLM in the tool should take the existing tasks array, modify it according to the user's request, then save it back to the project in the database. Let me know if you have questions or concerns about this.
 ```
 
 Then I modified the chatbot so that the UI would reflect changes caused by teh tool calling without a manual refresh:
