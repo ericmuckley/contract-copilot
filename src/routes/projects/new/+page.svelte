@@ -1,46 +1,30 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import ApproverNameInput from '$lib/components/ApproverNameInput.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
+	import { emptyProject, type Project } from '$lib/schema';
 
-	let projectName = $state('');
-	let approverName = $state('');
+	let project = $state<Project>(emptyProject);
 	let isCreating = $state(false);
 	let error = $state('');
 
-	async function handleSubmit(e: Event) {
-		e.preventDefault();
-
-		if (!projectName.trim()) {
-			error = 'Project name is required';
-			return;
-		}
-
-		if (!approverName.trim()) {
-			error = 'Your name is required';
-			return;
-		}
-
+	async function handleSubmit() {
+		console.log($state.snapshot(project));
 		isCreating = true;
-		error = '';
 
 		try {
-			// Create project
-			const createResponse = await fetch('/api/projects', {
+			const response = await fetch('/api/projects', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name: projectName.trim(), approved_by: approverName.trim() })
+				body: JSON.stringify(project)
 			});
 
-			if (!createResponse.ok) {
-				throw new Error('Failed to create project');
+			if (response.ok) {
+				const { project } = await response.json();
+				goto(`/projects/${project.id}`);
 			}
-
-			const { project } = await createResponse.json();
-
-			// Redirect to project detail page
-			goto(`/projects/${project.id}`);
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'An error occurred';
+			alert(err);
 			isCreating = false;
 		}
 	}
@@ -54,10 +38,10 @@
 		</a>
 	</div>
 
-	<div>
+	<div class="card bg-white">
 		<h1 class="mb-6">Create New Project</h1>
 
-		<form onsubmit={handleSubmit} class="space-y-6">
+		<div class="space-y-6">
 			<div>
 				<label for="project-name" class="mb-1 block text-sm text-slate-600">
 					Project Name <span class="text-red-500">*</span>
@@ -65,7 +49,7 @@
 				<input
 					id="project-name"
 					type="text"
-					bind:value={projectName}
+					bind:value={project.project_name}
 					disabled={isCreating}
 					placeholder="Enter project name"
 					class="text-input"
@@ -74,7 +58,7 @@
 
 			<div>
 				<ApproverNameInput
-					bind:value={approverName}
+					bind:value={project.created_by}
 					disabled={isCreating}
 					placeholder="Enter your name"
 				/>
@@ -87,29 +71,31 @@
 				</div>
 			{/if}
 
-			<div class="flex space-x-4">
-				<button
-					type="submit"
-					disabled={isCreating}
-					class="btn btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
-				>
-					{#if isCreating}
-						<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
-						Creating...
-					{:else}
+			{#if isCreating}
+				<div class="flex justify-center py-2">
+					<Spinner />
+				</div>
+			{:else}
+				<div class="flex space-x-4">
+					<button
+						disabled={project.project_name.trim().length < 1 ||
+							project.created_by.trim().length < 1}
+						class="btn btn-primary flex-1"
+						onclick={handleSubmit}
+					>
 						<i class="bi bi-plus-lg mr-2"></i>
 						Create Project
-					{/if}
-				</button>
-				<a
-					href="/"
-					class="btn flex-1 bg-slate-500 text-center text-white hover:bg-slate-700 {isCreating
-						? 'pointer-events-none opacity-50'
-						: ''}"
-				>
-					Cancel
-				</a>
-			</div>
-		</form>
+					</button>
+					<a
+						href="/"
+						class="btn flex-1 bg-slate-500 text-center text-white hover:bg-slate-700 {isCreating
+							? 'pointer-events-none opacity-50'
+							: ''}"
+					>
+						Cancel
+					</a>
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>

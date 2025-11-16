@@ -1,8 +1,8 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
-import { CheckTheWeatherTool } from '../../lib/server/bedrockTools';
+import { GetProjectDetailsTool } from '$lib/server/bedrockTools';
 
-const TOOLS = [CheckTheWeatherTool];
+const TOOLS = [GetProjectDetailsTool];
 
 interface ToolExecutionRequest {
 	toolUseId: string;

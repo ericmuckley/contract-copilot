@@ -1,9 +1,7 @@
-import { listProjects } from '$lib/server/projectDb';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
-	const projects = await listProjects();
-	return {
-		projects
-	};
+export const load: PageServerLoad = async ({ parent }) => {
+	// Inherit projects from layout
+	const { projects } = await parent();
+	return { projects };
 };

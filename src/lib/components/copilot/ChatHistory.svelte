@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Message, ContentBlock } from '@aws-sdk/client-bedrock-runtime';
 	import LLMOutput from './LLMOutput.svelte';
-	import Ping from './Ping.svelte';
+	import Ping from '../Ping.svelte';
 	import { cleanString } from '$lib/utils';
 
 	let {
@@ -75,7 +75,9 @@
 					<div class="message flex justify-end">
 						<div class="max-w-[80%] rounded-xl bg-sky-100 px-4 py-2 text-sm">
 							<div class="font-semibold text-sky-800">🔧 Tool Result</div>
-							<div class="mt-1 text-gray-700">{result.content}</div>
+							<div class="mt-1 max-h-32 overflow-x-auto overflow-y-auto text-slate-600">
+								{result.content}
+							</div>
 						</div>
 					</div>
 				{/each}
@@ -102,10 +104,11 @@
 						<div class="mt-2 space-y-1">
 							{#each toolCalls as tool}
 								<div class="rounded-lg bg-purple-100 px-3 py-2 text-sm">
-									<p class="font-semibold">
-										{cleanString(tool.name)}
+									<p class="space-x-1 font-bold">
+										<i class="bi bi-stars"></i>
+										<span>{cleanString(tool.name)}</span>
 									</p>
-									<div class="mt-1 text-xs text-gray-600">
+									<div class="mt-1 max-h-32 overflow-x-auto overflow-y-auto text-xs text-gray-600">
 										Input: {JSON.stringify(tool.input)}
 									</div>
 								</div>
@@ -118,7 +121,7 @@
 	{/each}
 
 	{#if isStreaming}
-		<div class="flex justify-start">
+		<div class="flex justify-center">
 			<div class="max-w-[80%]">
 				{#if streamingContent}
 					<LLMOutput text={streamingContent} />
@@ -131,12 +134,16 @@
 								<p class="font-semibold">
 									{cleanString(toolName)}
 								</p>
-								<Ping />
+								<div class="my-2 flex justify-center">
+									<Ping />
+								</div>
 							</div>
 						{/each}
 					</div>
 				{:else}
-					<Ping />
+					<div class="my-2 flex justify-center">
+						<Ping />
+					</div>
 				{/if}
 			</div>
 		</div>

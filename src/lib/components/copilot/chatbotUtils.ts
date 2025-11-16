@@ -35,16 +35,18 @@ export interface StreamCallbacks {
  */
 export async function fetchBedrockStream(
 	messages: Message[],
-	useTools: boolean
+	useTools: boolean,
+	activeProjectId: number | null
 ): Promise<Response> {
-	const response = await fetch('/bedrock', {
+	const response = await fetch('/api/bedrock', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
 			messages,
-			useTools
+			useTools,
+			activeProjectId
 		})
 	});
 
@@ -181,7 +183,7 @@ export async function executeToolCall(toolUse: ToolUse): Promise<ContentBlock> {
 	try {
 		const parsedInput = JSON.parse(toolUse.input);
 
-		const response = await fetch('/tools', {
+		const response = await fetch('/api/tools', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'

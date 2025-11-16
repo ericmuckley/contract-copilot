@@ -1,16 +1,15 @@
 <script lang="ts">
-	import type { Artifact } from '$lib/types/project';
+	import type { Artifact } from '$lib/schema';
+	import Spinner from '../Spinner.svelte';
 
 	let {
 		projectId,
 		artifacts = [],
-		onRefresh,
-		approverName
+		onRefresh
 	}: {
 		projectId: number;
 		artifacts?: Artifact[];
-		onRefresh: () => void;
-		approverName: string;
+		onRefresh: () => Promise<void>;
 	} = $props();
 
 	let isUploading = $state(false);
@@ -30,8 +29,6 @@
 				const file = files[i];
 				const formData = new FormData();
 				formData.append('file', file);
-				formData.append('artifact_type', 'document');
-				formData.append('approved_by', approverName);
 
 				const response = await fetch(`/api/projects/${projectId}/artifacts`, {
 					method: 'POST',
@@ -47,57 +44,50 @@
 			target.value = '';
 
 			// Refresh artifacts list
-			onRefresh();
+			await onRefresh();
 		} catch (err) {
 			uploadError = err instanceof Error ? err.message : 'Upload failed';
 		} finally {
 			isUploading = false;
 		}
 	}
-
-	function formatDate(dateString: string): string {
-		const date = new Date(dateString);
-		return date.toLocaleString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
-		});
-	}
 </script>
 
 <div class="space-y-4">
 	<div class="">
-		<h3 class="mb-4 text-lg font-semibold text-slate-800">Upload Artifacts</h3>
+		<h1 class="mb-4">Upload Artifacts</h1>
 		<p class="mb-4 text-sm text-slate-600">
 			Upload documents, transcripts, notes, or any other files that provide context for this
 			project. At least 2 artifacts are required to advance to the next stage.
 		</p>
 
-		<div class="mb-4">
-			<label
-				for="artifact-upload"
-				class="inline-flex items-center space-x-2 rounded-lg bg-sky-500 px-4 py-2 text-white transition-colors {isUploading
-					? 'cursor-not-allowed opacity-50'
-					: 'cursor-pointer hover:bg-sky-600'}"
-			>
-				<i class="bi bi-upload"></i>
-				<span>{isUploading ? 'Uploading...' : 'Upload Files'}</span>
-			</label>
-			<input
-				id="artifact-upload"
-				type="file"
-				multiple
-				onchange={handleFileUpload}
-				disabled={isUploading}
-				accept=".pdf,.doc,.docx,.txt,.md"
-				class="hidden"
-			/>
-		</div>
+		{#if isUploading}
+			<div class="my-4 flex justify-center">
+				<Spinner />
+			</div>
+		{:else}
+			<div class="mb-4">
+				<label
+					for="artifact-upload"
+					class="btn btn-primary flex cursor-pointer items-center justify-center space-x-2 rounded-lg text-center"
+				>
+					<i class="bi bi-upload"></i>
+					<span>{isUploading ? 'Uploading...' : 'Upload Files'}</span>
+				</label>
+				<input
+					id="artifact-upload"
+					type="file"
+					multiple
+					onchange={handleFileUpload}
+					disabled={isUploading}
+					accept=".pdf,.doc,.docx,.txt,.md"
+					class="hidden"
+				/>
+			</div>
+		{/if}
 
 		{#if uploadError}
-			<div class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+			<div class="my-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
 				<i class="bi bi-exclamation-triangle-fill mr-2"></i>
 				{uploadError}
 			</div>
@@ -123,12 +113,6 @@
 							<i class="bi bi-file-earmark-text text-2xl text-slate-400"></i>
 							<div>
 								<div class="font-medium text-slate-800">{artifact.file_name}</div>
-								<div class="text-xs text-slate-500">
-									Uploaded {formatDate(artifact.uploaded_at)}
-									{#if artifact.artifact_type}
-										• {artifact.artifact_type}
-									{/if}
-								</div>
 							</div>
 						</div>
 						<div class="flex items-center space-x-2">

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import type { Message } from '@aws-sdk/client-bedrock-runtime';
 	import ChatInput from './ChatInput.svelte';
 	import ChatHistory from './ChatHistory.svelte';
@@ -9,6 +11,7 @@
 		buildAssistantMessage,
 		executeToolCalls
 	} from './chatbotUtils';
+	import { activeProjectId, chatMessages } from '$lib/stores';
 
 	let messages: Message[] = $state([]);
 	let chatInputValue = $state('');
@@ -17,6 +20,21 @@
 	let toolCallsInProgress: string[] = $state([]);
 
 	let { useTools = true }: { useTools?: boolean } = $props();
+
+	// Load messages from store on mount only
+	onMount(() => {
+		const stored = get(chatMessages);
+		if (stored && stored.length > 0) {
+			messages = stored;
+		}
+	});
+
+	// Update store whenever messages change (but not during initial load)
+	$effect(() => {
+		if (messages.length > 0) {
+			chatMessages.set(messages);
+		}
+	});
 
 	const handleSubmit = async () => {
 		if (!chatInputValue.trim()) return;
@@ -34,6 +52,11 @@
 		await runInferenceLoop();
 	};
 
+	const resetChat = () => {
+		messages = [];
+		chatMessages.set([]);
+	};
+
 	const runInferenceLoop = async () => {
 		let continueLoop = true;
 
@@ -43,7 +66,7 @@
 
 			try {
 				// Fetch streaming response from Bedrock
-				const response = await fetchBedrockStream(messages, useTools);
+				const response = await fetchBedrockStream(messages, useTools, $activeProjectId);
 
 				// Process the stream with callbacks for UI updates
 				const state = await processStream(response, {
@@ -110,20 +133,35 @@
 	};
 </script>
 
-<div class="flex h-full flex-col">
-	{#if messages.length}
-		<div class="min-h-0 flex-1 overflow-y-auto pr-3 pl-2">
+<div class="flex h-full flex-col overflow-hidden">
+	<!-- Scrollable chat messages area -->
+	<div class="min-h-0 flex-1 overflow-y-auto px-4 py-2">
+		{#if messages.length}
 			<div in:slide>
 				<ChatHistory {messages} {streamingContent} {isStreaming} {toolCallsInProgress} />
 			</div>
-		</div>
-	{:else}
-		<div class="flex-1"></div>
-	{/if}
+		{:else}
+			<div class="py-24 text-center">
+				<div class="text-9xl text-slate-400">
+					<i class="bi bi-chat-dots"></i>
+				</div>
+				<div class="mt-4 text-slate-400">Ask about your project estimates or contracts</div>
+			</div>
+		{/if}
+	</div>
 
-	{#if 1 || !isStreaming}
-		<div class="mt-2 px-2">
-			<ChatInput bind:chatInputValue {handleSubmit} />
-		</div>
-	{/if}
+	<!-- Fixed bottom input area -->
+	<div class="shrink-0 border-t border-gray-200 bg-white px-2">
+		{#if 1 || !isStreaming}
+			<div class="px-2 pt-2">
+				<ChatInput bind:chatInputValue {handleSubmit} />
+			</div>
+		{/if}
+
+		{#if messages.length > 0 && !isStreaming}
+			<div class="px-2 pt-1 pb-1 text-center">
+				<button onclick={resetChat} class="link text-xs"> Reset chat </button>
+			</div>
+		{/if}
+	</div>
 </div>

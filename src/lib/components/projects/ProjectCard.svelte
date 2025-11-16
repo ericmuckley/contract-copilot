@@ -1,25 +1,11 @@
 <script lang="ts">
-	import type { Project } from '$lib/types/project';
+	import type { Project } from '$lib/schema';
+	import { STAGES } from '$lib/schema';
 
 	let { project }: { project: Project } = $props();
 
-	const stageColors: Record<string, string> = {
-		Artifacts: 'bg-slate-200 text-slate-700',
-		BusinessCase: 'bg-sky-200 text-sky-700',
-		Requirements: 'bg-purple-200 text-purple-700',
-		SolutionArchitecture: 'bg-green-200 text-green-700',
-		EffortEstimate: 'bg-yellow-200 text-yellow-700',
-		Quote: 'bg-pink-200 text-pink-700'
-	};
-
-	const stageLabels: Record<string, string> = {
-		Artifacts: 'Artifacts',
-		BusinessCase: 'Business Case',
-		Requirements: 'Requirements',
-		SolutionArchitecture: 'Solution/Architecture',
-		EffortEstimate: 'Effort Estimate',
-		Quote: 'Quote'
-	};
+	const stageIdx = $derived(project.sdata.filter((s) => s.approved).length);
+	const progressPercentage = $derived((stageIdx / (STAGES.length - 1)) * 100);
 
 	function formatDate(dateString: string): string {
 		const date = new Date(dateString);
@@ -36,13 +22,24 @@
 	class="card block border border-slate-200 bg-white transition-shadow hover:shadow-lg"
 >
 	<div class="mb-3 flex items-start justify-between">
-		<h3 class="text-xl font-semibold text-slate-800">{project.name}</h3>
-		<span class="rounded-full px-3 py-1 text-xs font-semibold {stageColors[project.current_stage]}">
-			{stageLabels[project.current_stage]}
+		<h3 class="text-xl font-semibold text-slate-800">{project.project_name}</h3>
+		<span
+			class="rounded-full px-3 py-1 text-xs font-semibold {STAGES[stageIdx].bgcolor} {STAGES[
+				stageIdx
+			].textcolor}"
+		>
+			{STAGES[stageIdx].label}
 		</span>
 	</div>
-	<div class="flex items-center justify-between text-sm text-slate-500">
-		<span>Created: {formatDate(project.created_at)}</span>
-		<span>Updated: {formatDate(project.updated_at)}</span>
+	<div class="flex items-center justify-between space-x-6 text-xs text-slate-500">
+		<span>Created: {formatDate(project.created_at as string)}</span>
+		<span>Updated: {formatDate(project.updated_at as string)}</span>
+	</div>
+	<!-- Progress bar -->
+	<div class="mt-4 h-1 w-full overflow-hidden rounded-full bg-slate-200">
+		<div
+			class="h-full rounded-full bg-linear-to-r from-purple-600 via-sky-600 to-green-600 transition-all duration-500"
+			style="width: {progressPercentage}%"
+		></div>
 	</div>
 </a>

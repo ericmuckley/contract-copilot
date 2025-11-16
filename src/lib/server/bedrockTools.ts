@@ -1,27 +1,35 @@
-export class CheckTheWeatherTool {
+import { getProject } from './db';
+
+export class GetProjectDetailsTool {
 	static spec = {
 		toolSpec: {
-			name: 'check_the_weather',
-			description: 'Check the weather for a specific zip code.',
+			name: 'get_project_details',
+			description: 'Get details for a specific project.',
 			inputSchema: {
 				json: {
 					type: 'object',
 					properties: {
-						zip: {
+						id: {
 							type: 'string',
-							description: 'The zip code to check the weather for.'
+							description: 'The ID of the project to get details for.'
 						}
 					},
-					required: ['zip']
+					required: ['id']
 				}
 			}
 		}
 	};
-	static async run({ zip }: { zip: string }) {
-		const text = `The weather is 67 degrees and sunny in ${zip}.`;
+	static async run({ id }: { id: number | string }) {
+		const project = await getProject(parseInt(id as string));
+		if (!project) {
+			return {
+				response: [`Project with ID ${id} not found.`],
+				text: JSON.stringify(`Project with ID ${id} not found.`)
+			};
+		}
 		return {
-			response: [text],
-			text: JSON.stringify(text)
+			response: project,
+			text: JSON.stringify(project)
 		};
 	}
 }
