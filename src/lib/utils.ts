@@ -7,7 +7,6 @@ export const cleanString = (input: string | null | undefined): string => {
 	return input.charAt(0).toUpperCase() + input.slice(1);
 };
 
-
 export const makeShortId = (length: number = 8): string => {
 	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	let result = '';
@@ -15,8 +14,7 @@ export const makeShortId = (length: number = 8): string => {
 		result += characters.charAt(Math.floor(Math.random() * characters.length));
 	}
 	return result;
-}
-
+};
 
 // Safely parse JSON from a string, returning a fallback value if parsing fails
 export const safeJsonParse = (input: string, fallback: any = {}) => {

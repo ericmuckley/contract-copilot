@@ -263,7 +263,10 @@
 			<div class="flex space-x-2">
 				<button
 					onclick={handleSave}
-					disabled={isSaving || !agreementName.trim() || !counterparty.trim() || !text_content.trim()}
+					disabled={isSaving ||
+						!agreementName.trim() ||
+						!counterparty.trim() ||
+						!text_content.trim()}
 					class="btn btn-primary"
 				>
 					{#if isSaving}

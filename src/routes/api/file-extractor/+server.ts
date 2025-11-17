@@ -57,7 +57,9 @@ export async function POST({ request }: RequestEvent) {
 
 			default:
 				return json(
-					{ error: `Unsupported file type: .${extension}. Supported types: .txt, .md, .json, .pdf, .docx` },
+					{
+						error: `Unsupported file type: .${extension}. Supported types: .txt, .md, .json, .pdf, .docx`
+					},
 					{ status: 400 }
 				);
 		}

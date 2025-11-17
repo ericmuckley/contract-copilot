@@ -1,5 +1,4 @@
 TODO: don't allow new contracts if there are no policies in place
-TODO: showing x/N on each dashboard filter
 
 Create these tables in Postgres:
 
