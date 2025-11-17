@@ -178,7 +178,7 @@
 			Choose File
 		</button>
 		{#if uploadedFiles.length > 0}
-			<p class="mt-2 text-sm text-slate-600">
+			<p class="standard mt-2 text-sm">
 				Selected: {uploadedFiles[0].name}
 			</p>
 		{/if}
@@ -203,7 +203,7 @@
 	{#if isProcessing}
 		<div class="my-8 flex flex-col items-center gap-4">
 			<Ping />
-			<p class="text-sm text-slate-600">Processing contract and extracting metadata...</p>
+			<p class="standard text-sm">Processing contract and extracting metadata...</p>
 		</div>
 	{/if}
 

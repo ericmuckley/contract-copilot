@@ -46,7 +46,7 @@
 
 <div>
 	{#if lastUpdated()}
-		<div class="mb-6 text-sm text-slate-600">
+		<div class="standard mb-6 text-sm">
 			<span class="font-medium">Last agreement update:</span>
 			{lastUpdated()?.toLocaleString('en-US', {
 				month: 'short',
@@ -79,7 +79,7 @@
 			<div class="mb-4 text-4xl text-slate-300">
 				<i class="bi bi-file-earmark-x"></i>
 			</div>
-			<p class="text-slate-600">
+			<p class="standard">
 				{typeFilter === 'all' ? 'No agreements yet.' : `No ${typeFilter} agreements found.`}
 			</p>
 		</div>

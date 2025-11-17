@@ -37,7 +37,7 @@
 
 <div>
 	{#if lastUpdated()}
-		<div class="mb-6 text-sm text-slate-600">
+		<div class="standard mb-6 text-sm">
 			<span class="font-medium">Last project update:</span>
 			{lastUpdated()?.toLocaleString('en-US', {
 				month: 'short',
@@ -66,7 +66,7 @@
 			<div class="mb-4 text-4xl text-slate-300">
 				<i class="bi bi-folder-x"></i>
 			</div>
-			<p class="text-slate-600">
+			<p class="standard">
 				{stageFilter === 'all'
 					? 'No projects yet.'
 					: `No projects in ${cleanString(stageFilter)} stage.`}

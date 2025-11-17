@@ -27,6 +27,9 @@ select {
 	@apply rounded-3xl border-2 border-slate-300 px-6 py-3 text-sm focus:border-sky-400 focus:outline-none;
 }
 
+.standard {
+	@apply text-slate-600;
+}
 .muted {
 	@apply text-slate-400;
 }
@@ -78,6 +81,19 @@ select {
 }
 .boilerplate h3 {
 	@apply mb-4 text-lg;
+}
+.boilerplate table {
+	@apply max-w-full;
+}
+.boilerplate th,
+.boilerplate td {
+	@apply border border-slate-300 px-4 py-2 text-left;
+}
+.boilerplate pre {
+	@apply max-w-full overflow-x-auto;
+}
+.boilerplate code {
+	@apply wrap-break-word;
 }
 
 .text-gradient {

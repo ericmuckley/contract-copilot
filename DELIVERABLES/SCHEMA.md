@@ -30,12 +30,14 @@ CREATE TABLE agreements(
     origin TEXT NOT NULL,
     counterparty TEXT,
     text_content TEXT,
+    notes TEXT[],
+    edits JSONB,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     agreement_type TEXT NOT NULL,
     agreement_name TEXT NOT NULL,
     created_by TEXT NOT NULL
-);
+)
 
 ```
 

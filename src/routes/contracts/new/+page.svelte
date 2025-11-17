@@ -49,7 +49,7 @@
 							? 'border-sky-600 bg-sky-50 shadow-lg'
 							: 'border-slate-200 bg-white hover:border-slate-600'}"
 					>
-						<div class="mb-1 font-bold text-slate-600">
+						<div class="standard mb-1 font-bold">
 							<i class="bi {option.icon} mr-2 text-2xl"></i>
 							{option.title}
 						</div>

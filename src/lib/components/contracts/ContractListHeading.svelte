@@ -8,7 +8,7 @@
 		<h1>Contracts/Agreements</h1>
 		{#if agreements.length > 0}
 			<div>
-				<div class="rounded-xl bg-slate-200 px-3 py-1 font-bold text-slate-600">
+				<div class="standard rounded-xl bg-slate-200 px-3 py-1 font-bold">
 					{agreements.length}
 				</div>
 			</div>

@@ -8,7 +8,7 @@
 		<h1>Project Estimates</h1>
 		{#if projects.length > 0}
 			<div>
-				<div class="rounded-xl bg-slate-200 px-3 py-1 font-bold text-slate-600">
+				<div class="standard rounded-xl bg-slate-200 px-3 py-1 font-bold">
 					{projects.length}
 				</div>
 			</div>

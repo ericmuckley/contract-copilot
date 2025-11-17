@@ -210,7 +210,7 @@
 <div class="space-y-4">
 	<div class="card bg-white">
 		<h1 class="mb-4">Effort Estimate (WBS)</h1>
-		<p class="mb-4 text-sm text-slate-600">
+		<p class="standard mb-4 text-sm">
 			Generate a detailed Work Breakdown Structure with tasks, assigned roles, and estimated hours
 			based on all previous stages.
 		</p>
@@ -254,7 +254,7 @@
 									<td class="px-4 py-2 text-right text-sm">{task.hours}</td>
 								</tr>
 							{/each}
-							<tr class="bg-slate-50 font-bold text-slate-600">
+							<tr class="standard bg-slate-50 font-bold">
 								<td class="px-4 py-2" colspan="2">Total</td>
 								<td class="px-4 py-2 text-right whitespace-nowrap">{totalHours}</td>
 							</tr>

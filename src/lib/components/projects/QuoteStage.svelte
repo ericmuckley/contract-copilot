@@ -119,7 +119,7 @@
 <div class="space-y-4">
 	<div class="card bg-white">
 		<h1 class="mb-4">Project Quote</h1>
-		<p class="mb-4 text-sm text-slate-600">
+		<p class="standard mb-4 text-sm">
 			Review the project tasks with rates and costs. Export to CSV or copy to clipboard.
 		</p>
 
@@ -135,7 +135,7 @@
 				<Spinner />
 			</div>
 		{:else if parsedData.tasks.length === 0}
-			<div class="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
+			<div class="standard rounded-lg bg-slate-50 p-4 text-sm">
 				No tasks available. Please complete the Effort Estimate stage first.
 			</div>
 		{:else}
@@ -187,13 +187,13 @@
 									<td class="px-4 py-3 text-right text-sm">${cost.toFixed(2)}</td>
 								</tr>
 							{/each}
-							<tr class="border-t-2 border-slate-300 bg-slate-50 font-bold text-slate-600">
+							<tr class="standard border-t-2 border-slate-300 bg-slate-50 font-bold">
 								<td class="px-4 py-3 text-sm" colspan="2">Total Project Cost</td>
 								<td class="px-4 py-3 text-right text-sm">{parsedData.totalHours} hrs</td>
 								<td class="px-4 py-3 text-right text-sm">—</td>
 								<td class="px-4 py-3 text-right text-sm">${parsedData.totalCost.toFixed(2)}</td>
 							</tr>
-							<tr class="border-b border-slate-200 bg-slate-50 font-bold text-slate-600">
+							<tr class="standard border-b border-slate-200 bg-slate-50 font-bold">
 								<td class="px-4 py-3 text-sm" colspan="4">Project Timeline (at 40 hrs/week)</td>
 								<td class="px-4 py-3 text-right text-sm">{parsedData.timelineWeeks} weeks</td>
 							</tr>

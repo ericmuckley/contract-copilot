@@ -146,10 +146,10 @@
 			</div>
 		{:else}
 			<div class="py-24 text-center">
-				<div class="text-9xl text-slate-400">
+				<div class="muted text-9xl">
 					<i class="bi bi-chat-dots"></i>
 				</div>
-				<div class="mt-4 text-slate-400">Ask about your project estimates or contracts</div>
+				<div class="muted mt-4">Ask about your project estimates or contracts</div>
 			</div>
 		{/if}
 	</div>
