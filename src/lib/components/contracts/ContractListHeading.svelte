@@ -1,20 +1,20 @@
 <script lang="ts">
-	//import type { Contract } from '$lib/schema';
-	let { contracts = [] }: { contracts?: any[] } = $props();
+	import type { Agreement } from '$lib/schema';
+	let { agreements = [] }: { agreements?: Agreement[] } = $props();
 </script>
 
 <div class="flex items-center justify-between">
 	<div class="flex space-x-2">
-		<h1>Contracts</h1>
-		{#if contracts.length > 0}
+		<h1>Contracts/Agreements</h1>
+		{#if agreements.length > 0}
 			<div>
 				<div class="rounded-xl bg-slate-200 px-3 py-1 font-bold text-slate-600">
-					{contracts.length}
+					{agreements.length}
 				</div>
 			</div>
 		{/if}
 	</div>
-	<div class="flex space-x-2">
+	<div class="flex space-x-4">
 		<div>
 			<a href="/contracts/policy-manager" class="btn btn-outline">
 				<i class="bi bi-gear-fill"></i>

@@ -364,7 +364,7 @@
 							Save
 						{/if}
 					</button>
-					<button onclick={cancelEditing} disabled={isSaving} class="btn bg-slate-500 text-white">
+					<button onclick={cancelEditing} disabled={isSaving} class="btn btn-outline">
 						Cancel
 					</button>
 				</div>

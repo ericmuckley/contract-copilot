@@ -121,7 +121,7 @@ export const emptyProject: Project = {
 export const AGREEMENT_TYPES = ['MSA', 'SOW', 'NDA'];
 
 export interface Agreement {
-	id?: number | string | null;
+	id?: number | null;
 	root_id: string;
 	version_number: number;
 	origin: 'client' | 'internal';
@@ -130,5 +130,7 @@ export interface Agreement {
 	agreement_name: string;
 	agreement_type: string;
 	created_by: string;
+	text_content: string;
+	counterparty?: string;
 	project_id?: number | null;
 }

@@ -1,4 +1,4 @@
-import { type ProjectTask, PROJECT_PERSONNEL_RATES } from './schema';
+import { type ProjectTask, type Agreement, PROJECT_PERSONNEL_RATES } from './schema';
 
 // Make a string more pretty
 export const cleanString = (input: string | null | undefined): string => {
@@ -47,4 +47,54 @@ export const generateQuoteCSV = (taskList: ProjectTask[]): string => {
 	rows.push(['Timeline (weeks)', '', timelineWeeks.toString(), '', '']);
 
 	return [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+};
+
+export const saveNewAgreement = async ({
+	origin,
+	created_by,
+	agreement_name,
+	agreement_type,
+	counterparty,
+	text_content
+}: {
+	origin: 'client' | 'internal';
+	created_by: string;
+	agreement_name: string;
+	agreement_type: string;
+	counterparty: string;
+	text_content: string;
+}): Promise<Agreement | null> => {
+	// Build Agreement object based on selected origin
+	const agreementData = {
+		root_id: crypto.randomUUID(),
+		version_number: 1,
+		origin,
+		created_by,
+		agreement_name,
+		agreement_type,
+		counterparty: counterparty,
+		text_content
+	};
+
+	try {
+		const response = await fetch('/api/agreements', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(agreementData)
+		});
+
+		if (!response.ok) {
+			const error = await response.json();
+			console.error('Failed to save agreement:', error);
+			return null;
+		}
+
+		const savedAgreement: Agreement = await response.json();
+		return savedAgreement;
+	} catch (error) {
+		console.error('Error saving agreement:', error);
+		return null;
+	}
 };

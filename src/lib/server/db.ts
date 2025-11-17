@@ -1,6 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import { DATABASE_URL } from '$lib/server/settings';
-import type { Project, Artifact } from '$lib/schema';
+import type { Project, Artifact, Agreement } from '$lib/schema';
 
 const sql = neon(DATABASE_URL);
 
@@ -223,5 +223,115 @@ export async function deleteArtifact(id: number): Promise<boolean> {
 		DELETE FROM "artifacts" WHERE id = ${id}
 	`;
 	// If no error is thrown, the deletion succeeded
+	return true;
+}
+
+// Agreement CRUD operations
+
+export async function createAgreement(
+	agreement: Omit<Agreement, 'id' | 'created_at' | 'updated_at'>
+): Promise<Agreement> {
+	const result = await sql`
+		INSERT INTO "agreements" (
+			root_id, 
+			version_number, 
+			origin, 
+			agreement_name, 
+			agreement_type, 
+			created_by, 
+			text_content, 
+			counterparty, 
+			project_id
+		)
+		VALUES (
+			${agreement.root_id}, 
+			${agreement.version_number}, 
+			${agreement.origin}, 
+			${agreement.agreement_name}, 
+			${agreement.agreement_type}, 
+			${agreement.created_by}, 
+			${agreement.text_content}, 
+			${agreement.counterparty || null}, 
+			${agreement.project_id || null}
+		)
+		RETURNING id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id
+	`;
+	return result[0] as Agreement;
+}
+
+export async function getAgreement(id: number): Promise<Agreement | null> {
+	const result = await sql`
+		SELECT id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id
+		FROM "agreements"
+		WHERE id = ${id}
+	`;
+	if (result.length === 0) return null;
+	return result[0] as Agreement;
+}
+
+export async function listAgreements(): Promise<Agreement[]> {
+	const result = await sql`
+		SELECT id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id
+		FROM "agreements"
+		ORDER BY updated_at DESC
+	`;
+	return result as Agreement[];
+}
+
+export async function updateAgreement(
+	id: number,
+	updates: Partial<Omit<Agreement, 'id' | 'created_at' | 'updated_at'>>
+): Promise<Agreement | null> {
+	// Build dynamic update query based on provided fields
+	const fields = [];
+	const values = [];
+
+	if (updates.agreement_name !== undefined) {
+		fields.push('agreement_name');
+		values.push(updates.agreement_name);
+	}
+	if (updates.agreement_type !== undefined) {
+		fields.push('agreement_type');
+		values.push(updates.agreement_type);
+	}
+	if (updates.text_content !== undefined) {
+		fields.push('text_content');
+		values.push(updates.text_content);
+	}
+	if (updates.counterparty !== undefined) {
+		fields.push('counterparty');
+		values.push(updates.counterparty);
+	}
+	if (updates.project_id !== undefined) {
+		fields.push('project_id');
+		values.push(updates.project_id);
+	}
+	if (updates.version_number !== undefined) {
+		fields.push('version_number');
+		values.push(updates.version_number);
+	}
+
+	if (fields.length === 0) {
+		return getAgreement(id);
+	}
+
+	const setClause = fields.map((field, idx) => `${field} = $${idx + 1}`).join(', ');
+	values.push(id);
+
+	const result = await sql`
+		UPDATE "agreements"
+		SET ${sql.unsafe(setClause)}, updated_at = NOW()
+		WHERE id = ${id}
+		RETURNING id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id
+	`;
+
+	if (result.length === 0) return null;
+	return result[0] as Agreement;
+}
+
+export async function deleteAgreement(id: number): Promise<boolean> {
+	await sql`
+		DELETE FROM "agreements" WHERE id = ${id}
+	`;
 	return true;
 }

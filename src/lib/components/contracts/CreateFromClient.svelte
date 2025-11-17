@@ -1,17 +1,18 @@
 <script lang="ts">
 	let {
-		agreementName = $bindable(''),
-		agreementType = $bindable(''),
-		description = $bindable(''),
-		uploadedFiles = $bindable<File[]>([])
+		origin,
+		createdBy
 	}: {
-		agreementName?: string;
-		agreementType?: string;
-		description?: string;
-		uploadedFiles?: File[];
+		origin: string;
+		createdBy: string;
 	} = $props();
 
 	let fileInput: HTMLInputElement;
+	let uploadedFiles = $state<File[]>([]);
+
+	// TODO: Populate agreement type and name from LLM
+	let agreementType = $state<string>('SOW');
+	let agreementName = $state<string>('');
 
 	function handleFileChange(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -23,8 +24,6 @@
 	function removeFile(index: number) {
 		uploadedFiles = uploadedFiles.filter((_, i) => i !== index);
 	}
-
-	const agreementTypes = ['MSA', 'SOW', 'NDA', 'Amendment', 'Other'];
 </script>
 
 <div class="space-y-4">
@@ -40,32 +39,6 @@
 			required
 			class="text-input"
 		/>
-	</div>
-
-	<div>
-		<label for="agreement-type" class="mb-1 block text-sm text-slate-700">
-			Agreement Type <span class="text-red-500">*</span>
-		</label>
-		<select id="agreement-type" bind:value={agreementType} required class="w-full">
-			<option value="" disabled>Select agreement type...</option>
-			{#each agreementTypes as type}
-				<option value={type}>{type}</option>
-			{/each}
-		</select>
-	</div>
-
-	<div>
-		<label for="description" class="mb-1 block text-sm text-slate-700">
-			Description <span class="text-red-500">*</span>
-		</label>
-		<textarea
-			id="description"
-			bind:value={description}
-			placeholder="Enter description..."
-			required
-			rows="3"
-			class="text-input"
-		></textarea>
 	</div>
 
 	<div>
@@ -105,7 +78,7 @@
 						<button
 							type="button"
 							onclick={() => removeFile(i)}
-							class="text-red-500 hover:text-red-700"
+							class="link"
 							aria-label={`Remove ${file.name}`}
 						>
 							<i class="bi bi-x-lg"></i>
@@ -116,3 +89,16 @@
 		{/if}
 	</div>
 </div>
+
+<!-- Submit Button 
+<div class="mt-12 flex justify-end gap-4">
+	<a href="/" class="btn btn-outline">Cancel</a>
+	<button
+		class="btn btn-primary"
+		onclick={handleSubmit}
+		disabled={createdBy.trim() === '' || !selectedOrigin || !agreementType?.trim()?.length}
+	>
+		Create Agreement
+	</button>
+</div>
+-->

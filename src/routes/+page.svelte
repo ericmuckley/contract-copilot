@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Project } from '$lib/schema';
+	import type { Project, Agreement } from '$lib/schema';
 	import ProjectList from '$lib/components/projects/ProjectList.svelte';
 	import ProjectListHeading from '$lib/components/projects/ProjectListHeading.svelte';
 	import ContractListHeading from '$lib/components/contracts/ContractListHeading.svelte';
 	import { activeProjectId, activeAgreementId } from '$lib/stores';
+	import ContractList from '$lib/components/contracts/ContractList.svelte';
 
 	let { data } = $props();
 
@@ -24,9 +25,9 @@
 	</div>
 	<div class="card">
 		<div class="mb-8">
-			<ContractListHeading contracts={[]} />
+			<ContractListHeading agreements={data.agreements} />
 		</div>
 
-		<p>Coming soon</p>
+		<ContractList agreements={data.agreements} />
 	</div>
 </div>

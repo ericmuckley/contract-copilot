@@ -2,12 +2,15 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.ico';
 	import Navbar from '$lib/components/Navbar.svelte';
-	import { allProjects } from '$lib/stores';
+	import { allProjects, allAgreements } from '$lib/stores';
 
 	let { children, data } = $props();
 
 	$effect(() => {
 		allProjects.set(data.projects);
+	});
+	$effect(() => {
+		allAgreements.set(data.agreements);
 	});
 </script>
 
