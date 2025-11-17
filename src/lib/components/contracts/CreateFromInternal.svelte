@@ -94,7 +94,7 @@
 			text_content
 		});
 		if (newAgreement) {
-			await goto(`/contracts/${newAgreement.id}`);
+			await goto(`/contracts/${newAgreement.root_id}`);
 		}
 	};
 </script>

@@ -278,6 +278,16 @@ export async function listAgreements(): Promise<Agreement[]> {
 	return result as Agreement[];
 }
 
+export async function getAgreementsByRootId(root_id: string): Promise<Agreement[]> {
+	const result = await sql`
+		SELECT id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id
+		FROM "agreements"
+		WHERE root_id = ${root_id}
+		ORDER BY version_number DESC
+	`;
+	return result as Agreement[];
+}
+
 export async function updateAgreement(
 	id: number,
 	updates: Partial<Omit<Agreement, 'id' | 'created_at' | 'updated_at'>>

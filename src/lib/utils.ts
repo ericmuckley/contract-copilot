@@ -7,6 +7,17 @@ export const cleanString = (input: string | null | undefined): string => {
 	return input.charAt(0).toUpperCase() + input.slice(1);
 };
 
+
+export const makeShortId = (length: number = 8): string => {
+	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	let result = '';
+	for (let i = 0; i < length; i++) {
+		result += characters.charAt(Math.floor(Math.random() * characters.length));
+	}
+	return result;
+}
+
+
 // Safely parse JSON from a string, returning a fallback value if parsing fails
 export const safeJsonParse = (input: string, fallback: any = {}) => {
 	try {
@@ -66,7 +77,7 @@ export const saveNewAgreement = async ({
 }): Promise<Agreement | null> => {
 	// Build Agreement object based on selected origin
 	const agreementData = {
-		root_id: crypto.randomUUID(),
+		root_id: makeShortId(),
 		version_number: 1,
 		origin,
 		created_by,

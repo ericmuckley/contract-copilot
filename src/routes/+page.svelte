@@ -4,14 +4,14 @@
 	import ProjectList from '$lib/components/projects/ProjectList.svelte';
 	import ProjectListHeading from '$lib/components/projects/ProjectListHeading.svelte';
 	import ContractListHeading from '$lib/components/contracts/ContractListHeading.svelte';
-	import { activeProjectId, activeAgreementId } from '$lib/stores';
+	import { activeProjectId, activeAgreementRootId } from '$lib/stores';
 	import ContractList from '$lib/components/contracts/ContractList.svelte';
 
 	let { data } = $props();
 
 	onMount(() => {
 		activeProjectId.set(null);
-		activeAgreementId.set(null);
+		activeAgreementRootId.set(null);
 	});
 </script>
 

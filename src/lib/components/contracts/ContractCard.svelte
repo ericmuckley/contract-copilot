@@ -26,7 +26,7 @@
 </script>
 
 <a
-	href="/contracts/{agreement.id}"
+	href="/contracts/{agreement.root_id}"
 	class="card block border border-slate-200 bg-white transition-shadow hover:shadow-lg"
 >
 	<div class="mb-3 flex items-start justify-between">

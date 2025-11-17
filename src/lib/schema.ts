@@ -118,7 +118,7 @@ export const emptyProject: Project = {
 	}))
 };
 
-export const AGREEMENT_TYPES = ['MSA', 'SOW', 'NDA'];
+export const AGREEMENT_TYPES = ['MSA', 'SOW', 'NDA', 'OTHER'];
 
 export interface Agreement {
 	id?: number | null;
