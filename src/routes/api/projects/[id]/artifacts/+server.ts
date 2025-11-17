@@ -10,7 +10,7 @@ import {
 import { BLOB_READ_WRITE_TOKEN } from '$lib/server/settings';
 import { readFileContent } from '$lib/server/readFileContent';
 
-// GET /api/projects/[id]/artifacts - List artifacts for a project
+// GET /api/projects/[id]/artifacts - List project artifacts or internal document artifacts
 export async function GET({ params }: RequestEvent) {
 	try {
 		// Handle null/undefined project ID to get orphaned artifacts

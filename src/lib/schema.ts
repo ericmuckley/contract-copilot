@@ -117,3 +117,20 @@ export const emptyProject: Project = {
 		tasks: stage.name === 'estimate' ? [] : null
 	}))
 };
+
+export const AGREEMENT_TYPES = ['MSA', 'SOW', 'NDA'];
+
+export interface Agreement {
+	id?: number | null;
+	root_id: string;
+	version_number: number;
+	origin: 'client' | 'internal';
+	created_at?: string | null;
+	updated_at?: string | null;
+	agreement_name: string;
+	agreement_type: string;
+	created_by: string;
+	text_content: string;
+	counterparty?: string;
+	project_id?: number | null;
+}

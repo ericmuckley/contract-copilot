@@ -51,14 +51,13 @@
 	{/if}
 
 	<div class="mb-6 flex items-center space-x-3">
-		<label for="stage-filter" class="text-sm font-medium text-slate-700">Filter by stage:</label>
 		<select id="stage-filter" bind:value={stageFilter}>
 			{#each [{ name: 'all', label: 'All' }, ...STAGES] as stage (stage.name)}
 				<option value={stage.name}>{cleanString(stage.label)}</option>
 			{/each}
 		</select>
 		<span class="text-sm text-slate-500">
-			{filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''}
+			{filteredProjects.length}/{projects.length} project{projects.length !== 1 ? 's' : ''}
 		</span>
 	</div>
 
@@ -74,7 +73,9 @@
 			</p>
 		</div>
 	{:else}
-		<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+		<div
+			class="grid max-h-84 grid-cols-1 gap-6 overflow-y-auto pr-3 pb-3 md:grid-cols-2 lg:grid-cols-3"
+		>
 			{#each filteredProjects as project (project.id)}
 				<ProjectCard {project} />
 			{/each}
