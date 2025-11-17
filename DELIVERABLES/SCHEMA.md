@@ -18,6 +18,21 @@ CREATE TABLE artifacts (
     file_url TEXT NOT NULL,
     file_content TEXT
 );
+
+
+CREATE TABLE agreements(
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+    root_id TEXT NOT NULL,
+    version_number INTEGER NOT NULL,
+    origin TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    agreement_type TEXT NOT NULL,
+    agreement_name TEXT NOT NULL,
+    created_by TEXT NOT NULL
+)
+
 ```
 
 # Refactor

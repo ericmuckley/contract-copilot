@@ -157,3 +157,16 @@ Your job is to help architect the schema, models, and patterns needed for these 
 - If we need specialized LLM prompts for any of these tasks, write out the Typescript functions that will generate those prompts and include the proper context in each prompt.
 - Generate a succinct, informative plan for implementing the changes, along with the amount of effort you estimate needed for each change.
 ```
+
+# New Agreements implementation
+
+```md
+In my "New Aggrement" component, I need:
+
+User chooses between "From internal policy templates", or "From Client"
+If user selects "from client", show the "CreateFromClient.svelte" component. This should allow files to be uploaded.
+If the user selects from policies, show the "CreateFromInternal.svelte" component. This should allow them to choose a type (MSA, SOW, etc), and a counterparty as text input fields.
+In either case, we need to build an Aggrement object, as specified in schema.ts.
+Regardless of which component is shown the ApproverNameInput component will also be shown so the created_by field in the Agreement object can be populated.
+Let me know if you have questions.
+```

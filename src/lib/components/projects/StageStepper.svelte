@@ -3,6 +3,8 @@
 	import type { StageData } from '$lib/schema';
 
 	let { currentStageIndex, sdata }: { currentStageIndex: number; sdata: StageData[] } = $props();
+
+	// TODO: possibly here? but somewhere, add ability to view project Markdown content at all previous stages.
 </script>
 
 <div class="flex">

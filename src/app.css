@@ -24,7 +24,7 @@ button {
 	@apply cursor-pointer;
 }
 select {
-	@apply rounded-3xl border-2 border-slate-300 px-6 py-2 text-sm focus:border-sky-400 focus:outline-none;
+	@apply rounded-3xl border-2 border-slate-300 px-6 py-3 text-sm focus:border-sky-400 focus:outline-none;
 }
 
 .muted {
