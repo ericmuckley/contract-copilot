@@ -1,4 +1,4 @@
-import { getProject, updateProject } from './db';
+import { getProject, updateProject, getAgreementsByRootId, updateAgreementNotes } from './db';
 import { bedrockClient } from './bedrockClient';
 import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { LLM_MODEL_ID } from './settings';
@@ -35,6 +35,166 @@ export class GetProjectDetailsTool {
 		return {
 			response: project,
 			text: JSON.stringify(project)
+		};
+	}
+}
+
+export class GetContractDetailsTool {
+	static spec = {
+		toolSpec: {
+			name: 'get_contract_details',
+			description: 'Get details for a specific contract or agreement.',
+			inputSchema: {
+				json: {
+					type: 'object',
+					properties: {
+						root_id: {
+							type: 'string',
+							description: 'The root_id of the contract to get details for.'
+						}
+					},
+					required: ['root_id']
+				}
+			}
+		}
+	};
+	static async run({ root_id }: { root_id: string }) {
+		const agreements = await getAgreementsByRootId(root_id);
+		if (!agreements || agreements.length === 0) {
+			return {
+				response: [`Contract with root_id ${root_id} not found.`],
+				text: JSON.stringify(`Contract with root_id ${root_id} not found.`)
+			};
+		}
+		// The agreements are already sorted by version_number DESC, so take the first one
+		const latestAgreement = agreements[0];
+		return {
+			response: latestAgreement,
+			text: JSON.stringify(latestAgreement)
+		};
+	}
+}
+
+export class GetContractEditsSummaryTool {
+	static spec = {
+		toolSpec: {
+			name: 'get_contract_edits_summary',
+			description:
+				'Get a summary of all edits / pushbacks / changes made across all versions of a contract or agreement.',
+			inputSchema: {
+				json: {
+					type: 'object',
+					properties: {
+						root_id: {
+							type: 'string',
+							description: 'The root_id of the contract to get edit history for.'
+						}
+					},
+					required: ['root_id']
+				}
+			}
+		}
+	};
+	static async run({ root_id }: { root_id: string }) {
+		const agreements = await getAgreementsByRootId(root_id);
+		if (!agreements || agreements.length === 0) {
+			return {
+				response: [`Contract with root_id ${root_id} not found.`],
+				text: JSON.stringify(`Contract with root_id ${root_id} not found.`)
+			};
+		}
+
+		// Extract all edits from all agreement versions
+		const editsHistory = agreements.map((agreement) => ({
+			version_number: agreement.version_number,
+			created_at: agreement.created_at,
+			edits: agreement.edits || 'No edits recorded for this version'
+		}));
+
+		return {
+			response: {
+				root_id,
+				total_versions: agreements.length,
+				edits_history: editsHistory
+			},
+			text: JSON.stringify({
+				root_id,
+				total_versions: agreements.length,
+				edits_history: editsHistory
+			})
+		};
+	}
+}
+
+export class AddNoteToContractTool {
+	static spec = {
+		toolSpec: {
+			name: 'add_note_to_contract',
+			description: 'Add a note to the latest version of a contract or agreement.',
+			inputSchema: {
+				json: {
+					type: 'object',
+					properties: {
+						root_id: {
+							type: 'string',
+							description: 'The root_id of the contract to add a note to.'
+						},
+						note: {
+							type: 'string',
+							description: 'The note to add to the contract.'
+						}
+					},
+					required: ['root_id', 'note']
+				}
+			}
+		}
+	};
+	static async run({ root_id, note }: { root_id: string; note: string }) {
+		const agreements = await getAgreementsByRootId(root_id);
+		if (!agreements || agreements.length === 0) {
+			return {
+				response: { error: `Contract with root_id ${root_id} not found.` },
+				text: JSON.stringify({ error: `Contract with root_id ${root_id} not found.` })
+			};
+		}
+
+		// The agreements are already sorted by version_number DESC, so take the first one
+		const latestAgreement = agreements[0];
+
+		// Ensure the agreement has an id
+		if (!latestAgreement.id) {
+			return {
+				response: { error: `Contract with root_id ${root_id} has no valid id.` },
+				text: JSON.stringify({ error: `Contract with root_id ${root_id} has no valid id.` })
+			};
+		}
+
+		// Get existing notes or initialize empty array
+		const existingNotes = latestAgreement.notes || [];
+		const updatedNotes = [...existingNotes, note];
+
+		// Update the agreement with the new notes
+		const updatedAgreement = await updateAgreementNotes(latestAgreement.id, updatedNotes);
+
+		if (!updatedAgreement) {
+			return {
+				response: { error: `Failed to update contract with root_id ${root_id}.` },
+				text: JSON.stringify({ error: `Failed to update contract with root_id ${root_id}.` })
+			};
+		}
+
+		return {
+			response: {
+				success: true,
+				message: 'Note added successfully',
+				agreement: updatedAgreement,
+				added_note: note
+			},
+			text: JSON.stringify({
+				success: true,
+				message: 'Note added successfully',
+				added_note: note
+			})
 		};
 	}
 }

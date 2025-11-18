@@ -11,7 +11,7 @@
 		buildAssistantMessage,
 		executeToolCalls
 	} from './chatbotUtils';
-	import { activeProjectId, chatMessages } from '$lib/stores';
+	import { activeProjectId, activeAgreementRootId, chatMessages } from '$lib/stores';
 	import { invalidate } from '$app/navigation';
 
 	let messages: Message[] = $state([]);
@@ -64,10 +64,17 @@
 		while (continueLoop) {
 			isStreaming = true;
 			streamingContent = '';
+			// Clear tool indicators when starting a new iteration
+			toolCallsInProgress = [];
 
 			try {
 				// Fetch streaming response from Bedrock
-				const response = await fetchBedrockStream(messages, useTools, $activeProjectId);
+				const response = await fetchBedrockStream(
+					messages,
+					useTools,
+					$activeProjectId,
+					$activeAgreementRootId
+				);
 
 				// Process the stream with callbacks for UI updates
 				const state = await processStream(response, {
@@ -99,10 +106,10 @@
 				// If there are tool calls, execute them and continue the loop
 				if (state.toolUses.size > 0) {
 					const toolResults = await executeToolCalls(state.toolUses);
-					toolCallsInProgress = [];
 
-					// Refresh project data after tool execution (in case data was modified)
+					// Refresh data after tool execution (in case data was modified)
 					await invalidate('project:data');
+					await invalidate('agreement:data');
 
 					// Add tool results as a user message (required by Bedrock API)
 					if (toolResults.length > 0) {
@@ -113,8 +120,11 @@
 						messages = [...messages, toolResultMessage];
 					}
 
+					// Don't clear toolCallsInProgress yet - keep it visible during next iteration
 					continueLoop = true; // Continue to get the final response
 				} else {
+					// No tool calls, clear any remaining tool indicators
+					toolCallsInProgress = [];
 					continueLoop = false; // No more tool calls, we're done
 				}
 			} catch (error) {

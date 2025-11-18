@@ -3,7 +3,6 @@
 	import LLMOutput from './LLMOutput.svelte';
 	import Ping from '../Ping.svelte';
 	import { cleanString } from '$lib/utils';
-
 	let {
 		messages = [],
 		streamingContent = '',
@@ -67,7 +66,7 @@
 
 <div class="space-y-2">
 	{#each messages as message, i (i)}
-		{#if message.role === 'user'}
+		{#if message.role === 'user' && (message.content ?? [{}])[0].text}
 			{@const toolResults = getToolResults(message.content)}
 			{#if toolResults.length > 0}
 				<!-- Display tool results -->
@@ -121,27 +120,27 @@
 	{/each}
 
 	{#if isStreaming}
-		<div class="flex justify-center">
+		<div class="flex justify-start">
 			<div class="max-w-[80%]">
 				{#if streamingContent}
 					<LLMOutput text={streamingContent} />
 				{/if}
 
-				{#if toolCallsInProgress.length > 0}
+				{#if toolCallsInProgress.length > 0 && 0}
 					<div class="mt-2 space-y-1">
 						{#each toolCallsInProgress as toolName}
 							<div class="rounded-lg bg-purple-100 px-3 py-2 text-sm">
 								<p class="font-semibold">
 									{cleanString(toolName)}
 								</p>
-								<div class="my-2 flex justify-center">
+								<div class="my-2 flex justify-center px-6">
 									<Ping />
 								</div>
 							</div>
 						{/each}
 					</div>
 				{:else}
-					<div class="my-2 flex justify-center">
+					<div class="my-2 flex justify-center px-6">
 						<Ping />
 					</div>
 				{/if}

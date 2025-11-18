@@ -23,7 +23,7 @@
 			await goto('/error');
 		}
 
-		activeAgreementRootId.set(currentAgreement?.root_id ? Number(currentAgreement.root_id) : null);
+		activeAgreementRootId.set(currentAgreement?.root_id ? currentAgreement.root_id : null);
 	});
 </script>
 

@@ -36,7 +36,8 @@ export interface StreamCallbacks {
 export async function fetchBedrockStream(
 	messages: Message[],
 	useTools: boolean,
-	activeProjectId: number | null
+	activeProjectId: number | null,
+	activeAgreementRootId: string | null
 ): Promise<Response> {
 	const response = await fetch('/api/bedrock', {
 		method: 'POST',
@@ -46,7 +47,8 @@ export async function fetchBedrockStream(
 		body: JSON.stringify({
 			messages,
 			useTools,
-			activeProjectId
+			activeProjectId,
+			activeAgreementRootId
 		})
 	});
 

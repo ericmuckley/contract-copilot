@@ -223,11 +223,4 @@
 		</div>
 		<p class="mt-4 text-center">Your quote is ready to be delivered to the client.</p>
 	{/if}
-
-	<!-- TODO: remove for production -->
-	{#if 0}
-		<div class="max-w-[500px] overflow-x-auto">
-			<pre class="text-xs">{JSON.stringify(data.project.sdata, null, 2)}</pre>
-		</div>
-	{/if}
 </div>

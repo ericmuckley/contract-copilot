@@ -1,5 +1,3 @@
-TODO: don't allow new contracts if there are no policies in place
-
 Create these tables in Postgres:
 
 ```sql
