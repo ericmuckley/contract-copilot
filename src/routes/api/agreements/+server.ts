@@ -65,6 +65,8 @@ export const PUT: RequestHandler = async ({ request }) => {
 			origin: data.origin,
 			agreement_name: data.agreement_name,
 			agreement_type: data.agreement_type,
+			notes: [],
+			edits: [],
 			created_by: data.created_by,
 			text_content: data.text_content,
 			counterparty: data.counterparty || undefined,

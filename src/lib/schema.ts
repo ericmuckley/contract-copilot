@@ -125,6 +125,12 @@ export interface Agreement {
 	root_id: string;
 	version_number: number;
 	origin: 'client' | 'internal';
+	notes: string[];
+	edits: {
+		old: string;
+		new: string;
+		note: string;
+	}[];
 	created_at?: string | null;
 	updated_at?: string | null;
 	agreement_name: string;

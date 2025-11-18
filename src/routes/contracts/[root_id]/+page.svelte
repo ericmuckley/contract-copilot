@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import LLMOutput from '$lib/components/copilot/LLMOutput.svelte';
+	import AgreementNotes from '$lib/components/contracts/AgreementNotes.svelte';
 	import { activeAgreementRootId } from '$lib/stores';
 	import { onMount } from 'svelte';
 
@@ -67,6 +68,12 @@
 			<LLMOutput text={lastAgreement?.text_content || 'No contract text available.'} />
 		</div>
 	</div>
+
+	{#if lastAgreement}
+		<div class="mt-8">
+			<AgreementNotes agreement={lastAgreement} />
+		</div>
+	{/if}
 </div>
 
 <div class="mt-4 max-w-[750px] overflow-x-auto text-xs">
