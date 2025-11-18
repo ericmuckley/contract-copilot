@@ -11,7 +11,7 @@
 		buildAssistantMessage,
 		executeToolCalls
 	} from './chatbotUtils';
-	import { activeProjectId, activeAgreementRootId, chatMessages } from '$lib/stores';
+	import { activeProjectId, activeAgreementRootId } from '$lib/stores';
 	import { invalidate } from '$app/navigation';
 
 	let messages: Message[] = $state([]);
@@ -22,21 +22,6 @@
 	let chatContainer: HTMLDivElement | undefined;
 
 	let { useTools = true }: { useTools?: boolean } = $props();
-
-	// Load messages from store on mount only
-	onMount(() => {
-		const stored = get(chatMessages);
-		if (stored && stored.length > 0) {
-			messages = stored;
-		}
-	});
-
-	// Update store whenever messages change (but not during initial load)
-	$effect(() => {
-		if (messages.length > 0) {
-			chatMessages.set(messages);
-		}
-	});
 
 	// Auto-scroll to bottom when messages or streaming content changes
 	$effect(() => {
@@ -70,7 +55,6 @@
 
 	const resetChat = () => {
 		messages = [];
-		chatMessages.set([]);
 	};
 
 	const runInferenceLoop = async () => {

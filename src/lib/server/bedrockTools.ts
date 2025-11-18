@@ -1,9 +1,15 @@
-import { getProject, updateProject, getAgreementsByRootId, updateAgreementNotes } from './db';
+import {
+	getProject,
+	updateProject,
+	getAgreementsByRootId,
+	updateAgreementNotes,
+	createAgreement
+} from './db';
 import { bedrockClient } from './bedrockClient';
 import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { LLM_MODEL_ID } from './settings';
 import type { ProjectTask, StageData } from '$lib/schema';
-import { generateQuoteCSV } from '$lib/utils';
+import { generateQuoteCSV, applyEditsToText } from '$lib/utils';
 
 export class GetProjectDetailsTool {
 	static spec = {
@@ -385,5 +391,174 @@ Return the modified tasks array as JSON:`;
 			modified,
 			totalHoursDiff: Math.round((newTotalHours - oldTotalHours) * 100) / 100
 		};
+	}
+}
+
+export class CreateNewContractVersionTool {
+	static spec = {
+		toolSpec: {
+			name: 'create_new_contract_version',
+			description:
+				'Create a new version of a contract or agreement by modifying its text content based on a user command.',
+			inputSchema: {
+				json: {
+					type: 'object',
+					properties: {
+						root_id: {
+							type: 'string',
+							description: 'The root_id of the contract to create a new version for.'
+						},
+						command: {
+							type: 'string',
+							description:
+								'Natural language command describing what changes to make to the contract text (e.g., "change the payment terms to net 60", "add a confidentiality clause", "remove section 3.2")'
+						}
+					},
+					required: ['root_id', 'command']
+				}
+			}
+		}
+	};
+
+	static async run({ root_id, command }: { root_id: string; command: string }) {
+		try {
+			// 1. Fetch the latest version of the contract
+			const agreements = await getAgreementsByRootId(root_id);
+			if (!agreements || agreements.length === 0) {
+				return {
+					response: { error: `Contract with root_id ${root_id} not found.` },
+					text: JSON.stringify({ error: `Contract with root_id ${root_id} not found.` })
+				};
+			}
+
+			// The agreements are already sorted by version_number DESC, so take the first one
+			const latestAgreement = agreements[0];
+			const currentTextContent = latestAgreement.text_content;
+			const currentVersionNumber = latestAgreement.version_number;
+
+			// 2. Use LLM to identify edits and apply them to the contract text
+			const { modifiedText, edits } = await this.modifyContractTextWithLLM(
+				currentTextContent,
+				command
+			);
+
+			// 3. Save the new version using createAgreement
+			const newAgreement = await createAgreement({
+				root_id: root_id,
+				version_number: currentVersionNumber + 1,
+				origin: latestAgreement.origin,
+				notes: [],
+				edits: edits, // Store the edits for audit trail
+				agreement_name: latestAgreement.agreement_name,
+				agreement_type: latestAgreement.agreement_type,
+				created_by: latestAgreement.created_by,
+				text_content: modifiedText,
+				counterparty: latestAgreement.counterparty || undefined,
+				project_id: latestAgreement.project_id || undefined
+			}); // 4. Return success response
+			return {
+				response: {
+					success: true,
+					message: `Created version ${newAgreement.version_number} of contract ${root_id}`,
+					root_id: root_id,
+					new_version_number: newAgreement.version_number,
+					command_applied: command,
+					agreement: newAgreement
+				},
+				text: JSON.stringify({
+					success: true,
+					message: `Created version ${newAgreement.version_number} of contract ${root_id}`,
+					new_version_number: newAgreement.version_number,
+					command_applied: command
+				})
+			};
+		} catch (error) {
+			return {
+				response: { error: `Failed to create new contract version: ${error}` },
+				text: JSON.stringify({ error: `Failed to create new contract version: ${error}` })
+			};
+		}
+	}
+
+	private static async modifyContractTextWithLLM(
+		currentText: string,
+		command: string
+	): Promise<{ modifiedText: string; edits: { old: string; new: string; note: string }[] }> {
+		// Step 1: Use LLM to identify specific edits to make (much faster than rewriting everything)
+		const systemPrompt = `You are a legal contract editor assistant. You will receive:
+1. The current text content of a contract
+2. A user command describing what changes to make
+
+Your job is to identify the specific edits needed and return them as a JSON array. Each edit should specify:
+- "old": The exact text from the contract to replace (empty string "" if adding new text)
+- "new": The replacement or additional text
+- "note": A brief explanation of the change
+
+Rules:
+- Return ONLY a JSON array of edit objects, no other text
+- For replacements: provide the exact text to find in "old" and the replacement in "new"
+- For additions: use empty string "" for "old" and provide the text to add in "new"
+- For deletions: provide the exact text to remove in "old" and empty string "" in "new"
+- Be precise with the "old" text - it must match exactly what's in the contract
+- Keep edits focused and minimal - only change what the command asks for
+- Maintain professional legal language in all changes
+
+Example output:
+[
+  {
+    "old": "payment within 60 days",
+    "new": "payment within 30 days",
+    "note": "Changed payment terms as requested"
+  }
+]`;
+
+		const userPrompt = `Current contract text:
+${currentText}
+
+User command: "${command}"
+
+Identify the specific edits needed and return them as a JSON array:`;
+
+		const response = await bedrockClient.send(
+			new ConverseCommand({
+				modelId: LLM_MODEL_ID,
+				messages: [
+					{
+						role: 'user',
+						content: [{ text: userPrompt }]
+					}
+				],
+				system: [{ text: systemPrompt }],
+				inferenceConfig: {
+					maxTokens: 2000, // Much smaller since we're only getting edits, not full text
+					temperature: 0.2
+				}
+			})
+		);
+
+		// Extract the text response
+		const outputText = response.output?.message?.content?.[0]?.text || '[]';
+
+		// Parse JSON from response (handle potential markdown code blocks)
+		const jsonMatch = outputText.match(/\[[\s\S]*\]/);
+		if (!jsonMatch) {
+			throw new Error('LLM did not return valid JSON array of edits');
+		}
+
+		const edits = JSON.parse(jsonMatch[0]) as { old: string; new: string; note: string }[];
+
+		// Validate the structure
+		if (!Array.isArray(edits)) {
+			throw new Error('LLM response is not an array');
+		}
+
+		// Step 2: Apply the edits to the original text
+		const modifiedText = applyEditsToText(currentText, edits);
+
+		if (!modifiedText || modifiedText.trim().length === 0) {
+			throw new Error('Applied edits resulted in empty contract text');
+		}
+
+		return { modifiedText, edits };
 	}
 }

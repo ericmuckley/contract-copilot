@@ -1,5 +1,6 @@
 import {
 	AddNoteToContractTool,
+	CreateNewContractVersionTool,
 	GetContractDetailsTool,
 	GetContractEditsSummaryTool,
 	GetProjectDetailsTool,
@@ -11,5 +12,6 @@ export const TOOLS = [
 	UpdateProjectTasksTool,
 	GetContractDetailsTool,
 	GetContractEditsSummaryTool,
-	AddNoteToContractTool
+	AddNoteToContractTool,
+	CreateNewContractVersionTool
 ];

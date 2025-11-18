@@ -66,9 +66,12 @@ export const applyEditsToText = (
 	let updatedText = textContent;
 
 	for (const edit of edits) {
-		if (edit.old && edit.new) {
-			// Replace all occurrences of the old text with the new text
+		if (edit.old) {
+			// Replace or delete: replace all occurrences of the old text with the new text (or empty string for deletion)
 			updatedText = updatedText.split(edit.old).join(edit.new);
+		} else if (edit.new) {
+			// Addition: append the new text at the end
+			updatedText = updatedText + '\n\n' + edit.new;
 		}
 	}
 
