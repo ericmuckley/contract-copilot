@@ -224,3 +224,32 @@ This component should allow the user to validate whether the current agreement.t
 
 For context, the prompt should use the agreement.text_content, and the content of the estimate stage of the selected project. Then using that context, ask the LLM if the project scopt / estimate is aligned with the current agreement text. If not, provide a list of issues that need to be resolved.
 ```
+
+# Creating cross-workflow LLM tools
+
+```md
+Create a new bedrock tool. It should be called `CreateNewContract`. The inputs will be `contract_type` (one of AGREEMENT_TYPES in schema.ts), and `project name`.
+
+First, the function will find the project ID associated with the project name. Then it will run the getProject(project_id) function to get the project details.
+
+Next, take all the content out of the project.stages, and feed it to an LLM. It should be prompted to turn the project into a contract and return JSON that includes: {
+contract_name,
+counterparty (or UNKNOWN),
+text_content (the content of the contract)
+}
+
+Finally, parse the LLM output as JSON to get the values of these items. Once we have the values, we can create the new contract.
+
+To create the new contract, we need to call the call the `saveNewAgreement` function.
+
+That function will need multiple inputs:
+
+- origin: use 'internal'
+- created_by: use the project.created_by
+- agreement_name: from the LLM output
+- agreement_type: any of AGREEMENT_TYPES in schema.ts, passed to the function by the user
+- counterparty: from the LLM output
+- text_content: from the LLM output
+- root_id: use `makeShortId()`
+- version_number: 1
+```

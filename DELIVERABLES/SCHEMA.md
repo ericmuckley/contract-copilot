@@ -128,4 +128,117 @@ When the copilot chatbot calls server functions/tools to make updates to the cur
 
 You must extend the current chatbot with basic "check weather" tool to include tools for modifying the stage data of the current project. When that data is modified, it should automatically update in the UI. The copilot should also be able to query other projects, based on the project name.
 
+# Big pivot: the db schema for project estimates
+
+-- Create a custom ENUM type for the fixed project stages [cite: 15]
+CREATE TYPE project_stage AS ENUM (
+'Artifacts',
+'BusinessCase',
+'Requirements',
+'SolutionArchitecture',
+'EffortEstimate',
+'Quote'
+);
+
+-- A simple User table for tracking "approvers" [cite: 29]
+CREATE TABLE "User" (
+"id" SERIAL PRIMARY KEY,
+"name" VARCHAR(255) NOT NULL,
+"email" VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- The main Project table, which tracks the current stage [cite: 18, 26]
+CREATE TABLE "Project" (
+"id" SERIAL PRIMARY KEY,
+"name" VARCHAR(255) NOT NULL,
+"current_stage" project_stage NOT NULL DEFAULT 'Artifacts',
+"created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+"updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Stores file references (from Vercel Blob Storage) for each project [cite: 18]
+CREATE TABLE "Artifact" (
+"id" SERIAL PRIMARY KEY,
+"project_id" INTEGER NOT NULL REFERENCES "Project"("id") ON DELETE CASCADE,
+"file_name" VARCHAR(255) NOT NULL,
+"file_url" VARCHAR(1024) NOT NULL, -- This would be the Vercel Blob URL
+"artifact_type" VARCHAR(100), -- e.g., 'transcript', 'notes', 'document' [cite: 18]
+"uploaded_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Stores the content for the Business Case stage [cite: 19]
+CREATE TABLE "BusinessCase" (
+"id" SERIAL PRIMARY KEY,
+"project_id" INTEGER NOT NULL UNIQUE REFERENCES "Project"("id") ON DELETE CASCADE,
+"content" TEXT, -- LLM-generated scope, outcomes, constraints [cite: 19]
+"created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+"updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Stores the content for the Requirements stage [cite: 20]
+CREATE TABLE "Requirements" (
+"id" SERIAL PRIMARY KEY,
+"project_id" INTEGER NOT NULL UNIQUE REFERENCES "Project"("id") ON DELETE CASCADE,
+"content" TEXT, -- LLM-generated requirements summary [cite: 20]
+"created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+"updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Stores the content for the Solution/Architecture stage [cite: 21]
+CREATE TABLE "SolutionArchitecture" (
+"id" SERIAL PRIMARY KEY,
+"project_id" INTEGER NOT NULL UNIQUE REFERENCES "Project"("id") ON DELETE CASCADE,
+"content" TEXT, -- Documented approach, tech stack, risks [cite: 21]
+"created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+"updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Stores the high-level effort estimate details [cite: 22]
+CREATE TABLE "EffortEstimate" (
+"id" SERIAL PRIMARY KEY,
+"project_id" INTEGER NOT NULL UNIQUE REFERENCES "Project"("id") ON DELETE CASCADE,
+"assumptions" TEXT, -- WBS assumptions [cite: 22]
+"created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+"updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Stores individual line items (WBS) for an estimate [cite: 22]
+CREATE TABLE "EstimateTask" (
+"id" SERIAL PRIMARY KEY,
+"estimate_id" INTEGER NOT NULL REFERENCES "EffortEstimate"("id") ON DELETE CASCADE,
+"task_description" TEXT NOT NULL,
+"assigned_role" VARCHAR(255) NOT NULL, -- "Backend", "QA" [cite: 22, 72]
+"hours" DECIMAL(10, 2) NOT NULL
+);
+
+-- Stores the final Quote details [cite: 24]
+CREATE TABLE "Quote" (
+"id" SERIAL PRIMARY KEY,
+"project_id" INTEGER NOT NULL UNIQUE REFERENCES "Project"("id") ON DELETE CASCADE,
+"payment_terms" TEXT,
+"timeline" TEXT,
+"is_delivered" BOOLEAN NOT NULL DEFAULT FALSE,
+"created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+"updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Stores the rates applied to roles for a specific quote [cite: 24]
+CREATE TABLE "QuoteRate" (
+"id" SERIAL PRIMARY KEY,
+"quote_id" INTEGER NOT NULL REFERENCES "Quote"("id") ON DELETE CASCADE,
+"role_name" VARCHAR(255) NOT NULL,
+"rate_per_hour" DECIMAL(10, 2) NOT NULL,
+UNIQUE("quote_id", "role_name") -- Ensures one rate per role per quote
+);
+
+-- Tracks all stage transitions, approvals, and history [cite: 29]
+CREATE TABLE "ProjectHistory" (
+"id" SERIAL PRIMARY KEY,
+"project_id" INTEGER NOT NULL REFERENCES "Project"("id") ON DELETE CASCADE,
+"stage" project_stage NOT NULL,
+"user_id" INTEGER REFERENCES "User"("id"), -- The "approver" [cite: 29]
+"action" VARCHAR(255) NOT NULL, -- e.g., 'Approved', 'Advanced', 'Artifact Uploaded'
+"timestamp" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 # GOOD for Loom conversation:"Implementing a "review agreement"
