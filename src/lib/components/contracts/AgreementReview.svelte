@@ -262,7 +262,7 @@
 				</div>
 			{:else}
 				<button class="btn btn-primary" onclick={reviewAgreement} disabled={isReviewing}>
-					Review Agreement
+					<i class="bi bi-pencil mr-2"></i>Review Agreement
 				</button>
 			{/if}
 		</div>
