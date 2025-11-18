@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { Message } from '@aws-sdk/client-bedrock-runtime';
 import { streamInference } from '$lib/server/bedrockClient';
-import { getAgreement } from '$lib/server/db';
+import { getAgreement, updateAgreement } from '$lib/server/db';
 import { getProject } from '$lib/server/db';
 import { validateAgreementAlignmentPrompt } from '$lib/prompts';
 
@@ -69,6 +69,9 @@ export async function POST({ params, request }: RequestEvent) {
 			],
 			useTools: false
 		});
+
+		// Update the agreement to link it to the project
+		await updateAgreement(agreementId, { project_id: projectId });
 
 		// Create a ReadableStream that processes the Bedrock response
 		const stream = new ReadableStream({

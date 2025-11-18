@@ -103,7 +103,7 @@
 			Evaluate whether the current version of this agreement is consistent with a project estimate
 			and scope.
 		</p>
-		{#if isValidatingForAlignment}
+		{#if isValidatingForAlignment || currentAgreement.project_id}
 			<div class="mt-4" in:slide>
 				<ValidateAlignment agreement={currentAgreement} />
 			</div>

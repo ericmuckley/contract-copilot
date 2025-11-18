@@ -6,7 +6,7 @@
 
 	let { agreement }: { agreement: Agreement } = $props();
 
-	let selectedProjectId = $state<number | null>(null);
+	let selectedProjectId = $state<number | null>(agreement.project_id || null);
 	let isValidating = $state(false);
 	let validationResult = $state('');
 	let error = $state('');
@@ -17,6 +17,11 @@
 			const estimateStage = project.sdata?.find((stage) => stage.name === 'estimate');
 			return estimateStage && estimateStage.content && estimateStage.content.trim().length > 0;
 		})
+	);
+
+	// Get the linked project details
+	const linkedProject = $derived(
+		selectedProjectId ? ($allProjects || []).find((p) => p.id === selectedProjectId) : null
 	);
 
 	async function performValidation() {
@@ -66,6 +71,9 @@
 					}
 				}
 			}
+
+			// Update the agreement object with the linked project
+			agreement.project_id = selectedProjectId;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Validation failed';
 		} finally {
@@ -76,7 +84,6 @@
 	function reset() {
 		validationResult = '';
 		error = '';
-		selectedProjectId = null;
 	}
 </script>
 
@@ -88,11 +95,42 @@
 		</div>
 	{/if}
 
-	{#if !isValidating && !validationResult}
+	{#if linkedProject}
+		<!-- Show linked project thumbnail -->
+		<div class="space-y-4">
+			<div class="rounded-lg border border-slate-200 bg-white p-4">
+				<div class="mb-2 text-sm font-medium text-slate-600">Linked to Project:</div>
+				<a
+					target="_blank"
+					href="/projects/{linkedProject.id}"
+					class="flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-slate-50"
+				>
+					<div class="flex h-10 w-10 items-center justify-center rounded bg-blue-100 text-blue-600">
+						<i class="bi bi-folder text-lg"></i>
+					</div>
+					<div class="flex-1">
+						<div class="font-medium text-slate-900">{linkedProject.project_name}</div>
+						<div class="text-xs text-slate-500">Click to view project</div>
+					</div>
+					<i class="bi bi-arrow-right text-slate-400"></i>
+				</a>
+			</div>
+		</div>
+	{/if}
+
+	{#if linkedProject && !validationResult}
+		<div class="flex justify-center">
+			<button onclick={performValidation} disabled={isValidating} class="btn btn-primary">
+				<i class="bi bi-check-circle mr-2"></i>
+				Validate Against Project Estimate
+			</button>
+		</div>
+	{:else if !isValidating && !validationResult}
+		<!-- Show project selector -->
 		<div class="space-y-4">
 			<div>
 				<label for="project-select" class="standard mb-2 block">
-					Select Project to validate against
+					Select Project to link and validate against
 				</label>
 				{#if projectsWithEstimates.length === 0}
 					<p class="text-sm text-slate-500">
@@ -117,7 +155,7 @@
 					class="btn btn-primary w-full"
 				>
 					<i class="bi bi-check-circle mr-2"></i>
-					Perform Validation
+					Link Project and Validate
 				</button>
 			{/if}
 		</div>
@@ -137,13 +175,26 @@
 
 	{#if validationResult && !isValidating}
 		<div class="space-y-4">
+			<!-- Show linked project info after validation -->
+			{#if linkedProject}
+				<div class="rounded-lg border border-green-200 bg-green-50 p-3">
+					<div class="flex items-center gap-2 text-sm text-green-700">
+						<i class="bi bi-check-circle-fill"></i>
+						<span>Linked to project:</span>
+						<a href="/projects/{linkedProject.id}" class="font-medium underline hover:no-underline">
+							{linkedProject.project_name}
+						</a>
+					</div>
+				</div>
+			{/if}
+
 			<div class="overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 p-6">
 				<LLMOutput text={validationResult} />
 			</div>
 
 			<button onclick={reset} class="btn btn-outline w-full">
 				<i class="bi bi-arrow-clockwise mr-2"></i>
-				Validate Against Different Project
+				Run Validation Again
 			</button>
 		</div>
 	{/if}
