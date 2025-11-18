@@ -19,6 +19,7 @@
 	let streamingContent = $state('');
 	let isStreaming = $state(false);
 	let toolCallsInProgress: string[] = $state([]);
+	let chatContainer: HTMLDivElement | undefined;
 
 	let { useTools = true }: { useTools?: boolean } = $props();
 
@@ -35,6 +36,20 @@
 		if (messages.length > 0) {
 			chatMessages.set(messages);
 		}
+	});
+
+	// Auto-scroll to bottom when messages or streaming content changes
+	$effect(() => {
+		// Track dependencies
+		messages.length;
+		streamingContent;
+
+		// Scroll to bottom after a small delay to ensure DOM has updated
+		setTimeout(() => {
+			if (chatContainer) {
+				chatContainer.scrollTop = chatContainer.scrollHeight;
+			}
+		}, 0);
 	});
 
 	const handleSubmit = async () => {
@@ -149,7 +164,7 @@
 
 <div class="flex h-full flex-col overflow-hidden">
 	<!-- Scrollable chat messages area -->
-	<div class="min-h-0 flex-1 overflow-y-auto px-4 py-2">
+	<div bind:this={chatContainer} class="min-h-0 flex-1 overflow-y-auto px-4 py-2">
 		{#if messages.length}
 			<div in:slide>
 				<ChatHistory {messages} {streamingContent} {isStreaming} {toolCallsInProgress} />
