@@ -73,9 +73,7 @@
 			</p>
 		</div>
 	{:else}
-		<div
-			class="grid max-h-84 grid-cols-1 gap-6 overflow-y-auto pr-3 pb-3 md:grid-cols-2 lg:grid-cols-3"
-		>
+		<div class="grid max-h-84 grid-cols-1 gap-6 overflow-y-auto pr-3 pb-3 md:grid-cols-2">
 			{#each filteredProjects as project (project.id)}
 				<ProjectCard {project} />
 			{/each}

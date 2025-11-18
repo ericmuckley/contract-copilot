@@ -24,10 +24,10 @@
 		<ProjectList projects={data.projects} />
 	</div>
 	<div class="card">
-		<div class="mb-8">
-			<ContractListHeading agreements={data.agreements} />
+		<div class="mb-4">
+			<ContractListHeading agreements={data.agreements} policyArtifacts={data.policyArtifacts} />
 		</div>
 
-		<ContractList agreements={data.agreements} />
+		<ContractList agreements={data.agreements} policyArtifacts={data.policyArtifacts} />
 	</div>
 </div>

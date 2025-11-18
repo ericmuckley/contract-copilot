@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { cleanString } from '$lib/utils';
-	import type { Agreement } from '$lib/schema';
+	import type { Agreement, Artifact } from '$lib/schema';
 	import ContractCard from './ContractCard.svelte';
 	import { AGREEMENT_TYPES } from '$lib/schema';
 
-	let { agreements = [] }: { agreements?: Agreement[] } = $props();
+	let {
+		agreements = [],
+		policyArtifacts
+	}: { agreements?: Agreement[]; policyArtifacts: Artifact[] } = $props();
 
 	let typeFilter = $state<string>('all');
 
@@ -44,50 +46,64 @@
 	});
 </script>
 
-<div>
-	{#if lastUpdated()}
-		<div class="standard mb-6 text-sm">
-			<span class="font-medium">Last agreement update:</span>
-			{lastUpdated()?.toLocaleString('en-US', {
-				month: 'short',
-				day: 'numeric',
-				year: 'numeric',
-				hour: 'numeric',
-				minute: '2-digit',
-				hour12: true
-			})}
-		</div>
-	{/if}
-
-	<div class="mb-6 flex items-center space-x-3">
-		<select id="type-filter" bind:value={typeFilter}>
-			<option value="all">All</option>
-			{#each AGREEMENT_TYPES as type}
-				<option value={type}>{type}</option>
-			{/each}
-		</select>
-		<span class="text-sm text-slate-500">
-			{filteredAgreements.length}/{latestAgreements().length} agreement{latestAgreements()
-				.length !== 1
-				? 's'
-				: ''}
-		</span>
-	</div>
-
-	{#if filteredAgreements.length === 0}
-		<div class="py-24 text-center">
-			<div class="mb-4 text-4xl text-slate-300">
-				<i class="bi bi-file-earmark-x"></i>
+{#if policyArtifacts.length}
+	<div>
+		{#if lastUpdated()}
+			<div class="standard mb-6 text-sm">
+				<span class="font-medium">Last contract update:</span>
+				{lastUpdated()?.toLocaleString('en-US', {
+					month: 'short',
+					day: 'numeric',
+					year: 'numeric',
+					hour: 'numeric',
+					minute: '2-digit',
+					hour12: true
+				})}
 			</div>
-			<p class="standard">
-				{typeFilter === 'all' ? 'No agreements yet.' : `No ${typeFilter} agreements found.`}
-			</p>
+		{/if}
+
+		<div class="mb-6 flex items-center space-x-3">
+			<select id="type-filter" bind:value={typeFilter}>
+				<option value="all">All</option>
+				{#each AGREEMENT_TYPES as type}
+					<option value={type}>{type}</option>
+				{/each}
+			</select>
+			<span class="text-sm text-slate-500">
+				{filteredAgreements.length}/{latestAgreements().length} agreement{latestAgreements()
+					.length !== 1
+					? 's'
+					: ''}
+			</span>
 		</div>
-	{:else}
-		<div class="grid max-h-84 grid-cols-1 gap-6 overflow-y-auto pr-3 pb-3 md:grid-cols-2">
-			{#each filteredAgreements as agreement (agreement.id)}
-				<ContractCard {agreement} />
-			{/each}
+
+		{#if filteredAgreements.length === 0}
+			<div class="py-24 text-center">
+				<div class="mb-4 text-4xl text-slate-300">
+					<i class="bi bi-file-earmark-x"></i>
+				</div>
+				<p class="standard">
+					{typeFilter === 'all' ? 'No agreements yet.' : `No ${typeFilter} agreements found.`}
+				</p>
+			</div>
+		{:else}
+			<div class="grid max-h-84 grid-cols-1 gap-6 overflow-y-auto pr-3 pb-3 md:grid-cols-2">
+				{#each filteredAgreements as agreement (agreement.id)}
+					<ContractCard {agreement} />
+				{/each}
+			</div>
+		{/if}
+	</div>
+{:else}
+	<div class="text-center">
+		<div class="flex justify-center">
+			<p>Upload some policy documents to get started</p>
 		</div>
-	{/if}
-</div>
+		<div class="mt-6 flex justify-center">
+			<a href="/contracts/policy-manager" class="btn btn-outline">
+				<i class="bi bi-gear-fill"></i>
+				Add Policies
+			</a>
+		</div>
+	</div>
+{/if}
