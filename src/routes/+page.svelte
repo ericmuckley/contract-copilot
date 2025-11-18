@@ -15,7 +15,7 @@
 	});
 </script>
 
-<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+<div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
 	<div class="card">
 		<div class="mb-4">
 			<ProjectListHeading projects={data.projects} />

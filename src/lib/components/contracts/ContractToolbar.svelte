@@ -139,12 +139,12 @@
 				{#if emailSent}
 					<div class="flex items-center gap-2 text-green-600">
 						<i class="bi-check-circle-fill"></i>
-						<span class="font-medium">Email sent!</span>
+						<span>Email sent!</span>
 					</div>
 				{:else}
 					<div class="space-y-3">
 						<div>
-							<label for="email" class="mb-1 block text-sm font-medium text-gray-700">
+							<label for="email" class="standard mb-1 block text-sm">
 								Recipient Email Address
 							</label>
 							<input

@@ -23,7 +23,7 @@ export const createInternalContractPrompt = async (
 	</EXAMPLE_POLICIES_AND_DOCUMENTS>
 	
 	
-	Now, using the example, create a detailed and professional ${agreement_type} agreement named "${agreement_name}" for the counterparty "${counterparty}". Ensure all standard clauses and legal language are included.`.trim();
+	Now, using the example, create a detailed and professional ${agreement_type} agreement named "${agreement_name}" for the counterparty "${counterparty}". Ensure all standard clauses and legal language are included. Make it short and concise.`.trim();
 
 	return prompt;
 };
@@ -127,18 +127,11 @@ Please analyze whether the agreement is consistent with the project estimate and
 5. **Resource Requirements**: Are the skills/roles mentioned aligned?
 6. **Assumptions and Constraints**: Are critical assumptions from the estimate reflected in the agreement?
 
-Provide your analysis in the following format:
+Provide your analysis in a concise table format which has columns for "Aspect", "Findings", and "Alignment Status" with a green, yellow, or red emojis.
 
-## Alignment Status
-[Overall assessment: "Aligned", "Partially Aligned", or "Not Aligned"]
+Conclude with short a summary of bullet point action items.
 
-## Issues Found
-[If any issues are identified, list them here. If aligned, state "No significant issues found."]
-
-## Recommendations
-[Provide specific recommendations to resolve any issues or improve alignment]
-
-Be thorough and specific in your analysis. Cite specific sections or details from both documents to support your findings. Be very concise in your recommendations.`;
+Be very concise and avoid unnecessary elaboration.`;
 
 	return prompt;
 };

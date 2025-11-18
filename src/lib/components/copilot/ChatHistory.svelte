@@ -107,8 +107,11 @@
 										<i class="bi bi-check-lg text-green-600"></i>
 										<span>{cleanString(tool.name)}</span>
 									</p>
-									<div class="mt-1 max-h-32 overflow-x-auto overflow-y-auto text-xs text-gray-600">
+									<div class="standard mt-1 max-h-32 overflow-x-auto overflow-y-auto text-xs">
 										Input: {JSON.stringify(tool.input)}
+									</div>
+									<div class="muted mt-1 text-xs">
+										Note: long running tasks may take up to one minute to complete.
 									</div>
 								</div>
 							{/each}

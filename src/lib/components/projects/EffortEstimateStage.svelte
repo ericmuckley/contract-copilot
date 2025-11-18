@@ -241,9 +241,9 @@
 					<table class="w-full border-collapse">
 						<thead>
 							<tr class="border-b border-slate-200 bg-slate-50">
-								<th class="px-4 py-2 text-left text-sm font-semibold text-slate-700">Task</th>
-								<th class="px-4 py-2 text-left text-sm font-semibold text-slate-700">Role</th>
-								<th class="px-4 py-2 text-right text-sm font-semibold text-slate-700">Hours</th>
+								<th class="standard px-4 py-2 text-left text-sm font-semibold">Task</th>
+								<th class="standard px-4 py-2 text-left text-sm font-semibold">Role</th>
+								<th class="standard px-4 py-2 text-right text-sm font-semibold">Hours</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -302,7 +302,7 @@
 											? 6
 											: header === 'Role'
 												? 3
-												: 2} font-semibold text-slate-700"
+												: 2} standard font-semibold"
 								>
 									{header}
 								</div>
@@ -382,13 +382,13 @@
 			<div class="mt-4 space-y-4">
 				{#if generatedAssumptions}
 					<div>
-						<h4 class="mb-2 font-semibold text-slate-700">Generating Assumptions:</h4>
+						<h4 class="standard mb-2 font-semibold">Generating Assumptions:</h4>
 						<LLMOutput text={generatedAssumptions} />
 					</div>
 				{/if}
 				{#if generatedTasks}
 					<div>
-						<h4 class="mb-2 font-semibold text-slate-700">Generating Tasks:</h4>
+						<h4 class="standard mb-2 font-semibold">Generating Tasks:</h4>
 						<div class="overflow-x-auto">
 							<pre class="rounded-lg bg-slate-50 p-4 text-xs">{generatedTasks}</pre>
 						</div>

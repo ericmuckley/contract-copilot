@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { Artifact } from '$lib/schema';
+	import { flip } from 'svelte/animate';
 	import Spinner from '../Spinner.svelte';
+	import { slide } from 'svelte/transition';
 
 	let {
 		projectId,
@@ -14,6 +16,7 @@
 
 	let isUploading = $state(false);
 	let uploadError = $state('');
+	let deletingArtifactId = $state<number | null>(null);
 
 	async function handleFileUpload(e: Event) {
 		const target = e.target as HTMLInputElement;
@@ -51,6 +54,31 @@
 			isUploading = false;
 		}
 	}
+
+	async function handleDeleteArtifact(artifactId: number, fileName: string) {
+		deletingArtifactId = artifactId;
+		uploadError = '';
+
+		try {
+			const response = await fetch(
+				`/api/projects/${projectId}/artifacts?artifactId=${artifactId}`,
+				{
+					method: 'DELETE'
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to delete artifact');
+			}
+
+			// Refresh artifacts list
+			await onRefresh();
+		} catch (err) {
+			uploadError = err instanceof Error ? err.message : 'Delete failed';
+		} finally {
+			deletingArtifactId = null;
+		}
+	}
 </script>
 
 <div class="space-y-4">
@@ -66,10 +94,10 @@
 				<Spinner />
 			</div>
 		{:else}
-			<div class="mb-4">
+			<div class="mb-4 flex justify-center">
 				<label
 					for="artifact-upload"
-					class="btn btn-primary flex cursor-pointer items-center justify-center space-x-2 rounded-lg text-center"
+					class="btn btn-primary flex items-center justify-center space-x-2"
 				>
 					<i class="bi bi-upload"></i>
 					<span>{isUploading ? 'Uploading...' : 'Upload Files'}</span>
@@ -94,10 +122,12 @@
 		{/if}
 
 		{#if artifacts.length < 2}
-			<div class="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-700">
-				<i class="bi bi-exclamation-circle mr-2"></i>
-				You need at least {2 - artifacts.length} more artifact{artifacts.length === 1 ? '' : 's'} to
-				advance to the next stage.
+			<div class="flex justify-center">
+				<div class="text-sm text-red-600">
+					<i class="bi bi-exclamation-circle"></i>
+					You need at least {2 - artifacts.length} more artifact{artifacts.length === 1 ? '' : 's'} to
+					advance to the next stage.
+				</div>
 			</div>
 		{/if}
 	</div>
@@ -107,12 +137,15 @@
 			<div class="space-y-2">
 				{#each artifacts as artifact (artifact.id)}
 					<div
-						class="flex items-center justify-between rounded-lg border border-slate-200 p-3 transition-colors hover:bg-slate-50"
+						class="card flex items-center justify-between border border-slate-200"
+						animate:flip
+						in:slide
+						out:slide
 					>
 						<div class="flex items-center space-x-3">
 							<i class="bi bi-file-earmark-text muted text-2xl"></i>
 							<div>
-								<div class="font-medium text-slate-800">{artifact.file_name}</div>
+								<div class="standard">{artifact.file_name}</div>
 							</div>
 						</div>
 						<div class="flex items-center space-x-2">
@@ -124,6 +157,19 @@
 								<i class="bi bi-download"></i>
 								Download
 							</a>
+							<button
+								onclick={() => handleDeleteArtifact(artifact.id, artifact.file_name)}
+								disabled={deletingArtifactId === artifact.id}
+								class="rounded px-3 py-1 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+								title="Remove artifact"
+							>
+								{#if deletingArtifactId === artifact.id}
+									<i class="bi bi-hourglass-split"></i>
+								{:else}
+									<i class="bi bi-trash"></i>
+								{/if}
+								Delete
+							</button>
 						</div>
 					</div>
 				{/each}

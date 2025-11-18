@@ -52,25 +52,25 @@
 
 	<div class="standard mt-6 grid grid-cols-2 gap-4">
 		<div class="flex flex-col">
-			<span class="muted text-xs font-medium tracking-wide uppercase">Created By</span>
+			<span class="muted text-xs tracking-wide uppercase">Created By</span>
 			<span class="mt-1 text-sm">{currentAgreement?.created_by}</span>
 		</div>
 		<div class="flex flex-col">
-			<span class="muted text-xs font-medium tracking-wide uppercase">Created On</span>
+			<span class="muted text-xs tracking-wide uppercase">Created On</span>
 			<span class="mt-1 text-sm"
 				>{new Date(currentAgreement?.created_at as string).toLocaleDateString()}</span
 			>
 		</div>
 		<div class="flex flex-col">
-			<span class="muted text-xs font-medium tracking-wide uppercase">Type</span>
+			<span class="muted text-xs tracking-wide uppercase">Type</span>
 			<span class="mt-1 text-sm">{currentAgreement?.agreement_type}</span>
 		</div>
 		<div class="flex flex-col">
-			<span class="muted text-xs font-medium tracking-wide uppercase">Counterparty</span>
+			<span class="muted text-xs tracking-wide uppercase">Counterparty</span>
 			<span class="mt-1 text-sm">{currentAgreement?.counterparty}</span>
 		</div>
 		<div class="flex flex-col">
-			<span class="muted text-xs font-medium tracking-wide uppercase">Origin</span>
+			<span class="muted text-xs tracking-wide uppercase">Origin</span>
 			<span class="mt-1 text-sm capitalize">{currentAgreement?.origin}</span>
 		</div>
 	</div>
@@ -129,7 +129,7 @@
 <!-- Debug: Uncomment to see raw data
 <div class="card mt-4">
 	<details>
-		<summary class="cursor-pointer font-medium">Debug: All Agreements Data</summary>
+		<summary class="cursor-pointer">Debug: All Agreements Data</summary>
 		<div class="mt-4 max-w-[750px] overflow-x-auto text-xs">
 			<pre>{JSON.stringify(data.agreements, null, 2)}</pre>
 		</div>

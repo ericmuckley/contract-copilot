@@ -75,21 +75,21 @@ contract-copilot/
 ### TypeScript
 
 - Use TypeScript for all new files
-- Define types in `src/lib/types.ts` or co-located with components
+- Define types in `src/lib/schema.ts` or co-located with components
+- Look in `src/lib/schema.ts` to see existing type definitions and other schema used throughout the app
 - Avoid using `any` type; use proper type definitions
 
 ### Svelte
 
 - Use Svelte 5 syntax (runes: `$state`, `$derived`, `$effect`)
+- Always favor onMount over $effect for client-side initialization when possible
 - Place components in `src/lib/components/`
-- Use composition over inheritance
 - Keep components focused and single-purpose
 
 ### Styling
 
 - Use Tailwind CSS utility classes
-- Follow Tailwind's responsive design patterns
-- Use Tailwind's color palette and spacing scale
+- When possible, use existing Tailwind utility classes defined in `app.css` instead of defining custom tailwind in every component
 - Custom CSS should be minimal and placed in component `<style>` blocks or `app.css`
 
 ### Formatting and Linting
@@ -103,7 +103,7 @@ contract-copilot/
 
 - Routes follow SvelteKit conventions: `+page.svelte`, `+layout.svelte`, `+server.ts`
 - Components use PascalCase: `MyComponent.svelte`
-- Utilities use camelCase: `utils.ts`, `types.ts`
+- Utilities use camelCase: `llmUtils.ts`, `types.ts`
 
 ## Key Dependencies
 

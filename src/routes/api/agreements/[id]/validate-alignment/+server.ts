@@ -64,7 +64,7 @@ export async function POST({ params, request }: RequestEvent) {
 			messages,
 			systemMessages: [
 				{
-					text: 'You are an expert contract and project scope analyst. Provide concise, detailed analysis to help identify alignment issues between contracts and project estimates.'
+					text: 'You are an expert contract and project scope analyst. Provide concise, specific analysis to help identify alignment issues between contracts and project estimates.'
 				}
 			],
 			useTools: false

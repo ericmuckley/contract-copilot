@@ -22,7 +22,7 @@
 	class="card block border border-slate-200 bg-white transition-shadow hover:shadow-lg"
 >
 	<div class="mb-3 flex items-start justify-between">
-		<h3 class="text-xl font-semibold text-slate-800">
+		<h3>
 			{project.project_name}
 
 			{#if project.sdata[stageIdx]?.name === 'quote'}
@@ -42,7 +42,7 @@
 			</span>
 		</div>
 	</div>
-	<div class="flex items-center justify-between space-x-6 text-xs text-slate-500">
+	<div class="standard flex items-center justify-between space-x-6 text-xs">
 		<span>Created: {formatDate(project.created_at as string)}</span>
 		<span>Updated: {formatDate(project.updated_at as string)}</span>
 	</div>

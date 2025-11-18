@@ -21,7 +21,7 @@
 
 	const originColors: Record<string, { bg: string; text: string }> = {
 		client: { bg: 'bg-orange-200', text: 'text-orange-700' },
-		internal: { bg: 'bg-slate-200', text: 'text-slate-700' }
+		internal: { bg: 'bg-slate-200', text: 'standard' }
 	};
 </script>
 
@@ -30,14 +30,14 @@
 	class="card block border border-slate-200 bg-white transition-shadow hover:shadow-lg"
 >
 	<div class="mb-3 flex items-start justify-between">
-		<h3 class="text-xl font-semibold text-slate-800">
+		<h3>
 			{agreement.agreement_name}
 		</h3>
 
 		<div class="flex flex-col gap-1">
 			<span
 				class="rounded-full px-3 py-1 text-xs font-semibold {typeColors[agreement.agreement_type]
-					?.bg || 'bg-slate-200'} {typeColors[agreement.agreement_type]?.text || 'text-slate-700'}"
+					?.bg || 'bg-slate-200'} {typeColors[agreement.agreement_type]?.text || 'standard'}"
 			>
 				{agreement.agreement_type}
 			</span>

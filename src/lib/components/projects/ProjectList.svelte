@@ -45,7 +45,7 @@
 <div>
 	{#if lastUpdated()}
 		<div class="standard mb-2 text-sm">
-			<span class="font-medium">Last project update:</span>
+			<span>Last project update:</span>
 			{lastUpdated()?.toLocaleString('en-US', {
 				month: 'short',
 				day: 'numeric',
@@ -63,14 +63,14 @@
 				<option value={stage.name}>{cleanString(stage.label)}</option>
 			{/each}
 		</select>
-		<span class="text-sm text-slate-500">
+		<span class="standard text-sm">
 			{filteredProjects.length}/{projects.length} project{projects.length !== 1 ? 's' : ''}
 		</span>
 	</div>
 
 	{#if filteredProjects.length === 0}
 		<div class="py-24 text-center">
-			<div class="mb-4 text-4xl text-slate-300">
+			<div class="muted mb-4 text-4xl">
 				<i class="bi bi-folder-x"></i>
 			</div>
 			<p class="standard">
