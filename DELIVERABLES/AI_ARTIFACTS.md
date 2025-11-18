@@ -170,3 +170,49 @@ In either case, we need to build an Aggrement object, as specified in schema.ts.
 Regardless of which component is shown the ApproverNameInput component will also be shown so the created_by field in the Agreement object can be populated.
 Let me know if you have questions.
 ```
+
+# Creating the contract generation from client documents
+
+```md
+Fill in my `CreateFromClient` component. It should follow a similar pattern to the `CreateFromInternal` component, culminating with the creation of a new agreement object saved to the database, but with a couple key differences:
+
+Instead of generating the text_content for the agreement, it should read the text content from the uploaded file and use that for the `text_content` field. The `agreement_name`, `counterparty`, and `agreement_type` fields should be inferred automatically from the text_content, using an LLM call to my bedrock API.
+
+Make sure the LLM outputs JSON so that we can read the `agreement_name`, `counterparty`, and `agreement_type` values from the LLM output and parse them into the agreement object so we can save it to the database. Also make sure the LLM knows what valid AGREEMENT_TYPES to use, as found in schema.ts. Put your prompt in `lib/prompts.ts`.
+```
+
+## Then, refinement
+
+```md
+I want you to make a couple changes to your implementation.
+
+1. Allow docx, pdf, md, txt, or json input files. To extract the text from the uploaded file, use the `readFileContent` method.
+
+2. We need to make sure the LLM response is clean so we can use JSON.parse. I already have a function for this: `safeJsonParse`. Use it before trying to parse the LLM output.
+```
+
+## Then, further refinement
+
+```md
+ok, since im already using those libraries on the server, create a new server endpoint called file-extractor, and put the file-reading logic in there. We should be able to send the file blob directly to the endpoint and read it that way, without uploading to Vercel or modifying the existing endpoint. Make sure the endpoint can handle docx, pdf, txt, json, and md, just so its all conveniently located in the same place, rather than parsing plaintext on the client, and docx/pdf on the server.
+```
+
+# Creating redline LLM call
+
+```md
+I need a button on my contract/agreement page that says "Review Agreement". When the user clicks it, it performs these actions:
+
+- it fetches the current policy text using GET `/api/policies`
+- it builds an LLM prompt with the policy text and the current agreement.text_content.
+- The promt asks the LLM to compare the policy text and current agreement, and make suggestions if there are any issues, discrepancies, or anything missing from he current agreement.
+- The prompt should tell the LLM to output the issues as a JSON list of "edits", where each edit is a, object with "old", "new", and "note" keys. The values should be the old text in the agreement, the new text in the agreement, and a note describing the reason for the change. If its just adding text (no old text), then leave old as an empty string.
+- Finally, the user should be presented with this list of edits. They should be able to edit them further, and then "save" them, and they will get saved to the `edits` JSONB field of the agreement in the database.
+```
+
+```md
+Put the LLM prompt you used in lib/prompts.ts and import it from there.
+```
+
+```md
+Good job. I don't want this to clutter up the existing agreement page though. extract the logic and changes to a new component called AgreementReview.svelte, and put it in the lib/components/contracts` folder. then import it to use it in the current page component.
+```

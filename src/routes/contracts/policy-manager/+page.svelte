@@ -166,7 +166,7 @@
 </script>
 
 <div class="card">
-	<div class="mb-4 flex text-sm text-slate-600">
+	<div class="standard mb-4 flex text-sm">
 		<a href="/" class="link">
 			<span>Dashboard</span>
 		</a>
@@ -234,7 +234,7 @@
 				<Spinner />
 			</div>
 		{:else if artifacts.length === 0}
-			<div class="rounded-md bg-slate-50 p-6 text-center text-slate-400">
+			<div class="muted rounded-md bg-slate-50 p-6 text-center">
 				<i class="bi-file-earmark-text mb-2 text-4xl"></i>
 				<p>No documents uploaded yet</p>
 			</div>
@@ -244,7 +244,7 @@
 					<div class="card bg-slate-50!" in:slide out:slide animate:flip>
 						<div class="flex justify-between">
 							<div class="flex items-center">
-								<i class="bi-file-earmark-text mr-3 text-3xl text-slate-400"></i>
+								<i class="bi-file-earmark-text muted mr-3 text-3xl"></i>
 								<div>
 									<a
 										href={artifact.file_url}

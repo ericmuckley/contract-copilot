@@ -56,7 +56,7 @@
 <div class="space-y-4">
 	<div class="">
 		<h1 class="mb-4">Upload Artifacts</h1>
-		<p class="mb-4 text-sm text-slate-600">
+		<p class="standard mb-4 text-sm">
 			Upload documents, transcripts, notes, or any other files that provide context for this
 			project. At least 2 artifacts are required to advance to the next stage.
 		</p>
@@ -110,7 +110,7 @@
 						class="flex items-center justify-between rounded-lg border border-slate-200 p-3 transition-colors hover:bg-slate-50"
 					>
 						<div class="flex items-center space-x-3">
-							<i class="bi bi-file-earmark-text text-2xl text-slate-400"></i>
+							<i class="bi bi-file-earmark-text muted text-2xl"></i>
 							<div>
 								<div class="font-medium text-slate-800">{artifact.file_name}</div>
 							</div>

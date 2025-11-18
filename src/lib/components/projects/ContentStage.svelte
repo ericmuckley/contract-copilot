@@ -137,7 +137,7 @@
 <div class="space-y-4">
 	<div class="card bg-white">
 		<h1 class="mb-4">{stage.label}</h1>
-		<p class="mb-4 text-sm text-slate-600">{info.description}</p>
+		<p class="standard mb-4 text-sm">{info.description}</p>
 
 		{#if error}
 			<div class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">

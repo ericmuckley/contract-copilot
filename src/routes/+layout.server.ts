@@ -1,4 +1,4 @@
-import { listAgreements, listProjects } from '$lib/server/db';
+import { listAgreements, listProjects, getProjectArtifacts } from '$lib/server/db';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ depends }) => {
@@ -8,8 +8,10 @@ export const load: LayoutServerLoad = async ({ depends }) => {
 
 	const projects = await listProjects();
 	const agreements = await listAgreements();
+	const policyArtifacts = await getProjectArtifacts(null);
 	return {
 		projects,
-		agreements
+		agreements,
+		policyArtifacts
 	};
 };

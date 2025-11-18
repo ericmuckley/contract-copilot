@@ -14,7 +14,7 @@
 				class="flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors {index <=
 				currentStageIndex
 					? `${STAGES[index].bordercolor} ${STAGES[index].textcolor} ${STAGES[index].bgcolor}`
-					: 'border-slate-300 bg-white text-slate-400'}"
+					: 'muted border-slate-300 bg-white'}"
 			>
 				<i class="bi {stage.icon}"></i>
 			</div>
@@ -23,7 +23,7 @@
 					? `${STAGES[index].textcolor}`
 					: index < currentStageIndex
 						? `${STAGES[index].textcolor}`
-						: 'text-slate-400'}"
+						: 'muted'}"
 			>
 				{stage.label}
 			</div>

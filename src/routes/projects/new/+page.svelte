@@ -43,7 +43,7 @@
 
 		<div class="space-y-6">
 			<div>
-				<label for="project-name" class="mb-1 block text-sm text-slate-600">
+				<label for="project-name" class="standard mb-1 block text-sm">
 					Project Name <span class="text-red-500">*</span>
 				</label>
 				<input

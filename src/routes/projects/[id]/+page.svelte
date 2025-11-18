@@ -92,7 +92,7 @@
 </script>
 
 <div class="card">
-	<div class="mb-1 flex text-sm text-slate-600">
+	<div class="standard mb-1 flex text-sm">
 		<a href="/" class="link">
 			<span>Dashboard</span>
 		</a>

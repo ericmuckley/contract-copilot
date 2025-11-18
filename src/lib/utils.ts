@@ -7,6 +7,15 @@ export const cleanString = (input: string | null | undefined): string => {
 	return input.charAt(0).toUpperCase() + input.slice(1);
 };
 
+export const makeShortId = (length: number = 8): string => {
+	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	let result = '';
+	for (let i = 0; i < length; i++) {
+		result += characters.charAt(Math.floor(Math.random() * characters.length));
+	}
+	return result;
+};
+
 // Safely parse JSON from a string, returning a fallback value if parsing fails
 export const safeJsonParse = (input: string, fallback: any = {}) => {
 	try {
@@ -49,13 +58,32 @@ export const generateQuoteCSV = (taskList: ProjectTask[]): string => {
 	return [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
 };
 
+// Apply a list of edits to text content
+export const applyEditsToText = (
+	textContent: string,
+	edits: { old: string; new: string; note: string }[]
+): string => {
+	let updatedText = textContent;
+
+	for (const edit of edits) {
+		if (edit.old && edit.new) {
+			// Replace all occurrences of the old text with the new text
+			updatedText = updatedText.split(edit.old).join(edit.new);
+		}
+	}
+
+	return updatedText;
+};
+
 export const saveNewAgreement = async ({
 	origin,
 	created_by,
 	agreement_name,
 	agreement_type,
 	counterparty,
-	text_content
+	text_content,
+	root_id,
+	version_number
 }: {
 	origin: 'client' | 'internal';
 	created_by: string;
@@ -63,11 +91,17 @@ export const saveNewAgreement = async ({
 	agreement_type: string;
 	counterparty: string;
 	text_content: string;
+	root_id?: string;
+	version_number?: number;
 }): Promise<Agreement | null> => {
 	// Build Agreement object based on selected origin
+
+	const _root_id = root_id || makeShortId();
+	const _version_number = version_number || 1;
+
 	const agreementData = {
-		root_id: crypto.randomUUID(),
-		version_number: 1,
+		root_id: _root_id,
+		version_number: _version_number,
 		origin,
 		created_by,
 		agreement_name,

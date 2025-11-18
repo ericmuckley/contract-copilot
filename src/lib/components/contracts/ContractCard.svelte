@@ -26,7 +26,7 @@
 </script>
 
 <a
-	href="/contracts/{agreement.id}"
+	href="/contracts/{agreement.root_id}"
 	class="card block border border-slate-200 bg-white transition-shadow hover:shadow-lg"
 >
 	<div class="mb-3 flex items-start justify-between">
@@ -44,7 +44,7 @@
 		</div>
 	</div>
 
-	<div class="mt-3 flex items-center justify-between text-xs text-slate-600">
+	<div class="standard mt-3 flex items-center justify-between text-xs">
 		<span>
 			<i class="bi bi-building"></i>
 			{agreement.counterparty}
@@ -52,7 +52,7 @@
 		<span>Version {agreement.version_number}</span>
 	</div>
 
-	<div class="mt-2 flex items-center justify-between space-x-6 text-xs text-slate-400">
+	<div class="muted mt-2 flex items-center justify-between space-x-6 text-xs">
 		<span>Created: {formatDate(agreement.created_at)}</span>
 		<span>Updated: {formatDate(agreement.updated_at)}</span>
 	</div>

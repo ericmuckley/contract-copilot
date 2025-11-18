@@ -241,7 +241,9 @@ export async function createAgreement(
 			created_by, 
 			text_content, 
 			counterparty, 
-			project_id
+			project_id,
+			notes,
+			edits
 		)
 		VALUES (
 			${agreement.root_id}, 
@@ -252,16 +254,18 @@ export async function createAgreement(
 			${agreement.created_by}, 
 			${agreement.text_content}, 
 			${agreement.counterparty || null}, 
-			${agreement.project_id || null}
+			${agreement.project_id || null},
+			${agreement.notes || []},
+			${JSON.stringify(agreement.edits || [])}
 		)
-		RETURNING id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id
+		RETURNING id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id, notes, edits
 	`;
 	return result[0] as Agreement;
 }
 
 export async function getAgreement(id: number): Promise<Agreement | null> {
 	const result = await sql`
-		SELECT id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id
+		SELECT id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id, notes, edits
 		FROM "agreements"
 		WHERE id = ${id}
 	`;
@@ -271,9 +275,19 @@ export async function getAgreement(id: number): Promise<Agreement | null> {
 
 export async function listAgreements(): Promise<Agreement[]> {
 	const result = await sql`
-		SELECT id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id
+		SELECT id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id, notes, edits
 		FROM "agreements"
 		ORDER BY updated_at DESC
+	`;
+	return result as Agreement[];
+}
+
+export async function getAgreementsByRootId(root_id: string): Promise<Agreement[]> {
+	const result = await sql`
+		SELECT id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id, notes, edits
+		FROM "agreements"
+		WHERE root_id = ${root_id}
+		ORDER BY version_number DESC
 	`;
 	return result as Agreement[];
 }
@@ -322,7 +336,34 @@ export async function updateAgreement(
 		UPDATE "agreements"
 		SET ${sql.unsafe(setClause)}, updated_at = NOW()
 		WHERE id = ${id}
-		RETURNING id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id
+		RETURNING id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id, notes, edits
+	`;
+
+	if (result.length === 0) return null;
+	return result[0] as Agreement;
+}
+
+export async function updateAgreementNotes(id: number, notes: string[]): Promise<Agreement | null> {
+	const result = await sql`
+		UPDATE "agreements"
+		SET notes = ${notes}, updated_at = NOW()
+		WHERE id = ${id}
+		RETURNING id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id, notes, edits
+	`;
+
+	if (result.length === 0) return null;
+	return result[0] as Agreement;
+}
+
+export async function updateAgreementEdits(
+	id: number,
+	edits: { old: string; new: string; note: string }[]
+): Promise<Agreement | null> {
+	const result = await sql`
+		UPDATE "agreements"
+		SET edits = ${JSON.stringify(edits)}::jsonb, updated_at = NOW()
+		WHERE id = ${id}
+		RETURNING id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id, notes, edits
 	`;
 
 	if (result.length === 0) return null;

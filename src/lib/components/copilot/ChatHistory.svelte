@@ -75,7 +75,7 @@
 					<div class="message flex justify-end">
 						<div class="max-w-[80%] rounded-xl bg-sky-100 px-4 py-2 text-sm">
 							<div class="font-semibold text-sky-800">🔧 Tool Result</div>
-							<div class="mt-1 max-h-32 overflow-x-auto overflow-y-auto text-slate-600">
+							<div class="standard mt-1 max-h-32 overflow-x-auto overflow-y-auto">
 								{result.content}
 							</div>
 						</div>
