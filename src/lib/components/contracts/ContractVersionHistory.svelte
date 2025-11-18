@@ -2,6 +2,7 @@
 	import { slide } from 'svelte/transition';
 	import LLMOutput from '$lib/components/copilot/LLMOutput.svelte';
 	import type { Agreement } from '$lib/schema';
+	import ContractToolbar from './ContractToolbar.svelte';
 
 	let { versions }: { versions: Agreement[] } = $props();
 
@@ -28,11 +29,9 @@
 				<div class="card border border-slate-200 bg-slate-50 transition-all duration-300">
 					<div class="p-4">
 						<div class="flex items-start justify-between">
-							<div class="flex-1">
+							<div class="standard flex-1">
 								<div class="flex items-center gap-3">
-									<span
-										class="rounded-full bg-slate-200 px-3 py-1 text-sm font-medium text-slate-700"
-									>
+									<span class="rounded-full bg-slate-200 px-3 py-1 text-sm">
 										Version {version.version_number}
 									</span>
 									<span class="text-xs text-slate-500">
@@ -46,17 +45,17 @@
 									</span>
 								</div>
 
-								<div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+								<div class="standard mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
 									<div>
 										<span class="muted text-xs">Created By:</span>
 										<span class="ml-2">{version.created_by}</span>
 									</div>
 									<div>
-										<span class="muted text-xs">Origin:</span>
-										<span class="ml-2 capitalize">{version.origin}</span>
+										<span class="muted text-xs">Counterparty:</span>
+										<span class="ml-2 capitalize">{version.counterparty}</span>
 									</div>
 									{#if version.notes && version.notes.length > 0}
-										<div class="col-span-2">
+										<div class="">
 											<span class="muted text-xs">Notes:</span>
 											<span class="ml-2"
 												>{version.notes.length}
@@ -65,7 +64,7 @@
 										</div>
 									{/if}
 									{#if version.edits && version.edits.length > 0}
-										<div class="col-span-2">
+										<div class="">
 											<span class="muted text-xs">Edits:</span>
 											<span class="ml-2"
 												>{version.edits.length}
@@ -73,6 +72,10 @@
 											>
 										</div>
 									{/if}
+									<div>
+										<span class="muted text-xs">Type:</span>
+										<span class="ml-2">{version.agreement_type}</span>
+									</div>
 								</div>
 							</div>
 
@@ -88,24 +91,12 @@
 
 					<!-- Expandable details section -->
 					{#if isExpanded}
-						<div
-							class="animate-in slide-in-from-top border-t border-slate-200 bg-white p-6 duration-300"
-							in:slide
-							out:slide
-						>
-							<div class="standard mb-10 grid grid-cols-2 gap-4">
-								<div class="flex flex-col">
-									<span class="muted text-xs font-medium tracking-wide uppercase">Type</span>
-									<span class="mt-1 text-sm">{version.agreement_type}</span>
-								</div>
-								<div class="flex flex-col">
-									<span class="muted text-xs font-medium tracking-wide uppercase">Counterparty</span
-									>
-									<span class="mt-1 text-sm">{version.counterparty}</span>
-								</div>
+						<div class="animate-in slide-in-from-top p-6 duration-300" in:slide out:slide>
+							<div>
+								<ContractToolbar agreement={version} />
 							</div>
 
-							<div class="mb-10">
+							<div class="mt-6 mb-10">
 								<h3 class="mb-3 text-lg font-semibold">Agreement Text</h3>
 								<div
 									class="card max-h-96 overflow-x-auto overflow-y-auto bg-slate-100! shadow-inner"

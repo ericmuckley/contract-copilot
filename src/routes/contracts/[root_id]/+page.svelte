@@ -6,6 +6,7 @@
 	import ContractVersionHistory from '$lib/components/contracts/ContractVersionHistory.svelte';
 	import { activeAgreementRootId } from '$lib/stores';
 	import { onMount } from 'svelte';
+	import ContractToolbar from '$lib/components/contracts/ContractToolbar.svelte';
 
 	let { data } = $props();
 
@@ -34,6 +35,11 @@
 	<div class="flex items-center justify-between">
 		<h1 class="mb-0 text-5xl!">{currentAgreement?.agreement_name}</h1>
 	</div>
+
+	<div class="mb-4">
+		<ContractToolbar agreement={currentAgreement} />
+	</div>
+
 	<div
 		class="w-min rounded-full bg-green-100 px-4 py-2 text-sm font-bold whitespace-nowrap text-green-700"
 	>

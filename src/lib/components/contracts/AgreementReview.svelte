@@ -13,7 +13,7 @@
 
 	let isReviewing = $state(false);
 	let isApplyingChanges = $state(false);
-	let edits = $state<{ old: string; new: string; note: string }[]>([]);
+	let edits = $state<{ old: string; new: string; note: string; checked: boolean }[]>([]);
 	let reviewError = $state('');
 	let streamingText = $state('');
 	let hasEdits = $state(false);
@@ -97,7 +97,8 @@
 				console.log(accumulatedText);
 				const result = safeJsonParse(accumulatedText, []);
 				if (Array.isArray(result)) {
-					edits = result;
+					// Add checked property to each edit (default to true)
+					edits = result.map((edit) => ({ ...edit, checked: true }));
 					hasEdits = true;
 					streamingText = '';
 				} else {
@@ -122,6 +123,14 @@
 			return;
 		}
 
+		// Filter to only include checked edits
+		const checkedEdits = edits.filter((edit) => edit.checked);
+
+		if (checkedEdits.length === 0) {
+			applyError = 'Please select at least one edit to apply';
+			return;
+		}
+
 		isApplyingChanges = true;
 		applyError = '';
 
@@ -132,15 +141,15 @@
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ edits })
+				body: JSON.stringify({ edits: checkedEdits })
 			});
 
 			if (!updateResponse.ok) {
 				throw new Error('Failed to save edits to database');
 			}
 
-			// Step 2: Apply edits to text_content
-			const updatedTextContent = applyEditsToText(agreement.text_content, edits);
+			// Step 2: Apply edits to text_content (only checked ones)
+			const updatedTextContent = applyEditsToText(agreement.text_content, checkedEdits);
 
 			// Step 3: Save a new version of the agreement with updated text_content
 			const newAgreement = await saveNewAgreement({
@@ -174,6 +183,11 @@
 		applyError = '';
 	}
 
+	function toggleAllEdits() {
+		const allChecked = edits.every((edit) => edit.checked);
+		edits = edits.map((edit) => ({ ...edit, checked: !allChecked }));
+	}
+
 	/*
     const exampleEdits = [
         {
@@ -196,35 +210,50 @@
 <div class="mt-8">
 	{#if hasEdits}
 		<div class="mt-6">
-			<h2>Suggested Edits</h2>
+			<div class="mb-4 flex items-center justify-between">
+				<h2>Suggested Edits</h2>
+				<button class="btn btn-sm btn-outline" onclick={toggleAllEdits}>
+					{edits.every((edit) => edit.checked) ? 'Deselect All' : 'Select All'}
+				</button>
+			</div>
 
 			{#if edits?.length}
 				<div class="space-y-4">
 					{#each edits as edit, index}
 						<div class="card border border-slate-200">
-							<div class="">
-								{#if edit.note?.length}
-									<p>
-										<span class="font-bold">
-											Edit {index + 1}:
-										</span>
-										<span>
-											{edit.note}
-										</span>
-									</p>
-								{/if}
+							<div class="flex gap-3">
+								<div class="shrink-0 pt-1">
+									<input
+										type="checkbox"
+										bind:checked={edit.checked}
+										class="h-5 w-5 cursor-pointer"
+										id="edit-{index}"
+									/>
+								</div>
+								<label for="edit-{index}" class="flex-1 cursor-pointer">
+									{#if edit.note?.length}
+										<p>
+											<span class="font-bold">
+												Edit {index + 1}:
+											</span>
+											<span>
+												{edit.note}
+											</span>
+										</p>
+									{/if}
 
-								{#if edit.old?.length}
-									<div class="text-red-600">
-										- {edit.old}
-									</div>
-								{/if}
+									{#if edit.old?.length}
+										<div class="text-red-600">
+											- {edit.old}
+										</div>
+									{/if}
 
-								{#if edit.new?.length}
-									<div class="text-green-600">
-										+ {edit.new}
-									</div>
-								{/if}
+									{#if edit.new?.length}
+										<div class="text-green-600">
+											+ {edit.new}
+										</div>
+									{/if}
+								</label>
 							</div>
 						</div>
 					{/each}
