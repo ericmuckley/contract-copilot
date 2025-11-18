@@ -46,10 +46,27 @@
 	});
 </script>
 
+<div class="mb-8 flex space-x-4">
+	{#if policyArtifacts.length > 0}
+		<div>
+			<a href="/contracts/new" class="btn btn-primary">
+				<i class="bi bi-plus-lg"></i>
+				New Contract / Agreement
+			</a>
+		</div>
+	{/if}
+	<div>
+		<a href="/contracts/policy-manager" class="btn btn-outline">
+			<i class="bi bi-gear-fill"></i>
+			Policies
+		</a>
+	</div>
+</div>
+
 {#if policyArtifacts.length}
 	<div>
 		{#if lastUpdated()}
-			<div class="standard mb-6 text-sm">
+			<div class="standard mb-4 text-sm">
 				<span class="font-medium">Last contract update:</span>
 				{lastUpdated()?.toLocaleString('en-US', {
 					month: 'short',
@@ -87,7 +104,7 @@
 				</p>
 			</div>
 		{:else}
-			<div class="grid max-h-84 grid-cols-1 gap-6 overflow-y-auto pr-3 pb-3 md:grid-cols-2">
+			<div class="space-y-4">
 				{#each filteredAgreements as agreement (agreement.id)}
 					<ContractCard {agreement} />
 				{/each}

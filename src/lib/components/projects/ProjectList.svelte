@@ -35,9 +35,16 @@
 	});
 </script>
 
+<div class="mt-4 mb-8">
+	<a href="/projects/new" class="btn btn-primary hover:bg-sky-700!">
+		<i class="bi bi-plus-lg"></i>
+		New Project
+	</a>
+</div>
+
 <div>
 	{#if lastUpdated()}
-		<div class="standard mb-6 text-sm">
+		<div class="standard mb-2 text-sm">
 			<span class="font-medium">Last project update:</span>
 			{lastUpdated()?.toLocaleString('en-US', {
 				month: 'short',
@@ -73,7 +80,7 @@
 			</p>
 		</div>
 	{:else}
-		<div class="grid max-h-84 grid-cols-1 gap-6 overflow-y-auto pr-3 pb-3 md:grid-cols-2">
+		<div class="space-y-4">
 			{#each filteredProjects as project (project.id)}
 				<ProjectCard {project} />
 			{/each}

@@ -14,10 +14,4 @@
 			</div>
 		{/if}
 	</div>
-	<div>
-		<a href="/projects/new" class="btn btn-primary hover:bg-sky-700!">
-			<i class="bi bi-plus-lg"></i>
-			New
-		</a>
-	</div>
 </div>

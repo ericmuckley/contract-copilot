@@ -25,7 +25,7 @@
 	</div>
 	<div class="card">
 		<div class="mb-4">
-			<ContractListHeading agreements={data.agreements} policyArtifacts={data.policyArtifacts} />
+			<ContractListHeading agreements={data.agreements} />
 		</div>
 
 		<ContractList agreements={data.agreements} policyArtifacts={data.policyArtifacts} />
