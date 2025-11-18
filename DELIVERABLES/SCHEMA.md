@@ -129,3 +129,5 @@ When the copilot chatbot calls server functions/tools to make updates to the cur
 ## Your task
 
 You must extend the current chatbot with basic "check weather" tool to include tools for modifying the stage data of the current project. When that data is modified, it should automatically update in the UI. The copilot should also be able to query other projects, based on the project name.
+
+# GOOD for Loom conversation:"Implementing a "review agreement"

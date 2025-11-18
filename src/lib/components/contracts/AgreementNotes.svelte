@@ -191,7 +191,7 @@
 {#if !isAdding}
 	<div class="mt-2 w-min">
 		<button
-			class="btn btn-primary whitespace-nowrap"
+			class="btn btn-bg whitespace-nowrap"
 			onclick={() => (isAdding = true)}
 			disabled={isSaving}
 		>

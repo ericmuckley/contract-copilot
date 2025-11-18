@@ -113,7 +113,7 @@
 	}
 </script>
 
-<div class="flex items-center gap-3 border-b border-slate-200 py-4">
+<div class="flex flex-wrap items-center gap-3 border-b border-slate-200 py-4">
 	<button onclick={exportToPDF} class="btn btn-primary flex items-center gap-2">
 		<i class="bi-file-earmark-pdf"></i>
 		Export to PDF

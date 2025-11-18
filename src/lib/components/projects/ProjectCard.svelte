@@ -49,7 +49,7 @@
 	<!-- Progress bar -->
 	<div class="mt-4 h-1 w-full overflow-hidden rounded-full bg-slate-200">
 		<div
-			class="h-full rounded-full bg-linear-to-r from-purple-600 via-sky-600 to-green-600 transition-all duration-500"
+			class="h-full rounded-full bg-green-600 transition-all duration-500"
 			style="width: {progressPercentage}%"
 		></div>
 	</div>

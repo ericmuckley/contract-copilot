@@ -77,7 +77,7 @@ Return your response as a JSON array of edit objects. Each edit object should ha
 - "new": The replacement or additional text
 - "note": A one-line explanation of why this change is needed
 
-Return AT MOST 2 edits. If there are no issues found, return an empty "edits" array.
+Return AT MOST 6 edits. If there are no issues found, return an empty "edits" array.
 
 Example output:
 [
@@ -98,4 +98,47 @@ Only return the JSON array, no additional text.`;
 	return prompt;
 };
 
-// TODO: Add more edits above
+export const validateAgreementAlignmentPrompt = (
+	agreementText: string,
+	estimateContent: string
+): string => {
+	const prompt = `You are an expert contract and project scope analyst. Your task is to validate whether a contract agreement is properly aligned with a project estimate and scope.
+
+<AGREEMENT_TEXT>
+
+${agreementText}
+
+</AGREEMENT_TEXT>
+
+
+<PROJECT_ESTIMATE_AND_SCOPE>
+
+${estimateContent}
+
+</PROJECT_ESTIMATE_AND_SCOPE>
+
+
+Please analyze whether the agreement is consistent with the project estimate and scope. Consider the following aspects:
+
+1. **Scope Alignment**: Does the agreement accurately reflect the work described in the estimate?
+2. **Deliverables**: Are the deliverables in the agreement consistent with what's estimated?
+3. **Timeline**: Do any timeline references match between documents?
+4. **Cost/Budget**: If mentioned, is the pricing consistent with the estimate?
+5. **Resource Requirements**: Are the skills/roles mentioned aligned?
+6. **Assumptions and Constraints**: Are critical assumptions from the estimate reflected in the agreement?
+
+Provide your analysis in the following format:
+
+## Alignment Status
+[Overall assessment: "Aligned", "Partially Aligned", or "Not Aligned"]
+
+## Issues Found
+[If any issues are identified, list them here. If aligned, state "No significant issues found."]
+
+## Recommendations
+[Provide specific recommendations to resolve any issues or improve alignment]
+
+Be thorough and specific in your analysis. Cite specific sections or details from both documents to support your findings. Be very concise in your recommendations.`;
+
+	return prompt;
+};

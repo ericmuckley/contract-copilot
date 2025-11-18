@@ -216,3 +216,11 @@ Put the LLM prompt you used in lib/prompts.ts and import it from there.
 ```md
 Good job. I don't want this to clutter up the existing agreement page though. extract the logic and changes to a new component called AgreementReview.svelte, and put it in the lib/components/contracts` folder. then import it to use it in the current page component.
 ```
+
+# Agreement validation against a project
+
+```md
+This component should allow the user to validate whether the current agreement.text_content is consistent with a project estimate. First provide a sleect element that lets the user select which project they want to validate against. Then add a button that says "Perform Validation". It should trigger an LLM stream, just like the one in `ContentStage.svelte`. The promt to the LLM should be placed in `lib/prompts.ts`.
+
+For context, the prompt should use the agreement.text_content, and the content of the estimate stage of the selected project. Then using that context, ask the LLM if the project scopt / estimate is aligned with the current agreement text. If not, provide a list of issues that need to be resolved.
+```
