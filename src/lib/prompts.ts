@@ -50,3 +50,52 @@ Example format:
 
 	return prompt;
 };
+
+export const reviewAgreementPrompt = (policyText: string, agreementText: string): string => {
+	const prompt = `You are a contract review assistant. Compare the following internal policy document examples with the provided agreement and identify any issues, discrepancies, or missing elements.
+
+<POLICY DOCUMENT EXAMPLES>
+
+${policyText}
+
+</POLICY DOCUMENT EXAMPLES>
+
+
+And here is the agreement document to review:
+
+<NEW AGREEMENT>
+
+${agreementText}
+
+</NEW AGREEMENT>
+
+
+Please analyze the new agreement against the policy examples and provide a list of suggested edits. Each edit should be a change that needs to be made to bring the agreement into compliance with the policy examples.
+
+Return your response as a JSON array of edit objects. Each edit object should have three keys:
+- "old": The exact text from the agreement that should be changed (empty string if adding new text and not replacing existing text)
+- "new": The replacement or additional text
+- "note": A one-line explanation of why this change is needed
+
+Return AT MOST 2 edits. If there are no issues found, return an empty "edits" array.
+
+Example output:
+[
+    {
+      "old": "payment within 60 days",
+      "new": "payment within 30 days",
+      "note": "Policy requires payment within 30 days, but agreement specifies 60 days."
+    },
+    {
+      "old": "",
+      "new": "Confidentiality obligations survive termination for 5 years.",
+      "note": "Missing required confidentiality survival clause per policy."
+    }
+]
+
+Only return the JSON array, no additional text.`;
+
+	return prompt;
+};
+
+// TODO: Add more edits above

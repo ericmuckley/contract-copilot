@@ -355,6 +355,21 @@ export async function updateAgreementNotes(id: number, notes: string[]): Promise
 	return result[0] as Agreement;
 }
 
+export async function updateAgreementEdits(
+	id: number,
+	edits: { old: string; new: string; note: string }[]
+): Promise<Agreement | null> {
+	const result = await sql`
+		UPDATE "agreements"
+		SET edits = ${JSON.stringify(edits)}::jsonb, updated_at = NOW()
+		WHERE id = ${id}
+		RETURNING id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id, notes, edits
+	`;
+
+	if (result.length === 0) return null;
+	return result[0] as Agreement;
+}
+
 export async function deleteAgreement(id: number): Promise<boolean> {
 	await sql`
 		DELETE FROM "agreements" WHERE id = ${id}

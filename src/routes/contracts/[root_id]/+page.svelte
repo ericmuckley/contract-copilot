@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import LLMOutput from '$lib/components/copilot/LLMOutput.svelte';
 	import AgreementNotes from '$lib/components/contracts/AgreementNotes.svelte';
+	import AgreementReview from '$lib/components/contracts/AgreementReview.svelte';
 	import { activeAgreementRootId } from '$lib/stores';
 	import { onMount } from 'svelte';
 
@@ -62,12 +63,14 @@
 
 	<div class="mt-12">
 		<h2>Agreement Text</h2>
-		<div
-			class="max-h-96 overflow-x-auto overflow-y-auto rounded-3xl bg-slate-100 px-6 py-4 pr-3 shadow-inner"
-		>
+		<div class="card max-h-96 overflow-x-auto overflow-y-auto bg-slate-100! shadow-inner">
 			<LLMOutput text={lastAgreement?.text_content || 'No contract text available.'} />
 		</div>
 	</div>
+
+	{#if lastAgreement}
+		<AgreementReview agreement={lastAgreement} />
+	{/if}
 
 	{#if lastAgreement}
 		<div class="mt-8">
