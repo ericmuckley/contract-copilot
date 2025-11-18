@@ -49,11 +49,7 @@
 		<i class="bi bi-robot"></i>
 	</div>
 
-	<div
-		class="text-standard flex h-full w-full items-center justify-center {isExpanded
-			? 'hidden'
-			: ''}"
-	>
+	<div class="standard flex h-full w-full items-center justify-center {isExpanded ? 'hidden' : ''}">
 		<i class="bi bi-chevron-double-left block"></i>
 	</div>
 </aside>

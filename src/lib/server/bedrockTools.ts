@@ -9,7 +9,7 @@ import { bedrockClient } from './bedrockClient';
 import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { LLM_MODEL_ID } from './settings';
 import type { ProjectTask, StageData } from '$lib/schema';
-import { generateQuoteCSV, applyEditsToText, makeShortId } from '$lib/utils';
+import { generateQuoteCSV, applyEditsToText, makeShortId, safeJsonParse } from '$lib/utils';
 
 export class GetProjectDetailsTool {
 	static spec = {
@@ -343,8 +343,8 @@ Return the modified tasks array as JSON:`;
 				],
 				system: [{ text: systemPrompt }],
 				inferenceConfig: {
-					maxTokens: 2000,
-					temperature: 0.1 // Low temperature for consistent, deterministic output
+					maxTokens: 2048,
+					temperature: 0.1
 				}
 			})
 		);
@@ -513,7 +513,10 @@ Example output:
 ]`;
 
 		const userPrompt = `Current contract text:
+
+		<CONTRACT_TEXT>
 ${currentText}
+</CONTRACT_TEXT>
 
 User command: "${command}"
 
@@ -530,7 +533,7 @@ Identify the specific edits needed and return them as a JSON array:`;
 				],
 				system: [{ text: systemPrompt }],
 				inferenceConfig: {
-					maxTokens: 2000, // Much smaller since we're only getting edits, not full text
+					maxTokens: 2048,
 					temperature: 0.2
 				}
 			})
@@ -612,10 +615,18 @@ export class CreateNewContractTool {
 					if (stage.content) {
 						return `## ${stage.name}\n${stage.content}`;
 					}
+					if (stage.tasks) {
+						return `## Tasks\n${JSON.stringify(stage.tasks, null, 2)}`;
+					}
 					return null;
 				})
 				.filter((content): content is string => content !== null)
 				.join('\n\n');
+
+			console.log('\n\n\n============================================');
+			console.log('Aggregated Project Content:');
+			console.log(aggregatedContent);
+			console.log('============================================');
 
 			if (!aggregatedContent || aggregatedContent.trim().length === 0) {
 				return {
@@ -630,6 +641,11 @@ export class CreateNewContractTool {
 				contract_type,
 				project.project_name
 			);
+
+			console.log('\n\n\n============================================');
+			console.log('Generated Contract Data:');
+			console.log(contractData);
+			console.log('============================================');
 
 			// 4. Create the new agreement
 			const newAgreement = await createAgreement({
@@ -703,9 +719,11 @@ Return ONLY valid JSON, no other text.`;
 Contract Type: ${contractType}
 
 Project Content:
+<PROJECT_CONTENT>
 ${projectContent}
+</PROJECT_CONTENT>
 
-Generate a ${contractType} contract based on this project content and return as JSON:`;
+Generate a short, concise ${contractType} contract based on this project content and return the valid JSON.`;
 
 		const response = await bedrockClient.send(
 			new ConverseCommand({
@@ -718,7 +736,7 @@ Generate a ${contractType} contract based on this project content and return as 
 				],
 				system: [{ text: systemPrompt }],
 				inferenceConfig: {
-					maxTokens: 4000,
+					maxTokens: 8192,
 					temperature: 0.3
 				}
 			})
@@ -727,13 +745,24 @@ Generate a ${contractType} contract based on this project content and return as 
 		// Extract the text response
 		const outputText = response.output?.message?.content?.[0]?.text || '{}';
 
-		// Parse JSON from response (handle potential markdown code blocks)
-		const jsonMatch = outputText.match(/\{[\s\S]*\}/);
-		if (!jsonMatch) {
-			throw new Error('LLM did not return valid JSON');
-		}
+		console.log('\n\n\n============================================');
+		console.log('LLM Output Text:');
+		console.log(outputText);
+		console.log('============================================');
 
-		const contractData = JSON.parse(jsonMatch[0]) as {
+		// Parse JSON from response (handle potential markdown code blocks)
+		const jsonMatch = safeJsonParse(outputText, {
+			contract_name: '',
+			counterparty: '',
+			text_content: ''
+		});
+
+		console.log('\n\n\n============================================');
+		console.log('Parsed Contract Data:');
+		console.log(jsonMatch);
+		console.log('============================================');
+
+		const contractData = jsonMatch as {
 			contract_name: string;
 			counterparty: string;
 			text_content: string;

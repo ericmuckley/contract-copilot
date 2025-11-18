@@ -5,8 +5,8 @@ export const STAGES = [
 		label: 'Artifacts',
 		icon: 'bi-file-earmark-text',
 		bgcolor: 'bg-slate-200',
-		textcolor: 'text-slate-700',
-		bordercolor: 'border-slate-700'
+		textcolor: 'text-slate-600',
+		bordercolor: 'border-slate-600'
 	},
 	{
 		idx: 1,

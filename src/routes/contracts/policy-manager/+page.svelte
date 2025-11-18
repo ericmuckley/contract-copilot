@@ -257,7 +257,7 @@
 									</a>
 
 									{#if artifact.file_content}
-										<div class="text-xs text-slate-500">
+										<div class="standard text-xs">
 											{artifact.file_content.length.toLocaleString()} characters
 										</div>
 									{/if}

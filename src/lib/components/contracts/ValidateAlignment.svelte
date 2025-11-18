@@ -99,7 +99,7 @@
 		<!-- Show linked project thumbnail -->
 		<div class="space-y-4">
 			<div class="rounded-lg border border-slate-200 bg-white p-4">
-				<div class="mb-2 text-sm font-medium text-slate-600">Linked to Project:</div>
+				<div class="standard mb-2 text-sm">Linked to Project:</div>
 				<a
 					target="_blank"
 					href="/projects/{linkedProject.id}"
@@ -109,10 +109,10 @@
 						<i class="bi bi-folder text-lg"></i>
 					</div>
 					<div class="flex-1">
-						<div class="font-medium text-slate-900">{linkedProject.project_name}</div>
-						<div class="text-xs text-slate-500">Click to view project</div>
+						<div class="standar font-bold">{linkedProject.project_name}</div>
+						<div class="standard text-xs">Click to view project</div>
 					</div>
-					<i class="bi bi-arrow-right text-slate-400"></i>
+					<i class="bi bi-arrow-right muted"></i>
 				</a>
 			</div>
 		</div>
@@ -133,7 +133,7 @@
 					Select Project to link and validate against
 				</label>
 				{#if projectsWithEstimates.length === 0}
-					<p class="text-sm text-slate-500">
+					<p class="muted text-sm">
 						No projects with estimates available. Create a project with an estimate first.
 					</p>
 				{:else}
@@ -175,27 +175,30 @@
 
 	{#if validationResult && !isValidating}
 		<div class="space-y-4">
-			<!-- Show linked project info after validation -->
+			<!-- Show linked project info after validation
 			{#if linkedProject}
 				<div class="rounded-lg border border-green-200 bg-green-50 p-3">
 					<div class="flex items-center gap-2 text-sm text-green-700">
 						<i class="bi bi-check-circle-fill"></i>
 						<span>Linked to project:</span>
-						<a href="/projects/{linkedProject.id}" class="font-medium underline hover:no-underline">
+						<a href="/projects/{linkedProject.id}" class="underline hover:no-underline">
 							{linkedProject.project_name}
 						</a>
 					</div>
 				</div>
 			{/if}
+			-->
 
 			<div class="overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 p-6">
 				<LLMOutput text={validationResult} />
 			</div>
 
-			<button onclick={reset} class="btn btn-outline w-full">
-				<i class="bi bi-arrow-clockwise mr-2"></i>
-				Run Validation Again
-			</button>
+			<div class="flex justify-center">
+				<button onclick={reset} class="btn btn-outline">
+					<i class="bi bi-arrow-clockwise mr-2"></i>
+					Run Validation Again
+				</button>
+			</div>
 		</div>
 	{/if}
 </div>
