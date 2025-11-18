@@ -9,7 +9,7 @@ import { bedrockClient } from './bedrockClient';
 import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { LLM_MODEL_ID } from './settings';
 import type { ProjectTask, StageData } from '$lib/schema';
-import { generateQuoteCSV, applyEditsToText } from '$lib/utils';
+import { generateQuoteCSV, applyEditsToText, makeShortId } from '$lib/utils';
 
 export class GetProjectDetailsTool {
 	static spec = {
@@ -560,5 +560,202 @@ Identify the specific edits needed and return them as a JSON array:`;
 		}
 
 		return { modifiedText, edits };
+	}
+}
+
+export class CreateNewContractTool {
+	static spec = {
+		toolSpec: {
+			name: 'create_new_contract',
+			description:
+				'Create a new contractual agreement from an existing project by aggregating project content and generating a contract.',
+			inputSchema: {
+				json: {
+					type: 'object',
+					properties: {
+						project_id: {
+							type: 'string',
+							description: 'The ID of the project to create a contract from.'
+						},
+						contract_type: {
+							type: 'string',
+							description: 'The type of contract to create.',
+							enum: ['MSA', 'SOW', 'NDA', 'OTHER']
+						}
+					},
+					required: ['project_id', 'contract_type']
+				}
+			}
+		}
+	};
+
+	static async run({
+		project_id,
+		contract_type
+	}: {
+		project_id: number | string;
+		contract_type: string;
+	}) {
+		try {
+			// 1. Fetch the project
+			const project = await getProject(parseInt(project_id as string));
+			if (!project) {
+				return {
+					response: { error: `Project with ID ${project_id} not found.` },
+					text: JSON.stringify({ error: `Project with ID ${project_id} not found.` })
+				};
+			}
+
+			// 2. Aggregate all content from project stages
+			const aggregatedContent = project.sdata
+				.map((stage: StageData) => {
+					if (stage.content) {
+						return `## ${stage.name}\n${stage.content}`;
+					}
+					return null;
+				})
+				.filter((content): content is string => content !== null)
+				.join('\n\n');
+
+			if (!aggregatedContent || aggregatedContent.trim().length === 0) {
+				return {
+					response: { error: 'Project has no content to generate a contract from.' },
+					text: JSON.stringify({ error: 'Project has no content to generate a contract from.' })
+				};
+			}
+
+			// 3. Use LLM to generate contract
+			const contractData = await this.generateContractWithLLM(
+				aggregatedContent,
+				contract_type,
+				project.project_name
+			);
+
+			// 4. Create the new agreement
+			const newAgreement = await createAgreement({
+				root_id: makeShortId(),
+				version_number: 1,
+				origin: 'internal',
+				notes: [],
+				edits: [],
+				agreement_name: contractData.contract_name,
+				agreement_type: contract_type,
+				created_by: project.created_by,
+				text_content: contractData.text_content,
+				counterparty: contractData.counterparty,
+				project_id: parseInt(project_id as string)
+			});
+
+			return {
+				response: {
+					success: true,
+					message: `Created new ${contract_type} contract from project ${project_id}`,
+					agreement: newAgreement
+				},
+				text: JSON.stringify({
+					success: true,
+					message: `Created new ${contract_type} contract from project ${project_id}`,
+					agreement_id: newAgreement.id,
+					root_id: newAgreement.root_id
+				})
+			};
+		} catch (error) {
+			return {
+				response: { error: `Failed to create contract: ${error}` },
+				text: JSON.stringify({ error: `Failed to create contract: ${error}` })
+			};
+		}
+	}
+
+	private static async generateContractWithLLM(
+		projectContent: string,
+		contractType: string,
+		projectName: string
+	): Promise<{ contract_name: string; counterparty: string; text_content: string }> {
+		const systemPrompt = `You are a legal contract generation assistant. You will receive:
+1. Aggregated content from a project (including requirements, architecture, estimates, etc.)
+2. The type of contract to generate (MSA, SOW, NDA, or OTHER)
+3. The project name
+
+Your job is to generate a professional contractual agreement based on the project content and return the result as JSON.
+
+The JSON response must have exactly these fields:
+{
+  "contract_name": "A descriptive name for the contract",
+  "counterparty": "The name of the other party (client/vendor), or 'UNKNOWN' if not identifiable from the content",
+  "text_content": "The full text content of the contract"
+}
+
+Guidelines for generating the contract:
+- Use professional legal language appropriate for business contracts
+- Include standard sections like parties, scope of work, terms, payment, and signatures
+- Base the scope and deliverables on the project content provided
+- For MSA: Focus on master service agreement terms, general conditions
+- For SOW: Focus on specific statement of work, deliverables, timeline, and pricing
+- For NDA: Focus on confidentiality and non-disclosure terms
+- For OTHER: Generate a general business agreement
+- Make the contract realistic and professional
+- The text_content should be properly formatted with sections and paragraphs
+
+Return ONLY valid JSON, no other text.`;
+
+		const userPrompt = `Project Name: ${projectName}
+Contract Type: ${contractType}
+
+Project Content:
+${projectContent}
+
+Generate a ${contractType} contract based on this project content and return as JSON:`;
+
+		const response = await bedrockClient.send(
+			new ConverseCommand({
+				modelId: LLM_MODEL_ID,
+				messages: [
+					{
+						role: 'user',
+						content: [{ text: userPrompt }]
+					}
+				],
+				system: [{ text: systemPrompt }],
+				inferenceConfig: {
+					maxTokens: 4000,
+					temperature: 0.3
+				}
+			})
+		);
+
+		// Extract the text response
+		const outputText = response.output?.message?.content?.[0]?.text || '{}';
+
+		// Parse JSON from response (handle potential markdown code blocks)
+		const jsonMatch = outputText.match(/\{[\s\S]*\}/);
+		if (!jsonMatch) {
+			throw new Error('LLM did not return valid JSON');
+		}
+
+		const contractData = JSON.parse(jsonMatch[0]) as {
+			contract_name: string;
+			counterparty: string;
+			text_content: string;
+		};
+
+		// Validate the structure
+		if (
+			!contractData.contract_name ||
+			!contractData.counterparty ||
+			!contractData.text_content ||
+			typeof contractData.contract_name !== 'string' ||
+			typeof contractData.counterparty !== 'string' ||
+			typeof contractData.text_content !== 'string'
+		) {
+			throw new Error(`Invalid contract data structure: ${JSON.stringify(contractData)}`);
+		}
+
+		// Ensure counterparty is set to UNKNOWN if empty
+		if (!contractData.counterparty.trim()) {
+			contractData.counterparty = 'UNKNOWN';
+		}
+
+		return contractData;
 	}
 }
