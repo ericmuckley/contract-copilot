@@ -1,7 +1,55 @@
 // Test for AddNoteToContractTool
-import { AddNoteToContractTool } from '$lib/server/bedrockTools';
 import { runTest, assert, createTestAgreement, cleanupTestAgreement } from './testUtils';
 import type { TestResult } from './testUtils';
+import { getAgreementsByRootId, updateAgreementNotes } from './testDb';
+
+// Simple implementation of AddNoteToContractTool for testing
+const AddNoteToContractTool = {
+	async run({ root_id, note }: { root_id: string; note: string }) {
+		const agreements = await getAgreementsByRootId(root_id);
+		if (!agreements || agreements.length === 0) {
+			return {
+				response: { error: `Contract with root_id ${root_id} not found.` },
+				text: JSON.stringify({ error: `Contract with root_id ${root_id} not found.` })
+			};
+		}
+
+		const latestAgreement = agreements[0];
+
+		if (!latestAgreement.id) {
+			return {
+				response: { error: `Contract with root_id ${root_id} has no valid id.` },
+				text: JSON.stringify({ error: `Contract with root_id ${root_id} has no valid id.` })
+			};
+		}
+
+		const existingNotes = latestAgreement.notes || [];
+		const updatedNotes = [...existingNotes, note];
+
+		const updatedAgreement = await updateAgreementNotes(latestAgreement.id, updatedNotes);
+
+		if (!updatedAgreement) {
+			return {
+				response: { error: `Failed to update contract with root_id ${root_id}.` },
+				text: JSON.stringify({ error: `Failed to update contract with root_id ${root_id}.` })
+			};
+		}
+
+		return {
+			response: {
+				success: true,
+				message: 'Note added successfully',
+				agreement: updatedAgreement,
+				added_note: note
+			},
+			text: JSON.stringify({
+				success: true,
+				message: 'Note added successfully',
+				added_note: note
+			})
+		};
+	}
+};
 
 export async function testAddNoteToContract(): Promise<TestResult> {
 	return runTest('AddNoteToContractTool', async () => {

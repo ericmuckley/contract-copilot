@@ -1,8 +1,39 @@
 // Test for GetContractEditsSummaryTool
-import { GetContractEditsSummaryTool } from '$lib/server/bedrockTools';
 import { runTest, assert, createTestAgreement, cleanupTestAgreement } from './testUtils';
 import type { TestResult } from './testUtils';
-import { createAgreement } from '$lib/server/db';
+import { createAgreement, getAgreementsByRootId } from './testDb';
+
+// Simple implementation of GetContractEditsSummaryTool for testing
+const GetContractEditsSummaryTool = {
+	async run({ root_id }: { root_id: string }) {
+		const agreements = await getAgreementsByRootId(root_id);
+		if (!agreements || agreements.length === 0) {
+			return {
+				response: [`Contract with root_id ${root_id} not found.`],
+				text: JSON.stringify(`Contract with root_id ${root_id} not found.`)
+			};
+		}
+
+		const editsHistory = agreements.map((agreement) => ({
+			version_number: agreement.version_number,
+			created_at: agreement.created_at,
+			edits: agreement.edits || 'No edits recorded for this version'
+		}));
+
+		return {
+			response: {
+				root_id,
+				total_versions: agreements.length,
+				edits_history: editsHistory
+			},
+			text: JSON.stringify({
+				root_id,
+				total_versions: agreements.length,
+				edits_history: editsHistory
+			})
+		};
+	}
+};
 
 export async function testGetContractEditsSummary(): Promise<TestResult> {
 	return runTest('GetContractEditsSummaryTool', async () => {

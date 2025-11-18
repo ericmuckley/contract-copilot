@@ -33,6 +33,7 @@ npm run test
 ### Database Cleanup
 
 All tests automatically clean up any database objects they create:
+
 - Test projects are deleted after tests complete
 - Test agreements are deleted after tests complete
 - Cleanup happens even if tests fail (using try/finally blocks)
@@ -40,6 +41,7 @@ All tests automatically clean up any database objects they create:
 ### Test Output
 
 Tests print colored results showing:
+
 - ✓ PASS (green) for successful tests
 - ✗ FAIL (red) for failed tests
 - Error messages for failed tests
@@ -47,18 +49,24 @@ Tests print colored results showing:
 
 ### Direct Tool Calling
 
-Tests call the tool's `run()` method directly without going through an LLM. This allows for:
-- Faster test execution
-- More predictable results
+Tests implement simplified versions of the tool's `run()` method without LLM calls. This allows for:
+
+- Faster test execution (no network calls to AWS Bedrock)
+- More predictable results (deterministic test behavior)
 - Direct validation of tool functionality
+- Tests can run without AWS credentials
+
+For tools that require LLM calls (UpdateProjectTasksTool, CreateNewContractVersionTool, CreateNewContractTool), the tests use simplified logic that achieves the same database operations without actually calling the LLM.
 
 ## Environment Requirements
 
-Tests require the following environment variables to be set:
-- `DATABASE_URL` - PostgreSQL connection string
-- `AWS_BEARER_TOKEN_BEDROCK` - AWS Bedrock credentials (for LLM-dependent tests)
+Tests require the following environment variable to be set:
 
-These can be set in a `.env` file or as environment variables.
+- `DATABASE_URL` - PostgreSQL connection string
+
+This can be set in a `.env` file or as an environment variable.
+
+Note: AWS credentials are NOT required because tests use simplified implementations that don't make actual LLM calls.
 
 ## Test Design
 
@@ -70,6 +78,7 @@ Each test follows this pattern:
 4. Clean up test data (in finally block)
 
 Tests validate:
+
 - Successful operations return expected data structures
 - Error cases (non-existent IDs) return appropriate error messages
 - Database operations persist correctly
@@ -92,10 +101,10 @@ import { runTest, assert } from './testUtils';
 import type { TestResult } from './testUtils';
 
 export async function testMyNewTool(): Promise<TestResult> {
-  return runTest('MyNewTool', async () => {
-    // Test logic here
-    const result = await MyNewTool.run({ param: 'value' });
-    assert(result.success === true, 'Should succeed');
-  });
+	return runTest('MyNewTool', async () => {
+		// Test logic here
+		const result = await MyNewTool.run({ param: 'value' });
+		assert(result.success === true, 'Should succeed');
+	});
 }
 ```

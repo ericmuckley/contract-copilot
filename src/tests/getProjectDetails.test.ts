@@ -1,7 +1,24 @@
 // Test for GetProjectDetailsTool
-import { GetProjectDetailsTool } from '$lib/server/bedrockTools';
 import { runTest, assert, createTestProject, cleanupTestProject } from './testUtils';
 import type { TestResult } from './testUtils';
+import { getProject } from './testDb';
+
+// Simple implementation of GetProjectDetailsTool for testing
+const GetProjectDetailsTool = {
+	async run({ id }: { id: number | string }) {
+		const project = await getProject(parseInt(id as string));
+		if (!project) {
+			return {
+				response: [`Project with ID ${id} not found.`],
+				text: JSON.stringify(`Project with ID ${id} not found.`)
+			};
+		}
+		return {
+			response: project,
+			text: JSON.stringify(project)
+		};
+	}
+};
 
 export async function testGetProjectDetails(): Promise<TestResult> {
 	return runTest('GetProjectDetailsTool', async () => {

@@ -1,6 +1,6 @@
 // Test utilities for LLM tool tests
 import type { Project, Agreement } from '$lib/schema';
-import { createProject, deleteProject, createAgreement, deleteAgreement } from '$lib/server/db';
+import { createProject, deleteProject, createAgreement, deleteAgreement } from './testDb';
 
 export interface TestResult {
 	name: string;
