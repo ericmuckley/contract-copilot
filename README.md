@@ -2,7 +2,9 @@
 
 AI copilot that helps review contracts and generate project requirements and pricing estimates.
 
-The application is live at [https://contract-copilot-tau.vercel.app/](https://contract-copilot-tau.vercel.app/)
+The application is live at [https://contract-copilot-tau.vercel.app/](https://contract-copilot-tau.vercel.app/).
+
+A video walkthrough is provided as an unlisted YouTube video at [https://www.youtube.com/watch?v=GgASFDLld2g](https://www.youtube.com/watch?v=GgASFDLld2g).
 
 ## Deliverables
 
