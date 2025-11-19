@@ -8,7 +8,7 @@ The application is live at [my-app.com](https://my-app.com)
 
 Please see deliverables in
 
-- [APPROACH.md](./APPROACH.md): my approach to Ai-assisted engineering
+- [APPROACH.md](./APPROACH.md): my approach to AI-assisted engineering
 - [AI_ARTIFACTS.md](./AI_ARTIFACTS.md): prompts and artifacts from the development process
 - [TESTING.md](./TESTING.md): instructions for running server-side tests
 
