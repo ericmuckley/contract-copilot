@@ -8,9 +8,9 @@ The application is live at [my-app.com](https://my-app.com)
 
 Please see deliverables in
 
-- [APPROACH.md](./APPROACH.md)
-- [AI_ARTIFACTS.md](./AI_ARTIFACTS.md)
-- [TESTING.md](./TESTING.md)
+- [APPROACH.md](./APPROACH.md): my approach to Ai-assisted engineering
+- [AI_ARTIFACTS.md](./AI_ARTIFACTS.md): prompts and artifacts from the development process
+- [TESTING.md](./TESTING.md): instructions for running server-side tests
 
 ## Running locally
 
@@ -26,7 +26,19 @@ npm i
 
 ```
 
-### 3. Run local development server
+### 3. Seed the database
+
+Run the database seeding script to create the required tables:
+
+```bash
+
+npm run seed
+
+```
+
+This will execute the SQL file located at `src/db/create_tables.sql`.
+
+### 4. Run local development server
 
 ```bash
 
