@@ -4,7 +4,7 @@ My approach to the problem.
 
 ## AI tools
 
-- **Copilot inside VSCode**: My dominant AI tool while coding. Recently I find that Claude Sonnet 4.5 gives me the most robust epxerience overall in terms of quality and speed, and in VSCode I can easily switch to lower-quality models for specific tasks (like editing CSS) to help conserve premium tokens. I generally keep Copilot in agent mode so it directly edits the files in VSCode inresponse to my chat messages. I review and refine the changes, usually by some combination of manual editing and providing followup prompts in the chat.
+- **Copilot inside VSCode**: My dominant AI tool while coding. Recently I find that Claude Sonnet 4.5 gives me the most robust experience overall in terms of quality and speed, and in VSCode I can easily switch to lower-quality models for specific tasks (like editing CSS) to help conserve premium tokens. I generally keep Copilot in agent mode so it directly edits the files in VSCode in response to my chat messages. I review and refine the changes, usually by some combination of manual editing and providing followup prompts in the chat.
 
 - **Github Copilot Agent**: For complex or long-running tasks. I create a GitHub issue and assign the issue to Copilot. After Copilot opens a pull request, I pull the changes, run locally, refine, and then merge the PR.
 
@@ -16,7 +16,7 @@ My approach to the problem.
 
 - **Setting guardrails**: I mention existing function names, component names, variable names, or API endpoints, and tell the LLM to use those resources to solve a task. I will also create a couple empty files or components in the locations I want them in the codebase, and tell the LLM to populate its solution there. This helps prevent deduplication of things like utility functions, variables, and installation of redundant packages.
 
-- **Keeping consistent memory**: My repo contains a `.github/copiot-instructions.md` file that gives an overview of stack, architecture and coding style. This helps maintain consistency across the repo. As the codebase grows, I often have the LLM rebuild the instructions file to reflect the new changes.
+- **Keeping consistent memory**: My repo contains a `.github/copilot-instructions.md` file that gives an overview of stack, architecture and coding style. This helps maintain consistency across the repo. As the codebase grows, I often have the LLM rebuild the instructions file to reflect the new changes.
 
 ## Biggest pivot/surprise during implementation
 
