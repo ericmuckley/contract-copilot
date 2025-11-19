@@ -39,7 +39,7 @@ This document explains the design decisions and implementation details of the LL
 
 **Challenge**: Making SvelteKit modules work in test environment.
 
-**Solution**: 
+**Solution**:
 
 - Modified `settings.ts` to check if it can load `$env/static/private`
 - If that fails (test environment), it falls back to `process.env`
@@ -54,7 +54,7 @@ try {
 	envModule = require('$env/static/private');
 } catch {
 	envModule = {
-		DATABASE_URL: process.env.DATABASE_URL || '',
+		DATABASE_URL: process.env.DATABASE_URL || ''
 		// ... other env vars
 	};
 }

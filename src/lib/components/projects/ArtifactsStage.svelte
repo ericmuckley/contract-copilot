@@ -149,18 +149,14 @@
 							</div>
 						</div>
 						<div class="flex items-center space-x-2">
-							<a
-								href={artifact.file_url}
-								target="_blank"
-								class="rounded px-3 py-1 text-sm text-sky-600 hover:bg-sky-50"
-							>
+							<a href={artifact.file_url} target="_blank" class="btn btn-bg">
 								<i class="bi bi-download"></i>
 								Download
 							</a>
 							<button
 								onclick={() => handleDeleteArtifact(artifact.id, artifact.file_name)}
 								disabled={deletingArtifactId === artifact.id}
-								class="rounded px-3 py-1 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+								class="btn btn-bg"
 								title="Remove artifact"
 							>
 								{#if deletingArtifactId === artifact.id}

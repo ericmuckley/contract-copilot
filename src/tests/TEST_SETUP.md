@@ -48,9 +48,11 @@ You'll need to run the same schema migrations on the test database as the produc
 Tests use the same environment variables as production. Set them via `.env` file or directly:
 
 **Required for all tests:**
+
 - `DATABASE_URL` - PostgreSQL connection string
 
 **Required only for LLM tool tests:**
+
 - AWS Bedrock credentials (configured via AWS CLI or environment variables)
 
 Option 1: Create a `.env` file in the project root:

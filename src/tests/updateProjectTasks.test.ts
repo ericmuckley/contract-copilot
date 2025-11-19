@@ -16,9 +16,12 @@ export async function testUpdateProjectTasks(): Promise<TestResult> {
 			// Get initial task hours
 			const estimateStage = testProject.sdata.find((stage) => stage.name === 'estimate');
 			assert(estimateStage !== undefined, 'Project should have estimate stage');
-			assert(estimateStage.tasks !== null, 'Estimate stage should have tasks');
+			assert(
+				estimateStage !== undefined && estimateStage.tasks !== null,
+				'Estimate stage should have tasks'
+			);
 
-			const initialTasks = estimateStage.tasks || [];
+			const initialTasks = estimateStage!.tasks || [];
 			const initialBackendHours = initialTasks.find((t) => t.role === 'Backend Dev')
 				?.hours as number;
 
@@ -47,12 +50,12 @@ export async function testUpdateProjectTasks(): Promise<TestResult> {
 				);
 				assert(updatedEstimateStage !== undefined, 'Updated project should have estimate stage');
 
-				const updatedTasks = updatedEstimateStage.tasks || [];
+				const updatedTasks = updatedEstimateStage!.tasks || [];
 				const updatedBackendTask = updatedTasks.find((t) => t.role === 'Backend Dev');
 
 				assert(updatedBackendTask !== undefined, 'Should still have Backend Dev task');
 				assert(
-					updatedBackendTask.hours >= initialBackendHours,
+					updatedBackendTask!.hours >= initialBackendHours,
 					'Backend hours should have increased'
 				);
 			}

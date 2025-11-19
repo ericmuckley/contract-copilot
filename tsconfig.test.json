@@ -14,7 +14,9 @@
 		"strict": true,
 		"paths": {
 			"$lib": ["./src/lib"],
-			"$lib/*": ["./src/lib/*"]
+			"$lib/*": ["./src/lib/*"],
+			"$lib/server/settings": ["./src/lib/server/settings.test.ts"],
+			"$env/static/private": ["./src/lib/server/settings.test.ts"]
 		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.svelte"],

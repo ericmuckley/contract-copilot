@@ -49,11 +49,9 @@ export async function testCreateNewContract(): Promise<TestResult> {
 				assert(agreement.agreement_type === 'SOW', 'Agreement type should be SOW');
 				assert(agreement.project_id === testProjectId, 'Agreement should be linked to the project');
 				assert(
-					agreement.text_content && agreement.text_content.length > 0,
+					typeof agreement.text_content === 'string' && agreement.text_content.length > 0,
 					'Agreement should have text content'
-				);
-
-				// Store the agreement ID for cleanup
+				); // Store the agreement ID for cleanup
 				createdAgreementId = agreement.id;
 			}
 
