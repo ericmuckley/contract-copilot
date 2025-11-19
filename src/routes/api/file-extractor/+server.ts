@@ -61,9 +61,14 @@ export async function POST({ request }: RequestEvent) {
 										if (textItem.R && Array.isArray(textItem.R)) {
 											for (const run of textItem.R) {
 												if (run.T) {
-													// Decode URI encoded text and add space between words
-													const decodedText = decodeURIComponent(run.T);
-													textParts.push(decodedText);
+													// Try to decode URI encoded text, fallback to raw text if it fails
+													try {
+														const decodedText = decodeURIComponent(run.T);
+														textParts.push(decodedText);
+													} catch (decodeError) {
+														// If decoding fails, use the raw text
+														textParts.push(run.T);
+													}
 												}
 											}
 										}
@@ -74,7 +79,7 @@ export async function POST({ request }: RequestEvent) {
 							}
 						}
 						
-						const text = textParts.join(' ').trim();
+						const text = textParts.join('').trim();
 						resolve(text);
 					} catch (err) {
 						console.error('Error extracting text from PDF data:', err);
