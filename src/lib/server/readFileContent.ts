@@ -32,23 +32,28 @@ export const readFileContent = async (fileUrl: string): Promise<string> => {
 				return JSON.stringify(jsonData.trim(), null, 2);
 			}
 
-			case 'pdf': {
-				const arrayBuffer = await response.arrayBuffer();
+		case 'pdf': {
+			const arrayBuffer = await response.arrayBuffer();
+			const buffer = Buffer.from(arrayBuffer);
 
-				// Use pdfjs-dist which works in Node.js/serverless environments
-				const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
-				const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+			// Use pdf2json which is designed for Node.js serverless environments
+			const PDFParser = (await import('pdf2json')).default;
 
-				let fullText = '';
-				for (let i = 1; i <= pdf.numPages; i++) {
-					const page = await pdf.getPage(i);
-					const textContent = await page.getTextContent();
-					const pageText = textContent.items.map((item: any) => item.str).join(' ');
-					fullText += pageText + '\n';
-				}
+			return new Promise<string>((resolve, reject) => {
+				const pdfParser = new PDFParser();
 
-				return fullText.trim();
-			}
+				pdfParser.on('pdfParser_dataError', (errData: any) => {
+					reject(new Error(errData.parserError));
+				});
+
+				pdfParser.on('pdfParser_dataReady', () => {
+					const text = (pdfParser as any).getRawTextContent();
+					resolve(text.trim());
+				});
+
+				pdfParser.parseBuffer(buffer);
+			});
+		}
 			case 'docx': {
 				const arrayBuffer = await response.arrayBuffer();
 				const buffer = Buffer.from(arrayBuffer);
