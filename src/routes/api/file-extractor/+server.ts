@@ -34,13 +34,20 @@ export async function POST({ request }: RequestEvent) {
 
 			case 'pdf': {
 				const arrayBuffer = await file.arrayBuffer();
-				const uint8Array = new Uint8Array(arrayBuffer);
 
-				// Dynamic import to avoid loading pdf-parse unless needed
-				const { PDFParse } = await import('pdf-parse');
-				const parser = new PDFParse(uint8Array);
-				const result = await parser.getText();
-				textContent = result.text.trim();
+				// Use pdfjs-dist which works in Node.js/serverless environments
+				const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+				const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+				let fullText = '';
+				for (let i = 1; i <= pdf.numPages; i++) {
+					const page = await pdf.getPage(i);
+					const content = await page.getTextContent();
+					const pageText = content.items.map((item: any) => item.str).join(' ');
+					fullText += pageText + '\n';
+				}
+
+				textContent = fullText.trim();
 				break;
 			}
 			case 'docx': {
