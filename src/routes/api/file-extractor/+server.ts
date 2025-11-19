@@ -37,18 +37,49 @@ export async function POST({ request }: RequestEvent) {
 			const buffer = Buffer.from(arrayBuffer);
 
 			// Use pdf2json which is designed for Node.js serverless environments
-			const PDFParser = (await import('pdf2json')).default;
+			const PDFParserModule = await import('pdf2json');
+			const PDFParser = PDFParserModule.default;
 
 			textContent = await new Promise<string>((resolve, reject) => {
 				const pdfParser = new PDFParser();
 
 				pdfParser.on('pdfParser_dataError', (errData: any) => {
+					console.error('PDF Parser Error:', errData);
 					reject(new Error(errData.parserError));
 				});
 
-				pdfParser.on('pdfParser_dataReady', () => {
-					const text = (pdfParser as any).getRawTextContent();
-					resolve(text.trim());
+				pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+					try {
+						// Extract text from the parsed PDF data structure
+						const textParts: string[] = [];
+						
+						if (pdfData && pdfData.Pages) {
+							for (const page of pdfData.Pages) {
+								if (page.Texts && Array.isArray(page.Texts)) {
+									for (const textItem of page.Texts) {
+										// Each text item can have multiple runs (R)
+										if (textItem.R && Array.isArray(textItem.R)) {
+											for (const run of textItem.R) {
+												if (run.T) {
+													// Decode URI encoded text and add space between words
+													const decodedText = decodeURIComponent(run.T);
+													textParts.push(decodedText);
+												}
+											}
+										}
+									}
+								}
+								// Add paragraph breaks between pages
+								textParts.push('\n\n');
+							}
+						}
+						
+						const text = textParts.join(' ').trim();
+						resolve(text);
+					} catch (err) {
+						console.error('Error extracting text from PDF data:', err);
+						reject(err);
+					}
 				});
 
 				pdfParser.parseBuffer(buffer);
