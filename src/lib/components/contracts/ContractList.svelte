@@ -46,7 +46,7 @@
 	});
 </script>
 
-<div class="mb-8 flex space-x-4">
+<div class="mb-8 flex flex-wrap gap-x-4 gap-y-8">
 	{#if policyArtifacts.length > 0}
 		<div>
 			<a href="/contracts/new" class="btn btn-primary">
@@ -67,7 +67,7 @@
 	<div>
 		{#if lastUpdated()}
 			<div class="standard mb-4 text-sm">
-				<span class="font-medium">Last contract update:</span>
+				<span>Last contract update:</span>
 				{lastUpdated()?.toLocaleString('en-US', {
 					month: 'short',
 					day: 'numeric',
@@ -86,7 +86,7 @@
 					<option value={type}>{type}</option>
 				{/each}
 			</select>
-			<span class="text-sm text-slate-500">
+			<span class="standard text-sm">
 				{filteredAgreements.length}/{latestAgreements().length} agreement{latestAgreements()
 					.length !== 1
 					? 's'
@@ -96,7 +96,7 @@
 
 		{#if filteredAgreements.length === 0}
 			<div class="py-24 text-center">
-				<div class="mb-4 text-4xl text-slate-300">
+				<div class="muted mb-4 text-4xl">
 					<i class="bi bi-file-earmark-x"></i>
 				</div>
 				<p class="standard">

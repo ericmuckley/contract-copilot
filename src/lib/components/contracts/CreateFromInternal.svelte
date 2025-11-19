@@ -100,7 +100,7 @@
 </script>
 
 <div>
-	<label for="agreement-type-internal" class="mb-1 block text-sm text-slate-700">
+	<label for="agreement-type-internal" class="standard mb-1 block text-sm">
 		Agreement Type <span class="text-red-500">*</span>
 	</label>
 	<select id="agreement-type-internal" bind:value={agreementType} class="w-full">
@@ -111,7 +111,7 @@
 </div>
 
 <div class="mt-8 space-y-1">
-	<label for="approver-name" class="block text-sm text-slate-700">
+	<label for="approver-name" class="standard block text-sm">
 		Agreement Name <span class="text-red-500">*</span>
 	</label>
 	<input
@@ -124,7 +124,7 @@
 </div>
 
 <div class="mt-8">
-	<label for="counterparty" class="mb-1 block text-sm text-slate-700">
+	<label for="counterparty" class="standard mb-1 block text-sm">
 		Counterparty <span class="text-red-500">*</span>
 	</label>
 	<input

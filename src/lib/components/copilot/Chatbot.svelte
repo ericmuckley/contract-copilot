@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { onMount } from 'svelte';
-	import { get } from 'svelte/store';
 	import type { Message } from '@aws-sdk/client-bedrock-runtime';
 	import ChatInput from './ChatInput.svelte';
 	import ChatHistory from './ChatHistory.svelte';
@@ -11,7 +9,7 @@
 		buildAssistantMessage,
 		executeToolCalls
 	} from './chatbotUtils';
-	import { activeProjectId, chatMessages } from '$lib/stores';
+	import { activeProjectId, activeAgreementRootId } from '$lib/stores';
 	import { invalidate } from '$app/navigation';
 
 	let messages: Message[] = $state([]);
@@ -19,22 +17,22 @@
 	let streamingContent = $state('');
 	let isStreaming = $state(false);
 	let toolCallsInProgress: string[] = $state([]);
+	let chatContainer: HTMLDivElement | undefined;
 
 	let { useTools = true }: { useTools?: boolean } = $props();
 
-	// Load messages from store on mount only
-	onMount(() => {
-		const stored = get(chatMessages);
-		if (stored && stored.length > 0) {
-			messages = stored;
-		}
-	});
-
-	// Update store whenever messages change (but not during initial load)
+	// Auto-scroll to bottom when messages or streaming content changes
 	$effect(() => {
-		if (messages.length > 0) {
-			chatMessages.set(messages);
-		}
+		// Track dependencies
+		messages.length;
+		streamingContent;
+
+		// Scroll to bottom after a small delay to ensure DOM has updated
+		setTimeout(() => {
+			if (chatContainer) {
+				chatContainer.scrollTop = chatContainer.scrollHeight;
+			}
+		}, 0);
 	});
 
 	const handleSubmit = async () => {
@@ -55,7 +53,6 @@
 
 	const resetChat = () => {
 		messages = [];
-		chatMessages.set([]);
 	};
 
 	const runInferenceLoop = async () => {
@@ -64,10 +61,17 @@
 		while (continueLoop) {
 			isStreaming = true;
 			streamingContent = '';
+			// Clear tool indicators when starting a new iteration
+			toolCallsInProgress = [];
 
 			try {
 				// Fetch streaming response from Bedrock
-				const response = await fetchBedrockStream(messages, useTools, $activeProjectId);
+				const response = await fetchBedrockStream(
+					messages,
+					useTools,
+					$activeProjectId,
+					$activeAgreementRootId
+				);
 
 				// Process the stream with callbacks for UI updates
 				const state = await processStream(response, {
@@ -99,10 +103,10 @@
 				// If there are tool calls, execute them and continue the loop
 				if (state.toolUses.size > 0) {
 					const toolResults = await executeToolCalls(state.toolUses);
-					toolCallsInProgress = [];
 
-					// Refresh project data after tool execution (in case data was modified)
+					// Refresh data after tool execution (in case data was modified)
 					await invalidate('project:data');
+					await invalidate('agreement:data');
 
 					// Add tool results as a user message (required by Bedrock API)
 					if (toolResults.length > 0) {
@@ -113,8 +117,11 @@
 						messages = [...messages, toolResultMessage];
 					}
 
+					// Don't clear toolCallsInProgress yet - keep it visible during next iteration
 					continueLoop = true; // Continue to get the final response
 				} else {
+					// No tool calls, clear any remaining tool indicators
+					toolCallsInProgress = [];
 					continueLoop = false; // No more tool calls, we're done
 				}
 			} catch (error) {
@@ -139,7 +146,7 @@
 
 <div class="flex h-full flex-col overflow-hidden">
 	<!-- Scrollable chat messages area -->
-	<div class="min-h-0 flex-1 overflow-y-auto px-4 py-2">
+	<div bind:this={chatContainer} class="min-h-0 flex-1 overflow-y-auto px-4 py-2">
 		{#if messages.length}
 			<div in:slide>
 				<ChatHistory {messages} {streamingContent} {isStreaming} {toolCallsInProgress} />

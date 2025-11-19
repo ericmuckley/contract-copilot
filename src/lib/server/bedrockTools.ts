@@ -1,9 +1,15 @@
-import { getProject, updateProject } from './db';
-import { bedrockClient } from './bedrockClient';
+import {
+	getProject,
+	updateProject,
+	getAgreementsByRootId,
+	updateAgreementNotes,
+	createAgreement
+} from './db';
+import { bedrockClient } from './bedrockClientInstance';
 import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { LLM_MODEL_ID } from './settings';
 import type { ProjectTask, StageData } from '$lib/schema';
-import { generateQuoteCSV } from '$lib/utils';
+import { generateQuoteCSV, applyEditsToText, makeShortId, safeJsonParse } from '$lib/utils';
 
 export class GetProjectDetailsTool {
 	static spec = {
@@ -35,6 +41,166 @@ export class GetProjectDetailsTool {
 		return {
 			response: project,
 			text: JSON.stringify(project)
+		};
+	}
+}
+
+export class GetContractDetailsTool {
+	static spec = {
+		toolSpec: {
+			name: 'get_contract_details',
+			description: 'Get details for a specific contract or agreement.',
+			inputSchema: {
+				json: {
+					type: 'object',
+					properties: {
+						root_id: {
+							type: 'string',
+							description: 'The root_id of the contract to get details for.'
+						}
+					},
+					required: ['root_id']
+				}
+			}
+		}
+	};
+	static async run({ root_id }: { root_id: string }) {
+		const agreements = await getAgreementsByRootId(root_id);
+		if (!agreements || agreements.length === 0) {
+			return {
+				response: [`Contract with root_id ${root_id} not found.`],
+				text: JSON.stringify(`Contract with root_id ${root_id} not found.`)
+			};
+		}
+		// The agreements are already sorted by version_number DESC, so take the first one
+		const latestAgreement = agreements[0];
+		return {
+			response: latestAgreement,
+			text: JSON.stringify(latestAgreement)
+		};
+	}
+}
+
+export class GetContractEditsSummaryTool {
+	static spec = {
+		toolSpec: {
+			name: 'get_contract_edits_summary',
+			description:
+				'Get a summary of all edits / pushbacks / changes made across all versions of a contract or agreement.',
+			inputSchema: {
+				json: {
+					type: 'object',
+					properties: {
+						root_id: {
+							type: 'string',
+							description: 'The root_id of the contract to get edit history for.'
+						}
+					},
+					required: ['root_id']
+				}
+			}
+		}
+	};
+	static async run({ root_id }: { root_id: string }) {
+		const agreements = await getAgreementsByRootId(root_id);
+		if (!agreements || agreements.length === 0) {
+			return {
+				response: [`Contract with root_id ${root_id} not found.`],
+				text: JSON.stringify(`Contract with root_id ${root_id} not found.`)
+			};
+		}
+
+		// Extract all edits from all agreement versions
+		const editsHistory = agreements.map((agreement) => ({
+			version_number: agreement.version_number,
+			created_at: agreement.created_at,
+			edits: agreement.edits || 'No edits recorded for this version'
+		}));
+
+		return {
+			response: {
+				root_id,
+				total_versions: agreements.length,
+				edits_history: editsHistory
+			},
+			text: JSON.stringify({
+				root_id,
+				total_versions: agreements.length,
+				edits_history: editsHistory
+			})
+		};
+	}
+}
+
+export class AddNoteToContractTool {
+	static spec = {
+		toolSpec: {
+			name: 'add_note_to_contract',
+			description: 'Add a note to the latest version of a contract or agreement.',
+			inputSchema: {
+				json: {
+					type: 'object',
+					properties: {
+						root_id: {
+							type: 'string',
+							description: 'The root_id of the contract to add a note to.'
+						},
+						note: {
+							type: 'string',
+							description: 'The note to add to the contract.'
+						}
+					},
+					required: ['root_id', 'note']
+				}
+			}
+		}
+	};
+	static async run({ root_id, note }: { root_id: string; note: string }) {
+		const agreements = await getAgreementsByRootId(root_id);
+		if (!agreements || agreements.length === 0) {
+			return {
+				response: { error: `Contract with root_id ${root_id} not found.` },
+				text: JSON.stringify({ error: `Contract with root_id ${root_id} not found.` })
+			};
+		}
+
+		// The agreements are already sorted by version_number DESC, so take the first one
+		const latestAgreement = agreements[0];
+
+		// Ensure the agreement has an id
+		if (!latestAgreement.id) {
+			return {
+				response: { error: `Contract with root_id ${root_id} has no valid id.` },
+				text: JSON.stringify({ error: `Contract with root_id ${root_id} has no valid id.` })
+			};
+		}
+
+		// Get existing notes or initialize empty array
+		const existingNotes = latestAgreement.notes || [];
+		const updatedNotes = [...existingNotes, note];
+
+		// Update the agreement with the new notes
+		const updatedAgreement = await updateAgreementNotes(latestAgreement.id, updatedNotes);
+
+		if (!updatedAgreement) {
+			return {
+				response: { error: `Failed to update contract with root_id ${root_id}.` },
+				text: JSON.stringify({ error: `Failed to update contract with root_id ${root_id}.` })
+			};
+		}
+
+		return {
+			response: {
+				success: true,
+				message: 'Note added successfully',
+				agreement: updatedAgreement,
+				added_note: note
+			},
+			text: JSON.stringify({
+				success: true,
+				message: 'Note added successfully',
+				added_note: note
+			})
 		};
 	}
 }
@@ -177,8 +343,8 @@ Return the modified tasks array as JSON:`;
 				],
 				system: [{ text: systemPrompt }],
 				inferenceConfig: {
-					maxTokens: 2000,
-					temperature: 0.1 // Low temperature for consistent, deterministic output
+					maxTokens: 2048,
+					temperature: 0.1
 				}
 			})
 		);
@@ -225,5 +391,400 @@ Return the modified tasks array as JSON:`;
 			modified,
 			totalHoursDiff: Math.round((newTotalHours - oldTotalHours) * 100) / 100
 		};
+	}
+}
+
+export class CreateNewContractVersionTool {
+	static spec = {
+		toolSpec: {
+			name: 'create_new_contract_version',
+			description:
+				'Create a new version of a contract or agreement by modifying its text content based on a user command.',
+			inputSchema: {
+				json: {
+					type: 'object',
+					properties: {
+						root_id: {
+							type: 'string',
+							description: 'The root_id of the contract to create a new version for.'
+						},
+						command: {
+							type: 'string',
+							description:
+								'Natural language command describing what changes to make to the contract text (e.g., "change the payment terms to net 60", "add a confidentiality clause", "remove section 3.2")'
+						}
+					},
+					required: ['root_id', 'command']
+				}
+			}
+		}
+	};
+
+	static async run({ root_id, command }: { root_id: string; command: string }) {
+		try {
+			// 1. Fetch the latest version of the contract
+			const agreements = await getAgreementsByRootId(root_id);
+			if (!agreements || agreements.length === 0) {
+				return {
+					response: { error: `Contract with root_id ${root_id} not found.` },
+					text: JSON.stringify({ error: `Contract with root_id ${root_id} not found.` })
+				};
+			}
+
+			// The agreements are already sorted by version_number DESC, so take the first one
+			const latestAgreement = agreements[0];
+			const currentTextContent = latestAgreement.text_content;
+			const currentVersionNumber = latestAgreement.version_number;
+
+			// 2. Use LLM to identify edits and apply them to the contract text
+			const { modifiedText, edits } = await this.modifyContractTextWithLLM(
+				currentTextContent,
+				command
+			);
+
+			// 3. Save the new version using createAgreement
+			const newAgreement = await createAgreement({
+				root_id: root_id,
+				version_number: currentVersionNumber + 1,
+				origin: latestAgreement.origin,
+				notes: [],
+				edits: edits, // Store the edits for audit trail
+				agreement_name: latestAgreement.agreement_name,
+				agreement_type: latestAgreement.agreement_type,
+				created_by: latestAgreement.created_by,
+				text_content: modifiedText,
+				counterparty: latestAgreement.counterparty || undefined,
+				project_id: latestAgreement.project_id || undefined
+			}); // 4. Return success response
+			return {
+				response: {
+					success: true,
+					message: `Created version ${newAgreement.version_number} of contract ${root_id}`,
+					root_id: root_id,
+					new_version_number: newAgreement.version_number,
+					command_applied: command,
+					agreement: newAgreement
+				},
+				text: JSON.stringify({
+					success: true,
+					message: `Created version ${newAgreement.version_number} of contract ${root_id}`,
+					new_version_number: newAgreement.version_number,
+					command_applied: command
+				})
+			};
+		} catch (error) {
+			return {
+				response: { error: `Failed to create new contract version: ${error}` },
+				text: JSON.stringify({ error: `Failed to create new contract version: ${error}` })
+			};
+		}
+	}
+
+	private static async modifyContractTextWithLLM(
+		currentText: string,
+		command: string
+	): Promise<{ modifiedText: string; edits: { old: string; new: string; note: string }[] }> {
+		// Step 1: Use LLM to identify specific edits to make (much faster than rewriting everything)
+		const systemPrompt = `You are a legal contract editor assistant. You will receive:
+1. The current text content of a contract
+2. A user command describing what changes to make
+
+Your job is to identify the specific edits needed and return them as a JSON array. Each edit should specify:
+- "old": The exact text from the contract to replace (empty string "" if adding new text)
+- "new": The replacement or additional text
+- "note": A brief explanation of the change
+
+Rules:
+- Return ONLY a JSON array of edit objects, no other text
+- For replacements: provide the exact text to find in "old" and the replacement in "new"
+- For additions: use empty string "" for "old" and provide the text to add in "new"
+- For deletions: provide the exact text to remove in "old" and empty string "" in "new"
+- Be precise with the "old" text - it must match exactly what's in the contract
+- Keep edits focused and minimal - only change what the command asks for
+- Maintain professional legal language in all changes
+
+Example output:
+[
+  {
+    "old": "payment within 60 days",
+    "new": "payment within 30 days",
+    "note": "Changed payment terms as requested"
+  }
+]`;
+
+		const userPrompt = `Current contract text:
+
+		<CONTRACT_TEXT>
+${currentText}
+</CONTRACT_TEXT>
+
+User command: "${command}"
+
+Identify the specific edits needed and return them as a JSON array:`;
+
+		const response = await bedrockClient.send(
+			new ConverseCommand({
+				modelId: LLM_MODEL_ID,
+				messages: [
+					{
+						role: 'user',
+						content: [{ text: userPrompt }]
+					}
+				],
+				system: [{ text: systemPrompt }],
+				inferenceConfig: {
+					maxTokens: 2048,
+					temperature: 0.2
+				}
+			})
+		);
+
+		// Extract the text response
+		const outputText = response.output?.message?.content?.[0]?.text || '[]';
+
+		// Parse JSON from response (handle potential markdown code blocks)
+		const jsonMatch = outputText.match(/\[[\s\S]*\]/);
+		if (!jsonMatch) {
+			throw new Error('LLM did not return valid JSON array of edits');
+		}
+
+		const edits = JSON.parse(jsonMatch[0]) as { old: string; new: string; note: string }[];
+
+		// Validate the structure
+		if (!Array.isArray(edits)) {
+			throw new Error('LLM response is not an array');
+		}
+
+		// Step 2: Apply the edits to the original text
+		const modifiedText = applyEditsToText(currentText, edits);
+
+		if (!modifiedText || modifiedText.trim().length === 0) {
+			throw new Error('Applied edits resulted in empty contract text');
+		}
+
+		return { modifiedText, edits };
+	}
+}
+
+export class CreateNewContractTool {
+	static spec = {
+		toolSpec: {
+			name: 'create_new_contract',
+			description:
+				'Create a new contractual agreement from an existing project by aggregating project content and generating a contract.',
+			inputSchema: {
+				json: {
+					type: 'object',
+					properties: {
+						project_id: {
+							type: 'string',
+							description: 'The ID of the project to create a contract from.'
+						},
+						contract_type: {
+							type: 'string',
+							description: 'The type of contract to create.',
+							enum: ['MSA', 'SOW', 'NDA', 'OTHER']
+						}
+					},
+					required: ['project_id', 'contract_type']
+				}
+			}
+		}
+	};
+
+	static async run({
+		project_id,
+		contract_type
+	}: {
+		project_id: number | string;
+		contract_type: string;
+	}) {
+		try {
+			// 1. Fetch the project
+			const project = await getProject(parseInt(project_id as string));
+			if (!project) {
+				return {
+					response: { error: `Project with ID ${project_id} not found.` },
+					text: JSON.stringify({ error: `Project with ID ${project_id} not found.` })
+				};
+			}
+
+			// 2. Aggregate all content from project stages
+			const aggregatedContent = project.sdata
+				.map((stage: StageData) => {
+					if (stage.content) {
+						return `## ${stage.name}\n${stage.content}`;
+					}
+					if (stage.tasks) {
+						return `## Tasks\n${JSON.stringify(stage.tasks, null, 2)}`;
+					}
+					return null;
+				})
+				.filter((content): content is string => content !== null)
+				.join('\n\n');
+
+			console.log('\n\n\n============================================');
+			console.log('Aggregated Project Content:');
+			console.log(aggregatedContent);
+			console.log('============================================');
+
+			if (!aggregatedContent || aggregatedContent.trim().length === 0) {
+				return {
+					response: { error: 'Project has no content to generate a contract from.' },
+					text: JSON.stringify({ error: 'Project has no content to generate a contract from.' })
+				};
+			}
+
+			// 3. Use LLM to generate contract
+			const contractData = await this.generateContractWithLLM(
+				aggregatedContent,
+				contract_type,
+				project.project_name
+			);
+
+			console.log('\n\n\n============================================');
+			console.log('Generated Contract Data:');
+			console.log(contractData);
+			console.log('============================================');
+
+			// 4. Create the new agreement
+			const newAgreement = await createAgreement({
+				root_id: makeShortId(),
+				version_number: 1,
+				origin: 'internal',
+				notes: [],
+				edits: [],
+				agreement_name: contractData.contract_name,
+				agreement_type: contract_type,
+				created_by: project.created_by,
+				text_content: contractData.text_content,
+				counterparty: contractData.counterparty,
+				project_id: parseInt(project_id as string)
+			});
+
+			return {
+				response: {
+					success: true,
+					message: `Created new ${contract_type} contract from project ${project_id}`,
+					agreement: newAgreement
+				},
+				text: JSON.stringify({
+					success: true,
+					message: `Created new ${contract_type} contract from project ${project_id}`,
+					agreement_id: newAgreement.id,
+					root_id: newAgreement.root_id
+				})
+			};
+		} catch (error) {
+			return {
+				response: { error: `Failed to create contract: ${error}` },
+				text: JSON.stringify({ error: `Failed to create contract: ${error}` })
+			};
+		}
+	}
+
+	private static async generateContractWithLLM(
+		projectContent: string,
+		contractType: string,
+		projectName: string
+	): Promise<{ contract_name: string; counterparty: string; text_content: string }> {
+		const systemPrompt = `You are a legal contract generation assistant. You will receive:
+1. Aggregated content from a project (including requirements, architecture, estimates, etc.)
+2. The type of contract to generate (MSA, SOW, NDA, or OTHER)
+3. The project name
+
+Your job is to generate a professional contractual agreement based on the project content and return the result as JSON.
+
+The JSON response must have exactly these fields:
+{
+  "contract_name": "A descriptive name for the contract",
+  "counterparty": "The name of the other party (client/vendor), or 'UNKNOWN' if not identifiable from the content",
+  "text_content": "The full text content of the contract"
+}
+
+Guidelines for generating the contract:
+- Use professional legal language appropriate for business contracts
+- Include standard sections like parties, scope of work, terms, payment, and signatures
+- Base the scope and deliverables on the project content provided
+- For MSA: Focus on master service agreement terms, general conditions
+- For SOW: Focus on specific statement of work, deliverables, timeline, and pricing
+- For NDA: Focus on confidentiality and non-disclosure terms
+- For OTHER: Generate a general business agreement
+- Make the contract realistic and professional
+- The text_content should be properly formatted with sections and paragraphs
+
+Return ONLY valid JSON, no other text.`;
+
+		const userPrompt = `Project Name: ${projectName}
+Contract Type: ${contractType}
+
+Project Content:
+<PROJECT_CONTENT>
+${projectContent}
+</PROJECT_CONTENT>
+
+Generate a short, concise ${contractType} contract based on this project content and return the valid JSON.`;
+
+		const response = await bedrockClient.send(
+			new ConverseCommand({
+				modelId: LLM_MODEL_ID,
+				messages: [
+					{
+						role: 'user',
+						content: [{ text: userPrompt }]
+					}
+				],
+				system: [{ text: systemPrompt }],
+				inferenceConfig: {
+					maxTokens: 8192,
+					temperature: 0.3
+				}
+			})
+		);
+
+		// Extract the text response
+		const outputText = response.output?.message?.content?.[0]?.text || '{}';
+
+		console.log('\n\n\n============================================');
+		console.log('LLM Output Text:');
+		console.log(outputText);
+		console.log('============================================');
+
+		// Parse JSON from response (handle potential markdown code blocks)
+		const jsonMatch = safeJsonParse(outputText, {
+			contract_name: '',
+			counterparty: '',
+			text_content: ''
+		});
+
+		console.log('\n\n\n============================================');
+		console.log('Parsed Contract Data:');
+		console.log(jsonMatch);
+		console.log('============================================');
+
+		const contractData = jsonMatch as {
+			contract_name: string;
+			counterparty: string;
+			text_content: string;
+		};
+
+		// Validate the structure
+		if (
+			!contractData.contract_name ||
+			!contractData.counterparty ||
+			!contractData.text_content ||
+			typeof contractData.contract_name !== 'string' ||
+			typeof contractData.counterparty !== 'string' ||
+			typeof contractData.text_content !== 'string'
+		) {
+			throw new Error(`Invalid contract data structure: ${JSON.stringify(contractData)}`);
+		}
+
+		// Ensure counterparty is set to UNKNOWN if empty
+		if (!contractData.counterparty.trim()) {
+			contractData.counterparty = 'UNKNOWN';
+		}
+
+		return contractData;
 	}
 }

@@ -3,7 +3,6 @@
 	import LLMOutput from './LLMOutput.svelte';
 	import Ping from '../Ping.svelte';
 	import { cleanString } from '$lib/utils';
-
 	let {
 		messages = [],
 		streamingContent = '',
@@ -67,7 +66,7 @@
 
 <div class="space-y-2">
 	{#each messages as message, i (i)}
-		{#if message.role === 'user'}
+		{#if message.role === 'user' && (message.content ?? [{}])[0].text}
 			{@const toolResults = getToolResults(message.content)}
 			{#if toolResults.length > 0}
 				<!-- Display tool results -->
@@ -108,9 +107,15 @@
 										<i class="bi bi-check-lg text-green-600"></i>
 										<span>{cleanString(tool.name)}</span>
 									</p>
-									<div class="mt-1 max-h-32 overflow-x-auto overflow-y-auto text-xs text-gray-600">
+									<div class="standard mt-1 max-h-32 overflow-x-auto overflow-y-auto text-xs">
 										Input: {JSON.stringify(tool.input)}
 									</div>
+									{#if tool.name.toLowerCase().includes('create')}
+										<div class="mt-1 text-xs text-purple-800">
+											<i class="bi bi-info-circle-fill"></i>
+											This task may take up to 1 min to finish
+										</div>
+									{/if}
 								</div>
 							{/each}
 						</div>
@@ -121,31 +126,34 @@
 	{/each}
 
 	{#if isStreaming}
-		<div class="flex justify-center">
-			<div class="max-w-[80%]">
-				{#if streamingContent}
+		{#if streamingContent}
+			<div class="flex justify-start">
+				<div class="max-w-[80%]">
 					<LLMOutput text={streamingContent} />
-				{/if}
-
-				{#if toolCallsInProgress.length > 0}
-					<div class="mt-2 space-y-1">
-						{#each toolCallsInProgress as toolName}
-							<div class="rounded-lg bg-purple-100 px-3 py-2 text-sm">
-								<p class="font-semibold">
-									{cleanString(toolName)}
-								</p>
-								<div class="my-2 flex justify-center">
-									<Ping />
+					{#if toolCallsInProgress.length > 0 && 0}
+						<div class="mt-2 space-y-1">
+							{#each toolCallsInProgress as toolName}
+								<div class="rounded-lg bg-purple-100 px-3 py-2 text-sm">
+									<p class="font-semibold">
+										{cleanString(toolName)}
+									</p>
+									<div class="my-2 flex justify-center px-6">
+										<Ping />
+									</div>
 								</div>
-							</div>
-						{/each}
-					</div>
-				{:else}
-					<div class="my-2 flex justify-center">
-						<Ping />
-					</div>
-				{/if}
+							{/each}
+						</div>
+					{:else}
+						<div class="my-2 flex justify-center px-6">
+							<Ping />
+						</div>
+					{/if}
+				</div>
 			</div>
-		</div>
+		{:else}
+			<div class="my-2 flex justify-center px-6">
+				<Ping />
+			</div>
+		{/if}
 	{/if}
 </div>

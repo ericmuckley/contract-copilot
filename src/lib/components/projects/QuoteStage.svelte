@@ -163,15 +163,11 @@
 					<table class="w-full border-collapse">
 						<thead>
 							<tr class="border-b-2 border-slate-300 bg-slate-50">
-								<th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Task</th>
-								<th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Role</th>
-								<th class="px-4 py-3 text-right text-sm font-semibold text-slate-700">Hours</th>
-								<th class="px-4 py-3 text-right text-sm font-semibold text-slate-700">
-									Rate/Hour
-								</th>
-								<th class="px-4 py-3 text-right text-sm font-semibold text-slate-700">
-									Total Cost
-								</th>
+								<th class="standard px-4 py-3 text-left text-sm font-semibold">Task</th>
+								<th class="standard px-4 py-3 text-left text-sm font-semibold">Role</th>
+								<th class="standard px-4 py-3 text-right text-sm font-semibold">Hours</th>
+								<th class="standard px-4 py-3 text-right text-sm font-semibold"> Rate/Hour </th>
+								<th class="standard px-4 py-3 text-right text-sm font-semibold"> Total Cost </th>
 							</tr>
 						</thead>
 						<tbody>

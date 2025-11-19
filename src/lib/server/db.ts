@@ -296,45 +296,33 @@ export async function updateAgreement(
 	id: number,
 	updates: Partial<Omit<Agreement, 'id' | 'created_at' | 'updated_at'>>
 ): Promise<Agreement | null> {
-	// Build dynamic update query based on provided fields
-	const fields = [];
-	const values = [];
+	// Get current agreement to merge with updates
+	const current = await getAgreement(id);
+	if (!current) return null;
 
-	if (updates.agreement_name !== undefined) {
-		fields.push('agreement_name');
-		values.push(updates.agreement_name);
-	}
-	if (updates.agreement_type !== undefined) {
-		fields.push('agreement_type');
-		values.push(updates.agreement_type);
-	}
-	if (updates.text_content !== undefined) {
-		fields.push('text_content');
-		values.push(updates.text_content);
-	}
-	if (updates.counterparty !== undefined) {
-		fields.push('counterparty');
-		values.push(updates.counterparty);
-	}
-	if (updates.project_id !== undefined) {
-		fields.push('project_id');
-		values.push(updates.project_id);
-	}
-	if (updates.version_number !== undefined) {
-		fields.push('version_number');
-		values.push(updates.version_number);
-	}
-
-	if (fields.length === 0) {
-		return getAgreement(id);
-	}
-
-	const setClause = fields.map((field, idx) => `${field} = $${idx + 1}`).join(', ');
-	values.push(id);
+	// Merge updates with current values - use explicit undefined check for numeric fields
+	const agreement_name =
+		updates.agreement_name !== undefined ? updates.agreement_name : current.agreement_name;
+	const agreement_type =
+		updates.agreement_type !== undefined ? updates.agreement_type : current.agreement_type;
+	const text_content =
+		updates.text_content !== undefined ? updates.text_content : current.text_content;
+	const counterparty =
+		updates.counterparty !== undefined ? updates.counterparty : current.counterparty;
+	const project_id = updates.project_id !== undefined ? updates.project_id : current.project_id;
+	const version_number =
+		updates.version_number !== undefined ? updates.version_number : current.version_number;
 
 	const result = await sql`
 		UPDATE "agreements"
-		SET ${sql.unsafe(setClause)}, updated_at = NOW()
+		SET 
+			agreement_name = ${agreement_name},
+			agreement_type = ${agreement_type},
+			text_content = ${text_content},
+			counterparty = ${counterparty},
+			project_id = ${project_id},
+			version_number = ${version_number},
+			updated_at = NOW()
 		WHERE id = ${id}
 		RETURNING id, root_id, version_number, origin, created_at, updated_at, agreement_name, agreement_type, created_by, text_content, counterparty, project_id, notes, edits
 	`;

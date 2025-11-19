@@ -157,7 +157,7 @@
 
 <div class="space-y-4">
 	<div>
-		<label for="file-upload" class="mb-1 block text-sm text-slate-700">
+		<label for="file-upload" class="standard mb-1 block text-sm">
 			Upload File from Client <span class="text-red-500">*</span>
 		</label>
 		<input
@@ -210,7 +210,7 @@
 	{#if metadataExtracted}
 		<div class="mt-8 space-y-4">
 			<div>
-				<label for="agreement-type-client" class="mb-1 block text-sm text-slate-700">
+				<label for="agreement-type-client" class="standard mb-1 block text-sm">
 					Agreement Type <span class="text-red-500">*</span>
 				</label>
 				<select id="agreement-type-client" bind:value={agreementType} class="w-full">
@@ -221,7 +221,7 @@
 			</div>
 
 			<div>
-				<label for="agreement-name" class="mb-1 block text-sm text-slate-700">
+				<label for="agreement-name" class="standard mb-1 block text-sm">
 					Agreement Name <span class="text-red-500">*</span>
 				</label>
 				<input
@@ -234,7 +234,7 @@
 			</div>
 
 			<div>
-				<label for="counterparty-client" class="mb-1 block text-sm text-slate-700">
+				<label for="counterparty-client" class="standard mb-1 block text-sm">
 					Counterparty <span class="text-red-500">*</span>
 				</label>
 				<input
@@ -248,7 +248,7 @@
 			</div>
 
 			<div>
-				<label for="text-content" class="mb-1 block text-sm text-slate-700">
+				<label for="text-content" class="standard mb-1 block text-sm">
 					Contract Content <span class="text-red-500">*</span>
 				</label>
 				<textarea

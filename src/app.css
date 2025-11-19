@@ -42,7 +42,7 @@ select {
 	@apply rounded-3xl bg-white px-6 py-4;
 }
 .btn {
-	@apply rounded-full px-4 py-3 text-white;
+	@apply cursor-pointer rounded-full px-4 py-3 text-white;
 }
 .btn-primary {
 	@apply border-2 border-transparent bg-sky-500 hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50;
@@ -83,7 +83,7 @@ select {
 	@apply mb-4 text-lg;
 }
 .boilerplate table {
-	@apply max-w-full;
+	@apply mb-6 max-w-full;
 }
 .boilerplate th,
 .boilerplate td {
@@ -94,6 +94,9 @@ select {
 }
 .boilerplate code {
 	@apply wrap-break-word;
+}
+.boilerplate hr {
+	@apply my-6 border-t border-slate-400;
 }
 
 .text-gradient {

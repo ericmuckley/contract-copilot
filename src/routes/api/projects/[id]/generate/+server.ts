@@ -43,7 +43,7 @@ export async function POST({ params, request }: RequestEvent) {
 			messages,
 			systemMessages: [
 				{
-					text: 'You are an expert at project planning, cost estimation, and solution architecture. Provide detailed, structured, and professional responses.'
+					text: 'You are an expert at project planning, cost estimation, and solution architecture. Provide concise, structured, and professional responses.'
 				}
 			],
 			useTools: false

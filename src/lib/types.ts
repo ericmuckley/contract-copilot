@@ -5,4 +5,5 @@ export interface LLMInferencePayload {
 	systemMessages?: { text: string }[];
 	useTools?: boolean;
 	activeProjectId?: number | null;
+	activeAgreementRootId?: string | null;
 }

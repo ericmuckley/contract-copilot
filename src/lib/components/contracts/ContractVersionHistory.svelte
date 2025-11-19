@@ -34,7 +34,7 @@
 									<span class="rounded-full bg-slate-200 px-3 py-1 text-sm">
 										Version {version.version_number}
 									</span>
-									<span class="text-xs text-slate-500">
+									<span class="standard text-xs">
 										{new Date(version.created_at as string).toLocaleDateString('en-US', {
 											year: 'numeric',
 											month: 'short',
