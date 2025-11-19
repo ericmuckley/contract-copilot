@@ -34,16 +34,15 @@ export async function POST({ request }: RequestEvent) {
 
 			case 'pdf': {
 				const arrayBuffer = await file.arrayBuffer();
-				const buffer = Buffer.from(arrayBuffer);
+				const uint8Array = new Uint8Array(arrayBuffer);
 
 				// Dynamic import to avoid loading pdf-parse unless needed
 				const { PDFParse } = await import('pdf-parse');
-				const parser = new PDFParse(buffer);
+				const parser = new PDFParse(uint8Array);
 				const result = await parser.getText();
 				textContent = result.text.trim();
 				break;
 			}
-
 			case 'docx': {
 				const arrayBuffer = await file.arrayBuffer();
 				const buffer = Buffer.from(arrayBuffer);

@@ -27,11 +27,11 @@
 
 <a
 	href="/contracts/{agreement.root_id}"
-	class="group relative block overflow-hidden rounded-xl border border-slate-200/60 bg-white p-5 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:border-indigo-200 hover:shadow-lg"
+	class="group/card relative block overflow-hidden rounded-xl border border-slate-200/60 bg-white p-5 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:border-indigo-200 hover:shadow-lg"
 >
 	<div class="mb-4 flex items-start justify-between gap-3">
 		<h3
-			class="flex-1 text-lg leading-tight font-semibold text-slate-700 transition-colors group-hover:text-indigo-700"
+			class="flex-1 text-lg leading-tight font-semibold text-slate-700 transition-colors group-hover/card:text-indigo-700"
 		>
 			{agreement.agreement_name}
 		</h3>
@@ -66,6 +66,6 @@
 
 	<!-- Hover effect gradient -->
 	<div
-		class="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+		class="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100"
 	></div>
 </a>
