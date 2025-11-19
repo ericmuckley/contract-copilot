@@ -28,15 +28,13 @@ npm i
 
 ### 3. Seed the database
 
-Run the database seeding script to create the required tables:
+Executes `src/db/create_tables.sql` to create the required database tables.
 
 ```bash
 
 npm run seed
 
 ```
-
-This will execute the SQL file located at `src/db/create_tables.sql`.
 
 ### 4. Run local development server
 
