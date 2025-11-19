@@ -144,15 +144,12 @@ Create a new Bedrock tool. It should be called `CreateNewContract`. The inputs w
 First, the function will find the project ID associated with the project name. Then it will run the getProject(project_id) function to get the project details.
 
 Next, take all the content out of the project.stages, and feed it to an LLM. It should be prompted to turn the project into a contract and return JSON that includes:
-```
 
 {
 contract_name,
 counterparty (or UNKNOWN),
 text_content (the content of the contract)
 }
-
-```
 
 Finally, parse the LLM output as JSON to get the values of these items. Once we have the values, we can create the new contract.
 
