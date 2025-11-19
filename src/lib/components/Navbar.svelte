@@ -1,12 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import Chatbot from './Chatbot.svelte';
-
-	const links = [
-		{ href: '/', label: 'Dashboard', icon: 'bi bi-grid' },
-		{ href: '/contracts', label: 'Contracts', icon: 'bi bi-file-earmark-text' },
-		{ href: '/projects', label: 'Projects', icon: 'bi bi-folder' }
-	];
+	import Chatbot from './copilot/Chatbot.svelte';
 
 	let isExpanded = $state(false);
 	let expandTarget: HTMLElement | null = null;
@@ -23,49 +16,56 @@
 <svelte:window onmousedown={handleMouseDown} />
 
 <aside
-	class="sticky top-0 left-0 border-r border-slate-200 bg-white {isExpanded
-		? 'w-96'
-		: 'w-52'} z-10 flex h-screen flex-col transition-all duration-300"
+	bind:this={expandTarget}
+	class="sticky top-0 right-0 border-l border-slate-200/60 shadow-xl backdrop-blur-sm {isExpanded
+		? 'w-full bg-white/95 md:w-[500px]'
+		: 'w-14 cursor-pointer bg-white/80 hover:bg-indigo-50/80'} z-10 flex h-screen flex-col transition-all duration-300"
 >
-	<div class="py-4">
-		<div class="muted cursor-default px-4 text-xl leading-none font-light">
-			<span
-				class="bg-linear-to-r from-sky-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
-			>
-				ContractCopilot
-			</span>
-		</div>
-	</div>
-	<nav class="mb-2 flex flex-col space-y-1 px-2">
-		{#each links as link}
-			<a
-				href={link.href}
-				class="flex items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium {page.url
-					.pathname === link.href
-					? 'bg-slate-200'
-					: 'tex-slate-600 hover:bg-slate-100'}"
-			>
-				<i class={link.icon}></i>
-				<span>{link.label}</span>
-			</a>
-		{/each}
-	</nav>
+	<div class="flex h-full w-full flex-col {isExpanded ? '' : 'hidden'}">
+		<div
+			class="flex shrink-0 items-center justify-between border-b border-slate-200/60 bg-white/50 px-6 py-5 backdrop-blur-sm"
+		>
+			<div class="cursor-default">
+				<div class="flex items-center gap-2">
+					<span
+						class="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg"
+					>
+						<i class="bi bi-robot text-xl"></i>
+					</span>
+					<span class="text-xl leading-none font-bold">
+						<span
+							class="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+						>
+							Contract Copilot
+						</span>
+					</span>
+				</div>
+			</div>
 
-	<div class="min-h-0 flex-1 border-t border-slate-200 pt-2" bind:this={expandTarget}>
-		<div class="flex h-full flex-col">
+			<button
+				class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600"
+				onclick={() => (isExpanded = false)}
+				aria-label="Collapse sidebar"
+			>
+				<i class="bi bi-x-lg text-lg"></i>
+			</button>
+		</div>
+
+		<div class="min-h-0 flex-1">
 			<Chatbot />
 		</div>
 	</div>
 
-	{#if isExpanded}
-		<div class="px-2 pb-1">
-			<button
-				class="text-standard w-full rounded-xl py-1 hover:bg-slate-200"
-				onclick={() => (isExpanded = false)}
-				aria-label="Collapse sidebar"
-			>
-				<i class="bi bi-chevron-double-left"></i>
-			</button>
+	<div
+		class="flex h-full w-full flex-col items-center justify-center gap-3 {isExpanded
+			? 'hidden'
+			: ''}"
+	>
+		<div
+			class="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg"
+		>
+			<i class="bi bi-robot text-xl"></i>
 		</div>
-	{/if}
+		<i class="bi bi-chevron-double-left text-slate-400"></i>
+	</div>
 </aside>

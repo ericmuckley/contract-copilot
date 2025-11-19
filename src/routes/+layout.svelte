@@ -2,8 +2,16 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.ico';
 	import Navbar from '$lib/components/Navbar.svelte';
+	import { allProjects, allAgreements } from '$lib/stores';
 
-	let { children } = $props();
+	let { children, data } = $props();
+
+	$effect(() => {
+		allProjects.set(data.projects);
+	});
+	$effect(() => {
+		allAgreements.set(data.agreements);
+	});
 </script>
 
 <svelte:head>
@@ -11,8 +19,8 @@
 </svelte:head>
 
 <div class="flex min-h-screen">
-	<Navbar />
-	<main class="flex-1 px-6 py-6">
+	<main class="flex-1 px-8 py-8">
 		{@render children()}
 	</main>
+	<Navbar />
 </div>

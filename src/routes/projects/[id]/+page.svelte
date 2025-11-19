@@ -1,23 +1,30 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
+	import { cleanString } from '$lib/utils';
 	import StageStepper from '$lib/components/projects/StageStepper.svelte';
 	import ArtifactsStage from '$lib/components/projects/ArtifactsStage.svelte';
 	import ContentStage from '$lib/components/projects/ContentStage.svelte';
 	import EffortEstimateStage from '$lib/components/projects/EffortEstimateStage.svelte';
 	import QuoteStage from '$lib/components/projects/QuoteStage.svelte';
-	import ProjectHistory from '$lib/components/projects/ProjectHistory.svelte';
 	import ApproverNameInput from '$lib/components/ApproverNameInput.svelte';
+	import { STAGES, type Artifact } from '$lib/schema';
+	import Spinner from '$lib/components/Spinner.svelte';
+	import { activeProjectId } from '$lib/stores.js';
+	import { invalidate } from '$app/navigation';
 
 	let { data } = $props();
 
+	activeProjectId.set(data?.project?.id ? Number(data.project.id) : null);
+
 	let isAdvancing = $state(false);
 	let advanceError = $state('');
-	let showHistory = $state(false);
 	let approverName = $state('');
 
+	let stageIdx = $derived(data.project.sdata.filter((s) => s.approved).length);
+
 	async function refreshData() {
-		// Reload the page data
-		window.location.reload();
+		// Use SvelteKit's invalidate for smoother reload
+		await invalidate('project:data');
 	}
 
 	async function advanceStage() {
@@ -50,196 +57,170 @@
 			await refreshData();
 		} catch (err) {
 			advanceError = err instanceof Error ? err.message : 'Failed to advance';
-		} finally {
-			isAdvancing = false;
 		}
+		isAdvancing = false;
 	}
 
 	const canAdvance = $derived(() => {
-		const stage = data.project.current_stage;
-
 		// Always require a valid approver name
 		if (!approverName || approverName.trim() === '') {
 			return false;
 		}
 
-		if (stage === 'Artifacts') {
+		const stageName = STAGES[stageIdx].name;
+
+		if (stageName === 'artifacts') {
 			return data.artifacts.length >= 2;
-		} else if (stage === 'BusinessCase') {
-			return data.businessCase?.content != null;
-		} else if (stage === 'Requirements') {
-			return data.requirements?.content != null;
-		} else if (stage === 'SolutionArchitecture') {
-			return data.solutionArchitecture?.content != null;
-		} else if (stage === 'EffortEstimate') {
-			return data.effortEstimate && data.effortEstimate.tasks.length > 0;
-		} else if (stage === 'Quote') {
+		} else if (stageName === 'business_case') {
+			return data.project.sdata[1].content != null;
+		} else if (stageName === 'requirements') {
+			return data.project.sdata[2].content != null;
+		} else if (stageName === 'architecture') {
+			return data.project.sdata[3].content != null;
+		} else if (stageName === 'estimate') {
+			return (
+				data.project.sdata[4].content != null &&
+				data.project.sdata[4]?.tasks?.length &&
+				data.project.sdata[4].tasks.length > 0
+			);
+		} else if (stageName === 'quote') {
 			return false; // Final stage
 		}
 
 		return false;
 	});
-
-	const isLastStage = $derived(data.project.current_stage === 'Quote');
 </script>
 
-<div class="space-y-6">
-	<div class="flex items-center justify-between">
-		<div>
-			<a href="/" class="link mb-2 inline-flex items-center space-x-2 text-sm">
-				<i class="bi bi-arrow-left"></i>
-				<span>Back to Dashboard</span>
-			</a>
-			<h1 class="mb-0">{data.project.name}</h1>
-		</div>
-		<button
-			onclick={() => (showHistory = !showHistory)}
-			class="btn bg-slate-500 text-white hover:bg-slate-600"
-		>
-			<i class="bi bi-clock-history mr-2"></i>
-			{showHistory ? 'Hide' : 'Show'} History
-		</button>
+<div class="card">
+	<div class="standard mb-1 flex text-sm">
+		<a href="/" class="link">
+			<span>Dashboard</span>
+		</a>
+		<span class="mx-1">/</span>
+		<span>{data.project.project_name}</span>
 	</div>
 
-	<StageStepper currentStage={data.project.current_stage} />
+	<div class="flex items-center justify-between">
+		<h1 class="mb-0 text-5xl!">{data.project.project_name}</h1>
 
-	{#if showHistory}
-		<div in:slide out:slide>
-			<ProjectHistory history={data.history} />
+		{#if data.project.sdata[stageIdx]?.name === 'quote'}
+			<div class="rounded-full bg-green-200 px-4 py-2 font-bold text-green-800">
+				<i class="bi bi-check-circle-fill mr-1"></i>
+				Complete
+			</div>
+		{/if}
+	</div>
+
+	<div class="mt-4 flex justify-between">
+		<div class="w-56 space-y-1">
+			<p>
+				Created by {data.project.created_by}
+			</p>
+			<p>
+				Current Stage: {cleanString(data.project.sdata[stageIdx]?.name) || 'Unknown'}
+			</p>
 		</div>
+
+		<div class="w-48 space-y-1">
+			<p class="flex justify-between">
+				<span>Created</span>
+				<span>{new Date(data.project.created_at as string).toLocaleDateString()}</span>
+			</p>
+			<p class="flex justify-between">
+				<span>Last Updated</span>
+				<span>{new Date(data.project.updated_at as string).toLocaleDateString()}</span>
+			</p>
+		</div>
+	</div>
+
+	<div class="mt-6">
+		<StageStepper sdata={data.project.sdata} currentStageIndex={stageIdx} />
+	</div>
+</div>
+
+<div class="card mt-4">
+	{#if STAGES[stageIdx].name === 'artifacts'}
+		<ArtifactsStage
+			projectId={data.project.id as number}
+			artifacts={data.artifacts as Artifact[]}
+			onRefresh={refreshData}
+		/>
+	{:else if STAGES[stageIdx].name === 'business_case'}
+		<ContentStage
+			projectId={data.project.id as number}
+			stageIndex={stageIdx}
+			content={data.project.sdata[stageIdx].content}
+			onRefresh={refreshData}
+		/>
+	{:else if STAGES[stageIdx].name === 'requirements'}
+		<ContentStage
+			projectId={data.project.id as number}
+			stageIndex={stageIdx}
+			content={data.project.sdata[stageIdx].content}
+			onRefresh={refreshData}
+		/>
+	{:else if STAGES[stageIdx].name === 'architecture'}
+		<ContentStage
+			projectId={data.project.id as number}
+			stageIndex={stageIdx}
+			content={data.project.sdata[stageIdx].content}
+			onRefresh={refreshData}
+		/>
+	{:else if STAGES[stageIdx].name === 'estimate'}
+		<EffortEstimateStage
+			projectId={data.project.id as number}
+			stageIndex={stageIdx}
+			assumptions={data.project.sdata[stageIdx].content}
+			tasks={data.project.sdata[stageIdx].tasks || []}
+			onRefresh={refreshData}
+		/>
+	{:else if STAGES[stageIdx].name === 'quote'}
+		<QuoteStage
+			projectId={data.project.id as number}
+			stageIndex={stageIdx}
+			content={data.project.sdata[stageIdx].content}
+			tasks={data.project.sdata[4].tasks || []}
+			onRefresh={refreshData}
+		/>
 	{/if}
+</div>
 
-	<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-		<div class="card border border-slate-200 lg:col-span-2">
-			{#if data.project.current_stage === 'Artifacts'}
-				<ArtifactsStage
-					projectId={data.project.id}
-					artifacts={data.artifacts}
-					onRefresh={refreshData}
-					{approverName}
-				/>
-			{:else if data.project.current_stage === 'BusinessCase'}
-				<ContentStage
-					projectId={data.project.id}
-					stage="BusinessCase"
-					content={data.businessCase?.content}
-					onRefresh={refreshData}
-					{approverName}
-				/>
-			{:else if data.project.current_stage === 'Requirements'}
-				<ContentStage
-					projectId={data.project.id}
-					stage="Requirements"
-					content={data.requirements?.content}
-					onRefresh={refreshData}
-					{approverName}
-				/>
-			{:else if data.project.current_stage === 'SolutionArchitecture'}
-				<ContentStage
-					projectId={data.project.id}
-					stage="SolutionArchitecture"
-					content={data.solutionArchitecture?.content}
-					onRefresh={refreshData}
-					{approverName}
-				/>
-			{:else if data.project.current_stage === 'EffortEstimate'}
-				<EffortEstimateStage
-					projectId={data.project.id}
-					assumptions={data.effortEstimate?.assumptions}
-					tasks={data.effortEstimate?.tasks || []}
-					onRefresh={refreshData}
-					{approverName}
-				/>
-			{:else if data.project.current_stage === 'Quote'}
-				<QuoteStage
-					projectId={data.project.id}
-					paymentTerms={data.quote?.payment_terms}
-					timeline={data.quote?.timeline}
-					isDelivered={data.quote?.is_delivered || false}
-					rates={data.quote?.rates || []}
-					tasks={data.effortEstimate?.tasks || []}
-					onRefresh={refreshData}
-				/>
-			{/if}
-		</div>
+<div class="card mt-4">
+	{#if stageIdx < STAGES.length - 1}
+		<h1>Stage Approval</h1>
 
-		<div class="card space-y-4 border border-slate-200">
-			<div class="">
-				<h3 class="mb-4 text-lg font-semibold text-slate-800">Approval</h3>
+		<div class="mt-4 flex items-end space-x-8">
+			<div class="w-full">
+				<ApproverNameInput bind:value={approverName} />
+			</div>
 
-				{#if !isLastStage}
-					<div class="mb-4">
-						<ApproverNameInput bind:value={approverName} />
-					</div>
-
+			<div class="w-full">
+				{#if isAdvancing}
+					<div class="my-2 flex justify-center"><Spinner /></div>
+				{:else}
 					<button
 						onclick={advanceStage}
 						disabled={!canAdvance() || isAdvancing}
-						class="btn btn-primary w-full"
+						class="btn btn-primary flex w-full justify-center space-x-1"
 					>
-						{#if isAdvancing}
-							<i class="bi bi-hourglass-split mr-2 animate-spin"></i>
-							Advancing...
-						{:else}
-							<i class="bi bi-arrow-right mr-2"></i>
-							Advance to Next Stage
-						{/if}
+						<i class="bi bi-arrow-right mr-2"></i>
+						<span>Advance to next stage</span>
 					</button>
-
-					{#if advanceError}
-						<div class="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-							<i class="bi bi-exclamation-triangle-fill mr-2"></i>
-							{advanceError}
-						</div>
-					{/if}
-				{:else}
-					<p class="mb-4 text-sm text-slate-600">
-						This is the final stage. Your quote is ready to be delivered to the client.
-					</p>
-					<div class="rounded-lg bg-green-50 p-4 text-center">
-						<i class="bi bi-check-circle-fill mb-2 text-4xl text-green-600"></i>
-						<p class="font-semibold text-green-800">Project Complete!</p>
-					</div>
 				{/if}
 			</div>
 
-			<div class="mt-8">
-				<p class="font-bold">Current Stage</p>
-				<p class="mb-4 text-xs">
-					{#if data.project.current_stage === 'Artifacts'}
-						Upload at least 2 artifacts (documents, notes, transcripts) to provide context for the
-						project.
-					{:else if data.project.current_stage === 'BusinessCase'}
-						Generate and review the business case, including scope, outcomes, and constraints.
-					{:else if data.project.current_stage === 'Requirements'}
-						Generate and review the functional and non-functional requirements.
-					{:else if data.project.current_stage === 'SolutionArchitecture'}
-						Document the technical approach, architecture, and risks.
-					{:else if data.project.current_stage === 'EffortEstimate'}
-						Generate the Work Breakdown Structure with tasks, roles, and hours.
-					{:else if data.project.current_stage === 'Quote'}
-						Set rates, payment terms, and timeline. Export or copy your quote.
-					{/if}
-				</p>
-			</div>
-
-			<div class="mt-8">
-				<p class="font-bold">Project Info</p>
-				<div class="space-y-1 text-xs">
-					<p class="flex justify-between">
-						<span>Created</span>
-						<span>{new Date(data.project.created_at).toLocaleDateString()}</span>
-					</p>
-					<p class="flex justify-between">
-						<span>Last Updated:</span>
-						<span>{new Date(data.project.updated_at).toLocaleDateString()}</span>
-					</p>
-					<p class="flex justify-between">
-						<span>Artifacts:</span>
-						<span>{data.artifacts.length}</span>
-					</p>
+			{#if advanceError}
+				<div class="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+					<i class="bi bi-exclamation-triangle-fill mr-2"></i>
+					{advanceError}
 				</div>
-			</div>
+			{/if}
 		</div>
-	</div>
+	{:else}
+		<div class="text-center text-2xl">
+			<i class="bi bi-check-circle-fill mb-2 text-4xl text-green-600"></i>
+			<div class="font-bold text-green-600">Project Complete!</div>
+		</div>
+		<p class="mt-4 text-center">Your quote is ready to be delivered to the client.</p>
+	{/if}
 </div>

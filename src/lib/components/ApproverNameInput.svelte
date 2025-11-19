@@ -12,8 +12,8 @@
 	} = $props();
 </script>
 
-<div class="space-y-1">
-	<label for="approver-name" class="block text-sm text-slate-700">
+<div class="w-full space-y-1">
+	<label for="approver-name" class="standard block text-sm">
 		{placeholder} <span class="text-red-500">{required ? '*' : ''}</span>
 	</label>
 	<input
@@ -23,6 +23,6 @@
 		{required}
 		placeholder={`Enter ${placeholder.toLowerCase()}...`}
 		{disabled}
-		class="text-input"
+		class="text-input w-full"
 	/>
 </div>

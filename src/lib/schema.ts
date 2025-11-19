@@ -1,0 +1,142 @@
+export const STAGES = [
+	{
+		idx: 0,
+		name: 'artifacts',
+		label: 'Artifacts',
+		icon: 'bi-file-earmark-text',
+		bgcolor: 'bg-slate-100',
+		textcolor: 'text-slate-700',
+		bordercolor: 'border-slate-300'
+	},
+	{
+		idx: 1,
+		name: 'business_case',
+		label: 'Business Case',
+		icon: 'bi-briefcase',
+		bgcolor: 'bg-blue-50',
+		textcolor: 'text-blue-700',
+		bordercolor: 'border-blue-300'
+	},
+	{
+		idx: 2,
+		name: 'requirements',
+		label: 'Requirements',
+		icon: 'bi-list-check',
+		bgcolor: 'bg-purple-50',
+		textcolor: 'text-purple-700',
+		bordercolor: 'border-purple-300'
+	},
+	{
+		idx: 3,
+		name: 'architecture',
+		label: 'Architecture',
+		icon: 'bi-diagram-3',
+		bgcolor: 'bg-emerald-50',
+		textcolor: 'text-emerald-700',
+		bordercolor: 'border-emerald-300'
+	},
+	{
+		idx: 4,
+		name: 'estimate',
+		label: 'Effort Estimate',
+		icon: 'bi-calculator',
+		bgcolor: 'bg-amber-50',
+		textcolor: 'text-amber-700',
+		bordercolor: 'border-amber-300'
+	},
+	{
+		idx: 5,
+		name: 'quote',
+		label: 'Quote',
+		icon: 'bi-currency-dollar',
+		bgcolor: 'bg-pink-50',
+		textcolor: 'text-pink-700',
+		bordercolor: 'border-pink-300'
+	}
+];
+export const PROJECT_PERSONNEL_RATES = {
+	'Backend Dev': 150,
+	'Frontend Dev': 120,
+	'SW Engineer': 180,
+	'SW Architect': 220,
+	'QA Engineer': 100,
+	'DevOps Engineer': 180,
+	'Project Manager': 180,
+	'Business Analyst': 85
+};
+
+export interface Stage {
+	name: string;
+	approved?: boolean | null;
+	approved_by?: string | null;
+	updated_at?: string | null;
+}
+
+export interface Artifact {
+	id: number;
+	project_id?: number | null;
+	file_name: string;
+	file_url: string;
+	file_content?: string | null;
+}
+
+export interface Project {
+	id?: number | string | null;
+	created_at?: string | null;
+	updated_at?: string | null;
+	project_name: string;
+	created_by: string;
+	sdata: StageData[];
+	artifacts?: Artifact[];
+}
+
+export interface StageData {
+	name: string;
+	content: string | null;
+	approved_by: string | null;
+	approved: boolean | null;
+	updated_at: string | null;
+	tasks?: ProjectTask[] | null;
+}
+
+export interface ProjectTask {
+	role: string;
+	description: string;
+	hours: number;
+}
+
+export const emptyProject: Project = {
+	project_name: '',
+	created_by: '',
+	sdata: STAGES.map((stage) => ({
+		name: stage.name,
+		content: null,
+		approved: null,
+		approved_by: null,
+		updated_at: null,
+		tasks: stage.name === 'estimate' ? [] : null
+	}))
+};
+
+export const AGREEMENT_TYPES = ['MSA', 'SOW', 'NDA', 'OTHER'];
+
+export interface Agreement {
+	id?: number | null;
+	root_id: string;
+	version_number: number;
+	origin: 'client' | 'internal';
+	notes: string[];
+	edits: {
+		old: string;
+		new: string;
+		note: string;
+	}[];
+	created_at?: string | null;
+	updated_at?: string | null;
+	agreement_name: string;
+	agreement_type: string;
+	created_by: string;
+	text_content: string;
+	counterparty?: string;
+	project_id?: number | null;
+}
