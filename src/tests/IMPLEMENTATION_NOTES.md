@@ -6,39 +6,61 @@ This document explains the design decisions and implementation details of the LL
 
 ## Design Decisions
 
-### 1. Independence from SvelteKit Runtime
+### 1. Testing Actual Production Code
 
-**Problem**: The original LLM tools import from SvelteKit-specific modules (`$env/static/private`, `$lib/server/*`) which are not available when running tests with tsx.
+**Problem**: The original LLM tools import from SvelteKit-specific modules (`$env/static/private`) which are not available when running tests with tsx.
 
-**Solution**: Created test-specific modules:
+**Solution**: Modified `src/lib/server/settings.ts` to support both environments:
 
-- `testDb.ts` - Database functions that use `process.env` instead of `$env`
-- `testSettings.ts` - Configuration that reads from environment variables directly
-- Test implementations of tool functions within test files
+- Uses try/catch to conditionally import from `$env/static/private` (SvelteKit) or `process.env` (tests)
+- Created `tsconfig.test.json` with path aliases (`$lib`, `$lib/*`) for tsx to resolve imports
+- Tests import actual tool classes from `bedrockTools.ts` instead of creating duplicates
 
-**Benefit**: Tests can run independently without needing the full SvelteKit build pipeline.
+**Benefit**: Tests validate the actual production code, ensuring changes to tools are automatically reflected in tests.
 
-### 2. Simplified LLM Tool Implementations
+### 2. LLM Tool Testing Strategy
 
-**Problem**: Three tools (UpdateProjectTasksTool, CreateNewContractVersionTool, CreateNewContractTool) make actual calls to AWS Bedrock LLM, which:
+**Approach**: Tests call the actual tool implementations, including those that make LLM calls.
 
-- Require AWS credentials
-- Are slow (network latency)
-- Have non-deterministic responses
-- Cost money per API call
+**For LLM-dependent tools** (UpdateProjectTasksTool, CreateNewContractVersionTool, CreateNewContractTool):
 
-**Solution**: Implemented simplified versions that:
+- Tests will make real LLM API calls if AWS credentials are available
+- Tests will fail if AWS credentials are not configured
+- This is intentional - we want to test the real behavior
 
-- Skip the LLM call entirely
-- Use deterministic logic to achieve the same database operations
-- Produce predictable results for testing
-- Run instantly with no network calls
+**For non-LLM tools** (GetProjectDetailsTool, GetContractDetailsTool, etc.):
 
-**Example**: Instead of asking the LLM to modify project tasks, the test version directly adds 10 hours to the Backend Dev task when the request mentions "backend" and "10".
+- Tests work without AWS credentials
+- Only DATABASE_URL is required
 
-**Benefit**: Fast, free, deterministic tests that still validate database operations and API structure.
+**Benefit**: We test the actual code paths and behaviors, not simplified mocks.
 
-### 3. Database Cleanup Strategy
+### 3. Environment Setup
+
+**Challenge**: Making SvelteKit modules work in test environment.
+
+**Solution**: 
+
+- Modified `settings.ts` to check if it can load `$env/static/private`
+- If that fails (test environment), it falls back to `process.env`
+- This allows the same code to work in both contexts
+
+**Code pattern in settings.ts**:
+
+```typescript
+let envModule: any = null;
+
+try {
+	envModule = require('$env/static/private');
+} catch {
+	envModule = {
+		DATABASE_URL: process.env.DATABASE_URL || '',
+		// ... other env vars
+	};
+}
+```
+
+### 4. Database Cleanup Strategy
 
 **Problem**: Tests create database records that need to be cleaned up, even if the test fails.
 

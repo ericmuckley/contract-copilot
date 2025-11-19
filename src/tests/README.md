@@ -49,24 +49,22 @@ Tests print colored results showing:
 
 ### Direct Tool Calling
 
-Tests implement simplified versions of the tool's `run()` method without LLM calls. This allows for:
+Tests import and call the actual tool implementations from `src/lib/server/bedrockTools.ts`. This ensures:
 
-- Faster test execution (no network calls to AWS Bedrock)
-- More predictable results (deterministic test behavior)
-- Direct validation of tool functionality
-- Tests can run without AWS credentials
+- We're testing the real production code, not duplicates
+- Changes to tool implementations are automatically reflected in tests
+- Direct validation of actual tool functionality
 
-For tools that require LLM calls (UpdateProjectTasksTool, CreateNewContractVersionTool, CreateNewContractTool), the tests use simplified logic that achieves the same database operations without actually calling the LLM.
+For tools that require LLM calls (UpdateProjectTasksTool, CreateNewContractVersionTool, CreateNewContractTool), tests will make actual LLM calls. In environments without AWS credentials, these tests will fail, but the non-LLM tools can still be tested.
 
 ## Environment Requirements
 
-Tests require the following environment variable to be set:
+Tests require the following environment variables to be set:
 
-- `DATABASE_URL` - PostgreSQL connection string
+- `DATABASE_URL` - PostgreSQL connection string (required for all tests)
+- AWS credentials - Required only for LLM-dependent tool tests (UpdateProjectTasksTool, CreateNewContractVersionTool, CreateNewContractTool)
 
-This can be set in a `.env` file or as an environment variable.
-
-Note: AWS credentials are NOT required because tests use simplified implementations that don't make actual LLM calls.
+Environment variables can be set in a `.env` file or as environment variables.
 
 ## Test Design
 

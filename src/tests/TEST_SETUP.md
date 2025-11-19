@@ -6,6 +6,7 @@ This guide explains how to set up and run the LLM tools test suite.
 
 1. **Node.js**: Version 20 or higher (the project uses Node.js 22.x)
 2. **PostgreSQL Database**: A PostgreSQL database instance for testing
+3. **AWS Credentials** (optional): Required only for testing LLM-dependent tools (UpdateProjectTasksTool, CreateNewContractVersionTool, CreateNewContractTool)
 
 ## Database Setup
 
@@ -42,14 +43,19 @@ You'll need to run the same schema migrations on the test database as the produc
 
 ## Running Tests
 
-### Set Environment Variable
+### Set Environment Variables
+
+Tests use the same environment variables as production. Set them via `.env` file or directly:
+
+**Required for all tests:**
+- `DATABASE_URL` - PostgreSQL connection string
+
+**Required only for LLM tool tests:**
+- AWS Bedrock credentials (configured via AWS CLI or environment variables)
 
 Option 1: Create a `.env` file in the project root:
 
 ```bash
-# Copy the example
-cp .env.test.example .env
-
 # Edit .env and set your DATABASE_URL
 DATABASE_URL=postgresql://user:password@localhost:5432/your_database
 ```
@@ -59,6 +65,8 @@ Option 2: Set the environment variable directly when running tests:
 ```bash
 DATABASE_URL="postgresql://user:password@localhost:5432/your_database" npm run test
 ```
+
+**Note**: Tests import the actual functions from `bedrockTools.ts`, so LLM-dependent tests will make real AWS Bedrock API calls if credentials are configured. Non-LLM tests (GetProjectDetailsTool, GetContractDetailsTool, etc.) work without AWS credentials.
 
 ### Execute Tests
 
