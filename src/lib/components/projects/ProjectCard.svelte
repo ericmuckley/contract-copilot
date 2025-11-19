@@ -19,18 +19,18 @@
 
 <a
 	href="/projects/{project.id}"
-	class="group relative block overflow-hidden rounded-xl border border-slate-200/60 bg-white p-5 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:border-indigo-200 hover:shadow-lg"
+	class="group/card relative block overflow-hidden rounded-xl border border-slate-200/60 bg-white p-5 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:border-indigo-200 hover:shadow-lg"
 >
 	<div class="mb-4 flex items-start justify-between gap-3">
 		<div class="flex flex-1 items-center gap-2">
 			<h3
-				class="text-lg leading-tight font-semibold text-slate-700 transition-colors group-hover:text-indigo-700"
+				class="text-lg leading-tight font-semibold text-slate-700 transition-colors group-hover/card:text-indigo-700"
 			>
 				{project.project_name}
 			</h3>
 
 			{#if project.sdata[stageIdx]?.name === 'quote'}
-				<span class="text-emerald-500 transition-transform group-hover:scale-110">
+				<span class="text-emerald-500 transition-transform group-hover/card:scale-110">
 					<i class="bi bi-check-circle-fill"></i>
 				</span>
 			{/if}
@@ -71,6 +71,6 @@
 
 	<!-- Hover effect gradient -->
 	<div
-		class="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+		class="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100"
 	></div>
 </a>

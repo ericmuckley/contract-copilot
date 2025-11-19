@@ -264,6 +264,7 @@
 				<button
 					onclick={handleSave}
 					disabled={isSaving ||
+						!createdBy.trim() ||
 						!agreementName.trim() ||
 						!counterparty.trim() ||
 						!text_content.trim()}
