@@ -107,8 +107,13 @@
 										<i class="bi bi-check-lg text-green-600"></i>
 										<span>{cleanString(tool.name)}</span>
 									</p>
-									<div class="standard mt-1 max-h-32 overflow-x-auto overflow-y-auto text-xs">
-										Input: {JSON.stringify(tool.input)}
+									<div class="standard mt-1 max-h-32 overflow-x-auto overflow-y-auto pl-6 text-xs">
+										{#each Object.entries(tool.input) as [key, value]}
+											<p>
+												<span class="font-semibold">{cleanString(key)}:</span>
+												<span>{JSON.stringify(value)}</span>
+											</p>
+										{/each}
 									</div>
 									{#if tool.name.toLowerCase().includes('create')}
 										<div class="mt-1 text-xs text-purple-800">

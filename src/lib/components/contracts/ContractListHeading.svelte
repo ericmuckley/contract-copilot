@@ -4,14 +4,14 @@
 </script>
 
 <div class="flex items-center justify-between">
-	<div class="flex space-x-2">
-		<h1>Contracts & Agreements</h1>
+	<div class="flex items-center gap-3">
+		<h2 class="text-2xl font-bold tracking-tight">Contracts & Agreements</h2>
 		{#if agreements.length > 0}
-			<div>
-				<div class="standard rounded-xl bg-slate-200 px-3 py-1 font-bold">
-					{agreements.length}
-				</div>
-			</div>
+			<span
+				class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-sm font-semibold text-indigo-700"
+			>
+				{agreements.length}
+			</span>
 		{/if}
 	</div>
 </div>

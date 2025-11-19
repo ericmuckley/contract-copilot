@@ -57,16 +57,18 @@
 		</div>
 	{/if}
 
-	<div class="mb-6 flex items-center space-x-3">
-		<select id="stage-filter" bind:value={stageFilter}>
-			{#each [{ name: 'all', label: 'All' }, ...STAGES] as stage (stage.name)}
-				<option value={stage.name}>{cleanString(stage.label)}</option>
-			{/each}
-		</select>
-		<span class="standard text-sm">
-			{filteredProjects.length}/{projects.length} project{projects.length !== 1 ? 's' : ''}
-		</span>
-	</div>
+	{#if projects.length > 0}
+		<div class="mb-6 flex items-center space-x-3">
+			<select id="stage-filter" bind:value={stageFilter}>
+				{#each [{ name: 'all', label: 'All' }, ...STAGES] as stage (stage.name)}
+					<option value={stage.name}>{cleanString(stage.label)}</option>
+				{/each}
+			</select>
+			<span class="standard text-sm">
+				{filteredProjects.length}/{projects.length} project{projects.length !== 1 ? 's' : ''}
+			</span>
+		</div>
+	{/if}
 
 	{#if filteredProjects.length === 0}
 		<div class="py-24 text-center">
@@ -80,7 +82,7 @@
 			</p>
 		</div>
 	{:else}
-		<div class="space-y-4">
+		<div class="mt-8 space-y-8">
 			{#each filteredProjects as project (project.id)}
 				<ProjectCard {project} />
 			{/each}

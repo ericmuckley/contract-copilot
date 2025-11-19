@@ -19,7 +19,7 @@
 </svelte:head>
 
 <div class="flex min-h-screen">
-	<main class="flex-1 px-6 py-6">
+	<main class="flex-1 px-8 py-8">
 		{@render children()}
 	</main>
 	<Navbar />

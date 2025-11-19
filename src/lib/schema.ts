@@ -4,54 +4,54 @@ export const STAGES = [
 		name: 'artifacts',
 		label: 'Artifacts',
 		icon: 'bi-file-earmark-text',
-		bgcolor: 'bg-slate-200',
-		textcolor: 'text-slate-600',
-		bordercolor: 'border-slate-600'
+		bgcolor: 'bg-slate-100',
+		textcolor: 'text-slate-700',
+		bordercolor: 'border-slate-300'
 	},
 	{
 		idx: 1,
 		name: 'business_case',
 		label: 'Business Case',
 		icon: 'bi-briefcase',
-		bgcolor: 'bg-sky-200',
-		textcolor: 'text-sky-700',
-		bordercolor: 'border-sky-700'
+		bgcolor: 'bg-blue-50',
+		textcolor: 'text-blue-700',
+		bordercolor: 'border-blue-300'
 	},
 	{
 		idx: 2,
 		name: 'requirements',
 		label: 'Requirements',
 		icon: 'bi-list-check',
-		bgcolor: 'bg-purple-200',
+		bgcolor: 'bg-purple-50',
 		textcolor: 'text-purple-700',
-		bordercolor: 'border-purple-700'
+		bordercolor: 'border-purple-300'
 	},
 	{
 		idx: 3,
 		name: 'architecture',
 		label: 'Architecture',
 		icon: 'bi-diagram-3',
-		bgcolor: 'bg-green-200',
-		textcolor: 'text-green-700',
-		bordercolor: 'border-green-700'
+		bgcolor: 'bg-emerald-50',
+		textcolor: 'text-emerald-700',
+		bordercolor: 'border-emerald-300'
 	},
 	{
 		idx: 4,
 		name: 'estimate',
 		label: 'Effort Estimate',
 		icon: 'bi-calculator',
-		bgcolor: 'bg-yellow-200',
-		textcolor: 'text-yellow-700',
-		bordercolor: 'border-yellow-700'
+		bgcolor: 'bg-amber-50',
+		textcolor: 'text-amber-700',
+		bordercolor: 'border-amber-300'
 	},
 	{
 		idx: 5,
 		name: 'quote',
 		label: 'Quote',
 		icon: 'bi-currency-dollar',
-		bgcolor: 'bg-pink-200',
+		bgcolor: 'bg-pink-50',
 		textcolor: 'text-pink-700',
-		bordercolor: 'border-pink-700'
+		bordercolor: 'border-pink-300'
 	}
 ];
 export const PROJECT_PERSONNEL_RATES = {

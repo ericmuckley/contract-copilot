@@ -17,39 +17,55 @@
 
 <aside
 	bind:this={expandTarget}
-	class="sticky top-0 right-0 border-r border-slate-200 shadow-lg {isExpanded
-		? 'w-full bg-white md:w-[500px]'
-		: 'w-12 cursor-pointer bg-white hover:bg-sky-200'} z-10 flex h-screen flex-col transition-all duration-300"
+	class="sticky top-0 right-0 border-l border-slate-200/60 shadow-xl backdrop-blur-sm {isExpanded
+		? 'w-full bg-white/95 md:w-[500px]'
+		: 'w-14 cursor-pointer bg-white/80 hover:bg-indigo-50/80'} z-10 flex h-screen flex-col transition-all duration-300"
 >
 	<div class="flex h-full w-full flex-col {isExpanded ? '' : 'hidden'}">
-		<div class="flex shrink-0 items-center justify-between space-x-6 border-b border-slate-200">
-			<div class="cursor-default px-4 py-4 text-xl leading-none font-bold">
-				<span class="text-gradient whitespace-nowrap">
-					<i class="bi bi-robot mr-1"></i>
-					Contract Copilot
-				</span>
+		<div
+			class="flex shrink-0 items-center justify-between border-b border-slate-200/60 bg-white/50 px-6 py-5 backdrop-blur-sm"
+		>
+			<div class="cursor-default">
+				<div class="flex items-center gap-2">
+					<span
+						class="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg"
+					>
+						<i class="bi bi-robot text-xl"></i>
+					</span>
+					<span class="text-xl leading-none font-bold">
+						<span
+							class="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+						>
+							Contract Copilot
+						</span>
+					</span>
+				</div>
 			</div>
 
-			<div class="items-center px-4">
-				<button
-					class="link px-1 py-1 text-xl"
-					onclick={() => (isExpanded = false)}
-					aria-label="Collapse sidebar"
-				>
-					<i class="bi bi-x-lg"></i>
-				</button>
-			</div>
+			<button
+				class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600"
+				onclick={() => (isExpanded = false)}
+				aria-label="Collapse sidebar"
+			>
+				<i class="bi bi-x-lg text-lg"></i>
+			</button>
 		</div>
 
 		<div class="min-h-0 flex-1">
 			<Chatbot />
 		</div>
 	</div>
-	<div class="text-gradient mx-auto py-2 text-2xl {isExpanded ? 'hidden' : ''}">
-		<i class="bi bi-robot"></i>
-	</div>
 
-	<div class="standard flex h-full w-full items-center justify-center {isExpanded ? 'hidden' : ''}">
-		<i class="bi bi-chevron-double-left block"></i>
+	<div
+		class="flex h-full w-full flex-col items-center justify-center gap-3 {isExpanded
+			? 'hidden'
+			: ''}"
+	>
+		<div
+			class="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg"
+		>
+			<i class="bi bi-robot text-xl"></i>
+		</div>
+		<i class="bi bi-chevron-double-left text-slate-400"></i>
 	</div>
 </aside>

@@ -135,7 +135,7 @@
 </script>
 
 <div class="space-y-4">
-	<div class="card bg-white">
+	<div>
 		<h1 class="mb-4">{stage.label}</h1>
 		<p class="standard mb-4 text-sm">{info.description}</p>
 

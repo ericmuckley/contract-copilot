@@ -140,7 +140,7 @@ function generatePromptForStage(
 ): string {
 	switch (stageName) {
 		case 'business_case':
-			return `You are analyzing the project "${projectName}" to create a comprehensive business case.
+			return `You are analyzing the project "${projectName}" to create a business case.
 <CONTEXT>
 ${context}
 </CONTEXT>
@@ -153,7 +153,7 @@ Based on the artifacts and context provided, generate a detailed business case t
 4. **Risks**: Key risks and mitigation strategies
 5. **Stakeholders**: Key stakeholders and their interests
 
-Format your response in clear sections with markdown formatting.`;
+Format your response in clear sections with markdown formatting. Be short and concise.`;
 
 		case 'requirements':
 			return `You are analyzing the project "${projectName}" to create a detailed requirements summary.
@@ -172,7 +172,7 @@ Based on the artifacts and business case, generate a comprehensive requirements 
 4. **Acceptance Criteria**: How we'll know the requirements are met
 5. **Dependencies**: External systems, APIs, or resources required
 
-Format your response in clear sections with markdown formatting.`;
+Format your response in clear sections with markdown formatting. Be short and concise.`;
 
 		case 'architecture':
 			return `You are designing the solution architecture for project "${projectName}".
@@ -192,7 +192,7 @@ Based on all the information provided, create a detailed solution/architecture d
 6. **Risks and Mitigation**: Technical risks and how to address them
 7. **Alternatives Considered**: Other approaches considered and why this one was chosen
 
-Format your response in clear sections with markdown formatting.`;
+Format your response in clear sections with markdown formatting. Be short and concise.`;
 
 		case 'estimate':
 			if (type === 'assumptions') {
@@ -215,7 +215,7 @@ Based on all the information provided, create a detailed list of assumptions tha
 - Deployment and infrastructure considerations
 - Risk factors that could affect estimates
 
-Format your response in clear markdown with bullet points or numbered lists. Be thorough and specific.`;
+Format your response in clear markdown with bullet points or numbered lists. Be short and concise.`;
 			} else if (type === 'tasks') {
 				return `You are creating a detailed Work Breakdown Structure (WBS) for project "${projectName}".
 

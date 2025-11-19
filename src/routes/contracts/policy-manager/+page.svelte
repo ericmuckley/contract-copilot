@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { slide } from 'svelte/transition';
+	import { invalidate } from '$app/navigation';
 	import type { Artifact } from '$lib/schema';
 	import Spinner from '$lib/components/Spinner.svelte';
 
@@ -74,6 +75,9 @@
 				artifacts = [...artifacts, data.artifact];
 			}
 
+			// Invalidate project data cache to refresh artifacts everywhere
+			await invalidate('project:data');
+
 			// Clear file input
 			if (fileInput) {
 				fileInput.value = '';
@@ -111,6 +115,9 @@
 
 			// Remove from local state
 			artifacts = artifacts.filter((a) => a.id !== artifactId);
+
+			// Invalidate project data cache to refresh artifacts everywhere
+			await invalidate('project:data');
 		} catch (error) {
 			console.error('Error deleting artifact:', error);
 			deleteError = error instanceof Error ? error.message : 'Failed to delete artifact';
@@ -152,6 +159,9 @@
 
 			// Update local state
 			artifacts = artifacts.map((a) => (a.id === artifactId ? data.artifact : a));
+
+			// Invalidate project data cache to refresh artifacts everywhere
+			await invalidate('project:data');
 
 			// Close the edit form
 			editingId = null;
@@ -341,4 +351,11 @@
 			</div>
 		{/if}
 	</div>
+</div>
+
+<div class="mt-6 flex justify-center">
+	<a href="/" class="btn btn-outline">
+		<i class="bi bi-arrow-left mr-2"></i>
+		Back to Dashboard
+	</a>
 </div>

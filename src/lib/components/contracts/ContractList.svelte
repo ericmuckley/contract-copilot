@@ -47,7 +47,7 @@
 </script>
 
 <div class="mb-8 flex flex-wrap gap-x-4 gap-y-8">
-	{#if policyArtifacts.length > 0}
+	{#if policyArtifacts.filter((a) => a.project_id == null).length > 0}
 		<div>
 			<a href="/contracts/new" class="btn btn-primary">
 				<i class="bi bi-plus-lg"></i>
@@ -57,7 +57,7 @@
 	{/if}
 	<div>
 		<a href="/contracts/policy-manager" class="btn btn-outline">
-			<i class="bi bi-gear-fill"></i>
+			<i class="bi bi-plus-lg"></i>
 			Policies
 		</a>
 	</div>
@@ -104,7 +104,7 @@
 				</p>
 			</div>
 		{:else}
-			<div class="space-y-4">
+			<div class="mt-8 space-y-8">
 				{#each filteredAgreements as agreement (agreement.id)}
 					<ContractCard {agreement} />
 				{/each}
@@ -112,15 +112,10 @@
 		{/if}
 	</div>
 {:else}
-	<div class="text-center">
-		<div class="flex justify-center">
-			<p>Upload some policy documents to get started</p>
+	<div class="py-24 text-center">
+		<div class="muted mb-4 text-4xl">
+			<i class="bi bi-file-x"></i>
 		</div>
-		<div class="mt-6 flex justify-center">
-			<a href="/contracts/policy-manager" class="btn btn-outline">
-				<i class="bi bi-gear-fill"></i>
-				Add Policies
-			</a>
-		</div>
+		<p class="standard">No policies yet</p>
 	</div>
 {/if}
