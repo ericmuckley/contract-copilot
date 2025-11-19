@@ -110,9 +110,12 @@
 									<div class="standard mt-1 max-h-32 overflow-x-auto overflow-y-auto text-xs">
 										Input: {JSON.stringify(tool.input)}
 									</div>
-									<div class="muted mt-1 text-xs">
-										Note: long running tasks may take up to one minute to complete.
-									</div>
+									{#if tool.name.toLowerCase().includes('create')}
+										<div class="mt-1 text-xs text-purple-800">
+											<i class="bi bi-info-circle-fill"></i>
+											This task may take up to 1 min to finish
+										</div>
+									{/if}
 								</div>
 							{/each}
 						</div>
@@ -123,31 +126,34 @@
 	{/each}
 
 	{#if isStreaming}
-		<div class="flex justify-start">
-			<div class="max-w-[80%]">
-				{#if streamingContent}
+		{#if streamingContent}
+			<div class="flex justify-start">
+				<div class="max-w-[80%]">
 					<LLMOutput text={streamingContent} />
-				{/if}
-
-				{#if toolCallsInProgress.length > 0 && 0}
-					<div class="mt-2 space-y-1">
-						{#each toolCallsInProgress as toolName}
-							<div class="rounded-lg bg-purple-100 px-3 py-2 text-sm">
-								<p class="font-semibold">
-									{cleanString(toolName)}
-								</p>
-								<div class="my-2 flex justify-center px-6">
-									<Ping />
+					{#if toolCallsInProgress.length > 0 && 0}
+						<div class="mt-2 space-y-1">
+							{#each toolCallsInProgress as toolName}
+								<div class="rounded-lg bg-purple-100 px-3 py-2 text-sm">
+									<p class="font-semibold">
+										{cleanString(toolName)}
+									</p>
+									<div class="my-2 flex justify-center px-6">
+										<Ping />
+									</div>
 								</div>
-							</div>
-						{/each}
-					</div>
-				{:else}
-					<div class="my-2 flex justify-center px-6">
-						<Ping />
-					</div>
-				{/if}
+							{/each}
+						</div>
+					{:else}
+						<div class="my-2 flex justify-center px-6">
+							<Ping />
+						</div>
+					{/if}
+				</div>
 			</div>
-		</div>
+		{:else}
+			<div class="my-2 flex justify-center px-6">
+				<Ping />
+			</div>
+		{/if}
 	{/if}
 </div>

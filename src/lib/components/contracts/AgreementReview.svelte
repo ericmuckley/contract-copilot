@@ -172,8 +172,6 @@
 		} catch (error) {
 			console.error('Error applying changes:', error);
 			applyError = error instanceof Error ? error.message : 'Failed to apply changes';
-		} finally {
-			isApplyingChanges = false;
 		}
 	}
 

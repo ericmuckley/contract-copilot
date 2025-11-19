@@ -44,7 +44,7 @@
 
 <div>
 	{#if lastUpdated()}
-		<div class="standard mb-2 text-sm">
+		<div class="standard mb-4 text-sm">
 			<span>Last project update:</span>
 			{lastUpdated()?.toLocaleString('en-US', {
 				month: 'short',

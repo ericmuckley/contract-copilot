@@ -5,7 +5,7 @@ import {
 	updateAgreementNotes,
 	createAgreement
 } from './db';
-import { bedrockClient } from './bedrockClient';
+import { bedrockClient } from './bedrockClientInstance';
 import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { LLM_MODEL_ID } from './settings';
 import type { ProjectTask, StageData } from '$lib/schema';

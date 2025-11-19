@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { onMount } from 'svelte';
-	import { get } from 'svelte/store';
 	import type { Message } from '@aws-sdk/client-bedrock-runtime';
 	import ChatInput from './ChatInput.svelte';
 	import ChatHistory from './ChatHistory.svelte';

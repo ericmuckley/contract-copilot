@@ -109,7 +109,7 @@
 						<i class="bi bi-folder text-lg"></i>
 					</div>
 					<div class="flex-1">
-						<div class="standar font-bold">{linkedProject.project_name}</div>
+						<div class="standard font-bold">{linkedProject.project_name}</div>
 						<div class="standard text-xs">Click to view project</div>
 					</div>
 					<i class="bi bi-arrow-right muted"></i>
@@ -129,34 +129,36 @@
 		<!-- Show project selector -->
 		<div class="space-y-4">
 			<div>
-				<label for="project-select" class="standard mb-2 block">
-					Select Project to link and validate against
-				</label>
+				<p class="standard mb-2 text-center">Select Project to link and validate against</p>
 				{#if projectsWithEstimates.length === 0}
-					<p class="muted text-sm">
+					<p class="muted text-center text-sm">
 						No projects with estimates available. Create a project with an estimate first.
 					</p>
 				{:else}
-					<select id="project-select" bind:value={selectedProjectId} class="text-input w-min">
-						<option value={null}>-- Select a project --</option>
-						{#each projectsWithEstimates as project}
-							<option value={project.id}>
-								{project.project_name}
-							</option>
-						{/each}
-					</select>
+					<div class="flex justify-center">
+						<select id="project-select" bind:value={selectedProjectId} class="text-input max-w-84">
+							<option value={null}>-- Select a project --</option>
+							{#each projectsWithEstimates as project}
+								<option value={project.id}>
+									{project.project_name}
+								</option>
+							{/each}
+						</select>
+					</div>
 				{/if}
 			</div>
 
 			{#if projectsWithEstimates.length > 0}
-				<button
-					onclick={performValidation}
-					disabled={!selectedProjectId || isValidating}
-					class="btn btn-primary w-full"
-				>
-					<i class="bi bi-check-circle mr-2"></i>
-					Link Project and Validate
-				</button>
+				<div class="flex justify-center">
+					<button
+						onclick={performValidation}
+						disabled={!selectedProjectId || isValidating}
+						class="btn btn-primary"
+					>
+						<i class="bi bi-check-circle mr-2"></i>
+						Link Project and Validate
+					</button>
+				</div>
 			{/if}
 		</div>
 	{/if}

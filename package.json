@@ -11,7 +11,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint ."
+		"lint": "prettier --check . && eslint .",
+		"test": "tsx --env-file=.env --tsconfig tsconfig.test.json src/tests/index.ts"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
@@ -34,6 +35,7 @@
 		"svelte": "^5.41.0",
 		"svelte-check": "^4.3.3",
 		"tailwindcss": "^4.1.17",
+		"tsx": "^4.20.6",
 		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.46.1",
 		"vite": "^7.1.10"
@@ -46,6 +48,7 @@
 		"@vercel/postgres": "^0.10.0",
 		"bootstrap-icons": "^1.13.1",
 		"docx": "^9.5.1",
+		"dotenv": "^17.2.3",
 		"jspdf": "^3.0.3",
 		"mammoth": "^1.11.0",
 		"marked": "^17.0.0",
