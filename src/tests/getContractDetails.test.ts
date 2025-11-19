@@ -1,25 +1,7 @@
 // Test for GetContractDetailsTool
+import { GetContractDetailsTool } from '$lib/server/bedrockTools';
 import { runTest, assert, createTestAgreement, cleanupTestAgreement } from './testUtils';
 import type { TestResult } from './testUtils';
-import { getAgreementsByRootId } from './testDb';
-
-// Simple implementation of GetContractDetailsTool for testing
-const GetContractDetailsTool = {
-	async run({ root_id }: { root_id: string }) {
-		const agreements = await getAgreementsByRootId(root_id);
-		if (!agreements || agreements.length === 0) {
-			return {
-				response: [`Contract with root_id ${root_id} not found.`],
-				text: JSON.stringify(`Contract with root_id ${root_id} not found.`)
-			};
-		}
-		const latestAgreement = agreements[0];
-		return {
-			response: latestAgreement,
-			text: JSON.stringify(latestAgreement)
-		};
-	}
-};
 
 export async function testGetContractDetails(): Promise<TestResult> {
 	return runTest('GetContractDetailsTool', async () => {

@@ -1,75 +1,8 @@
 // Test for UpdateProjectTasksTool
+import { UpdateProjectTasksTool } from '$lib/server/bedrockTools';
 import { runTest, assert, createTestProject, cleanupTestProject } from './testUtils';
 import type { TestResult } from './testUtils';
-import { getProject, updateProject } from './testDb';
-import type { ProjectTask, StageData } from '$lib/schema';
-
-// Simple implementation of UpdateProjectTasksTool for testing (without LLM)
-const UpdateProjectTasksTool = {
-	async run({ id, request }: { id: number | string; request: string }) {
-		try {
-			const project = await getProject(parseInt(id as string));
-			if (!project) {
-				return {
-					response: { error: `Project with ID ${id} not found.` },
-					text: JSON.stringify({ error: `Project with ID ${id} not found.` })
-				};
-			}
-
-			const estimateStage = project.sdata.find((stage: StageData) => stage.name === 'estimate');
-			if (!estimateStage) {
-				return {
-					response: { error: 'Estimate stage not found in project.' },
-					text: JSON.stringify({ error: 'Estimate stage not found in project.' })
-				};
-			}
-
-			const currentTasks: ProjectTask[] = estimateStage.tasks || [];
-
-			// Simplified task modification (without LLM)
-			// For testing, just add 10 hours to backend dev if the request mentions it
-			let modifiedTasks = [...currentTasks];
-			if (request.toLowerCase().includes('backend') && request.toLowerCase().includes('10')) {
-				modifiedTasks = currentTasks.map((task) => {
-					if (task.role === 'Backend Dev') {
-						return { ...task, hours: task.hours + 10 };
-					}
-					return task;
-				});
-			}
-
-			const updatedSdata = project.sdata.map((stage: StageData) =>
-				stage.name === 'estimate' ? { ...stage, tasks: modifiedTasks } : stage
-			);
-
-			await updateProject(parseInt(id as string), { sdata: updatedSdata });
-
-			return {
-				response: {
-					success: true,
-					message: 'Tasks updated successfully',
-					oldTasks: currentTasks,
-					newTasks: modifiedTasks,
-					changes: {
-						added: 0,
-						removed: 0,
-						modified: modifiedTasks.length,
-						totalHoursDiff: 10
-					}
-				},
-				text: JSON.stringify({
-					success: true,
-					message: 'Tasks updated successfully'
-				})
-			};
-		} catch (error) {
-			return {
-				response: { error: `Failed to update tasks: ${error}` },
-				text: JSON.stringify({ error: `Failed to update tasks: ${error}` })
-			};
-		}
-	}
-};
+import { getProject } from '$lib/server/db';
 
 export async function testUpdateProjectTasks(): Promise<TestResult> {
 	return runTest('UpdateProjectTasksTool', async () => {

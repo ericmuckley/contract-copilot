@@ -1,4 +1,5 @@
 // Test for CreateNewContractTool
+import { CreateNewContractTool } from '$lib/server/bedrockTools';
 import {
 	runTest,
 	assert,
@@ -7,59 +8,6 @@ import {
 	cleanupTestAgreement
 } from './testUtils';
 import type { TestResult } from './testUtils';
-import { getProject, createAgreement } from './testDb';
-import { makeShortId } from '$lib/utils';
-
-// Simple implementation of CreateNewContractTool for testing (without LLM)
-const CreateNewContractTool = {
-	async run({ project_id, contract_type }: { project_id: number | string; contract_type: string }) {
-		try {
-			const project = await getProject(parseInt(project_id as string));
-			if (!project) {
-				return {
-					response: { error: `Project with ID ${project_id} not found.` },
-					text: JSON.stringify({ error: `Project with ID ${project_id} not found.` })
-				};
-			}
-
-			// Simplified contract generation (without LLM)
-			const contractText = `Test ${contract_type} Contract for Project: ${project.project_name}\n\nThis is a test contract.`;
-
-			const newAgreement = await createAgreement({
-				root_id: makeShortId(),
-				version_number: 1,
-				origin: 'internal' as const,
-				notes: [],
-				edits: [],
-				agreement_name: `Test ${contract_type} - ${project.project_name}`,
-				agreement_type: contract_type,
-				created_by: project.created_by,
-				text_content: contractText,
-				counterparty: 'Test Client',
-				project_id: parseInt(project_id as string)
-			});
-
-			return {
-				response: {
-					success: true,
-					message: `Created new ${contract_type} contract from project ${project_id}`,
-					agreement: newAgreement
-				},
-				text: JSON.stringify({
-					success: true,
-					message: `Created new ${contract_type} contract from project ${project_id}`,
-					agreement_id: newAgreement.id,
-					root_id: newAgreement.root_id
-				})
-			};
-		} catch (error) {
-			return {
-				response: { error: `Failed to create contract: ${error}` },
-				text: JSON.stringify({ error: `Failed to create contract: ${error}` })
-			};
-		}
-	}
-};
 
 export async function testCreateNewContract(): Promise<TestResult> {
 	return runTest('CreateNewContractTool', async () => {

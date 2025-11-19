@@ -1,66 +1,8 @@
 // Test for CreateNewContractVersionTool
+import { CreateNewContractVersionTool } from '$lib/server/bedrockTools';
 import { runTest, assert, createTestAgreement, cleanupTestAgreement } from './testUtils';
 import type { TestResult } from './testUtils';
-import { getAgreementsByRootId, createAgreement } from './testDb';
-
-// Simple implementation of CreateNewContractVersionTool for testing (without LLM)
-const CreateNewContractVersionTool = {
-	async run({ root_id, command }: { root_id: string; command: string }) {
-		try {
-			const agreements = await getAgreementsByRootId(root_id);
-			if (!agreements || agreements.length === 0) {
-				return {
-					response: { error: `Contract with root_id ${root_id} not found.` },
-					text: JSON.stringify({ error: `Contract with root_id ${root_id} not found.` })
-				};
-			}
-
-			const latestAgreement = agreements[0];
-
-			// Simplified modification (without LLM)
-			const modifiedText = latestAgreement.text_content + ' (Modified: ' + command + ')';
-			const edits = [
-				{ old: latestAgreement.text_content, new: modifiedText, note: 'Test modification' }
-			];
-
-			const newAgreement = await createAgreement({
-				root_id: root_id,
-				version_number: latestAgreement.version_number + 1,
-				origin: latestAgreement.origin,
-				notes: [],
-				edits: edits,
-				agreement_name: latestAgreement.agreement_name,
-				agreement_type: latestAgreement.agreement_type,
-				created_by: latestAgreement.created_by,
-				text_content: modifiedText,
-				counterparty: latestAgreement.counterparty || undefined,
-				project_id: latestAgreement.project_id || undefined
-			});
-
-			return {
-				response: {
-					success: true,
-					message: `Created version ${newAgreement.version_number} of contract ${root_id}`,
-					root_id: root_id,
-					new_version_number: newAgreement.version_number,
-					command_applied: command,
-					agreement: newAgreement
-				},
-				text: JSON.stringify({
-					success: true,
-					message: `Created version ${newAgreement.version_number} of contract ${root_id}`,
-					new_version_number: newAgreement.version_number,
-					command_applied: command
-				})
-			};
-		} catch (error) {
-			return {
-				response: { error: `Failed to create new contract version: ${error}` },
-				text: JSON.stringify({ error: `Failed to create new contract version: ${error}` })
-			};
-		}
-	}
-};
+import { getAgreementsByRootId, createAgreement } from '$lib/server/db';
 
 export async function testCreateNewContractVersion(): Promise<TestResult> {
 	return runTest('CreateNewContractVersionTool', async () => {
